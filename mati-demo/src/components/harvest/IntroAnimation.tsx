@@ -117,13 +117,14 @@ export function IntroAnimation({ onComplete }: IntroAnimationProps) {
                             animate={
                                 phase === "fly-out"
                                     ? {
-                                          x: "34vw",
-                                          y: "-26vh",
-                                          scale: 0.7,
+                                          // Nudge the bag toward the hero card position (left column, upper-middle)
+                                          x: "-22vw",
+                                          y: "-10vh",
+                                          scale: 0.9,
                                       }
                                     : {}
                             }
-                            transition={{ duration: 1.2, ease: "easeInOut" }}
+                            transition={{ duration: 1.1, ease: "easeInOut" }}
                         >
                             {phase === "bag-reveal" || phase === "fly-out" ? (
                                 <motion.div
