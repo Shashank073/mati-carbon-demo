@@ -1,0 +1,42 @@
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft, FileText, ArrowRight } from "lucide-react";
+
+export default function ComponentsPage() {
+    return (
+        <main className="min-h-screen bg-zinc-50 dark:bg-zinc-900 p-4 md:p-8">
+            <div className="max-w-6xl mx-auto space-y-8">
+                <div className="flex items-center space-x-4">
+                    <Link href="/">
+                        <Button variant="ghost" size="icon" className="hover:bg-zinc-200 dark:hover:bg-zinc-800">
+                            <ArrowLeft className="h-5 w-5" />
+                        </Button>
+                    </Link>
+                    <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">Components Library</h1>
+                </div>
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <Card className="hover:shadow-md transition-shadow dark:bg-zinc-950 dark:border-zinc-800">
+                        <CardHeader className="flex flex-row items-center gap-4 space-y-0">
+                            <div className="bg-zinc-100 dark:bg-zinc-900 p-3 rounded-lg">
+                                <FileText className="h-6 w-6 text-zinc-700 dark:text-zinc-300" />
+                            </div>
+                            <CardTitle className="text-xl">Survey Card</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                                A versatile card component for displaying survey questions and responses in various formats (text, rating, image, etc.).
+                            </p>
+                            <Link href="/components/survey" className="block">
+                                <Button className="w-full bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200">
+                                    View Variants <ArrowRight className="ml-2 h-4 w-4" />
+                                </Button>
+                            </Link>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        </main>
+    );
+}

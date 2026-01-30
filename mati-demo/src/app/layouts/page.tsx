@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { ArrowLeft, ArrowRight, Table, Users, Search, Activity, AlertTriangle, MapPin, ListTree, BarChart3 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Table as TableIcon, Users, Search, Activity, AlertTriangle, MapPin, ListTree, BarChart3, ArrowUpDown, LayoutGrid } from "lucide-react";
+import { Table, TableHeader, TableHead, TableRow } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function LayoutsPage() {
     const layouts = [
@@ -63,7 +65,58 @@ export default function LayoutsPage() {
 
                 <section className="space-y-6">
                     <div className="flex items-center gap-2 border-b border-zinc-200 dark:border-zinc-800 pb-4">
-                        <Table className="h-6 w-6 text-zinc-900 dark:text-zinc-50" />
+                        <TableIcon className="h-6 w-6 text-zinc-900 dark:text-zinc-50" />
+                        <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">Table Components</h2>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <Card className="hover:shadow-md transition-shadow group cursor-pointer border-zinc-200 dark:border-zinc-800">
+                            <CardHeader>
+                                <div className="flex items-center gap-3 mb-2">
+                                    <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-md group-hover:bg-mati-gold/10 transition-colors">
+                                        <TableIcon className="h-5 w-5 text-zinc-700 dark:text-zinc-300 group-hover:text-mati-gold" />
+                                    </div>
+                                    <CardTitle className="text-lg">Headers Library</CardTitle>
+                                </div>
+                                <CardDescription className="line-clamp-2">
+                                    A collection of individual table header components with their labels.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <Link href="/layouts/headers" className="block">
+                                    <Button className="w-full group-hover:bg-zinc-900 group-hover:text-zinc-50 dark:group-hover:bg-zinc-50 dark:group-hover:text-zinc-900" variant="outline">
+                                        View Headers <ArrowRight className="ml-2 h-4 w-4" />
+                                    </Button>
+                                </Link>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="hover:shadow-md transition-shadow group cursor-pointer border-zinc-200 dark:border-zinc-800">
+                            <CardHeader>
+                                <div className="flex items-center gap-3 mb-2">
+                                    <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-md group-hover:bg-mati-gold/10 transition-colors">
+                                        <LayoutGrid className="h-5 w-5 text-zinc-700 dark:text-zinc-300 group-hover:text-mati-gold" />
+                                    </div>
+                                    <CardTitle className="text-lg">Cells Library</CardTitle>
+                                </div>
+                                <CardDescription className="line-clamp-2">
+                                    Review different types of table cells (Status, Avatar, Actions, etc).
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <Link href="/layouts/cells" className="block">
+                                    <Button className="w-full group-hover:bg-zinc-900 group-hover:text-zinc-50 dark:group-hover:bg-zinc-50 dark:group-hover:text-zinc-900" variant="outline">
+                                        View Cells <ArrowRight className="ml-2 h-4 w-4" />
+                                    </Button>
+                                </Link>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </section>
+
+                <section className="space-y-6">
+                    <div className="flex items-center gap-2 border-b border-zinc-200 dark:border-zinc-800 pb-4">
+                        <TableIcon className="h-6 w-6 text-zinc-900 dark:text-zinc-50" />
                         <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">Table Layouts</h2>
                     </div>
 
@@ -83,7 +136,7 @@ export default function LayoutsPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <Link href={layout.href} className="block">
-                                        <Button className="w-full group-hover:bg-zinc-900 dark:group-hover:bg-zinc-50" variant="outline">
+                                        <Button className="w-full group-hover:bg-zinc-900 group-hover:text-zinc-50 dark:group-hover:bg-zinc-50 dark:group-hover:text-zinc-900" variant="outline">
                                             View Variant <ArrowRight className="ml-2 h-4 w-4" />
                                         </Button>
                                     </Link>

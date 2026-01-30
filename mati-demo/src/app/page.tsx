@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Globe, Leaf, ArrowRight, Layout } from "lucide-react";
+import { Globe, Leaf, ArrowRight, Layout, Component } from "lucide-react";
 
 export default function WelcomePage() {
   return (
@@ -98,6 +98,30 @@ export default function WelcomePage() {
               <Link href="/layouts" className="w-full">
                 <Button className="w-full bg-zinc-900 hover:bg-zinc-800 text-white font-medium transition-colors dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200">
                   View Layouts <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="w-full border-zinc-200 dark:border-zinc-800 shadow-lg">
+          <CardHeader className="flex flex-col items-center space-y-4 pb-2">
+            <div className="rounded-full bg-zinc-100 p-4 dark:bg-zinc-800">
+              <Component className="h-12 w-12 text-zinc-700 dark:text-zinc-300" />
+            </div>
+            <CardTitle className="text-2xl font-bold text-center text-zinc-900 dark:text-zinc-50">
+              Components
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6 text-center">
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed min-h-[60px]">
+              Discover our library of reusable UI components. Check out the versatile Survey Card and more.
+            </p>
+
+            <div className="flex justify-center pt-4">
+              <Link href="/components" className="w-full">
+                <Button className="w-full bg-zinc-900 hover:bg-zinc-800 text-white font-medium transition-colors dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200">
+                  Explore Components <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
             </div>
