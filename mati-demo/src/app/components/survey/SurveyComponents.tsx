@@ -182,8 +182,8 @@ const CopyableText = ({ text, children, icon }: { text: string; children: React.
     };
 
     return (
-        <div className="group flex items-start gap-2 relative w-full min-w-0">
-            {icon && <div className="flex-shrink-0 text-zinc-500 pt-0.5">{icon}</div>}
+        <div className="group flex items-center gap-2 relative w-full min-w-0">
+            {icon && <div className="flex-shrink-0 text-zinc-500">{icon}</div>}
             <div className="flex-1 min-w-0 pr-10">
                 {children}
             </div>
@@ -435,7 +435,7 @@ export const SurveyCard = ({
                                     <MapPin className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <p className="font-medium text-zinc-900 dark:text-zinc-100">{item.answer as string}</p>
+                                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{item.answer as string}</p>
                                     {item.meta && <p className="text-xs text-zinc-500">{item.meta}</p>}
                                 </div>
                             </div>
