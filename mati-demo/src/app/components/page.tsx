@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, FileText, ArrowRight } from "lucide-react";
+import { ArrowLeft, FileText, ArrowRight, LayoutDashboard } from "lucide-react";
 
 export default function ComponentsPage() {
     return (
@@ -31,6 +31,25 @@ export default function ComponentsPage() {
                             <Link href="/components/survey" className="block">
                                 <Button className="w-full bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200">
                                     View Variants <ArrowRight className="ml-2 h-4 w-4" />
+                                </Button>
+                            </Link>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="hover:shadow-md transition-shadow dark:bg-zinc-950 dark:border-zinc-800">
+                        <CardHeader className="flex flex-row items-center gap-4 space-y-0">
+                            <div className="bg-zinc-100 dark:bg-zinc-900 p-3 rounded-lg">
+                                <LayoutDashboard className="h-6 w-6 text-zinc-700 dark:text-zinc-300" />
+                            </div>
+                            <CardTitle className="text-xl">Dashboard Preview</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                                A realistic dashboard layout demonstrating the survey components in a 3-column verification view.
+                            </p>
+                            <Link href="/components/preview" className="block">
+                                <Button className="w-full bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200">
+                                    View Preview <ArrowRight className="ml-2 h-4 w-4" />
                                 </Button>
                             </Link>
                         </CardContent>
