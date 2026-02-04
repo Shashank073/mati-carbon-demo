@@ -72,7 +72,7 @@ export const surveyData: SurveyItem[] = [
         id: "4",
         question: "Record a video of the crop health:",
         type: "video",
-        answer: "https://www.w3schools.com/html/mov_bbb.mp4", // Placeholder video
+        answer: "https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Fdebug%2Fiy4OkLOT2aQuNvwAHiNZGvU9R883%2Fvideos%2F2026_02_03_17_13_11_114.mp4?alt=media&token=3383c304-79ce-41b5-a734-f02ed2c237fe", // Farmer submission video
         label: "Video Upload",
         description: "Suitable for showcasing video content, replays, or dynamic visual reports.",
     },
