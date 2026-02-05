@@ -72,7 +72,7 @@ export const surveyData: SurveyItem[] = [
         id: "4",
         question: "Record a video of the crop health:",
         type: "video",
-        answer: "https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Fdebug%2Fiy4OkLOT2aQuNvwAHiNZGvU9R883%2Fvideos%2F2026_02_03_17_13_11_114.mp4?alt=media&token=3383c304-79ce-41b5-a734-f02ed2c237fe", // Farmer submission video
+        answer: "https://www.w3schools.com/html/mov_bbb.mp4", // Test video for fallback
         label: "Video Upload",
         description: "Suitable for showcasing video content, replays, or dynamic visual reports.",
     },
@@ -364,14 +364,30 @@ export const SurveyCard = ({
                                 </HoverCardTrigger>
                                 <HoverCardContent className="w-64 p-0 overflow-hidden border-none shadow-xl" side="left" align="start" sideOffset={10}>
                                     <div className="relative w-full aspect-video bg-black">
-                                        <video src={item.answer as string} className="w-full h-full object-cover" />
+                                        <video
+                                            src={item.answer as string}
+                                            className="w-full h-full object-cover"
+                                            playsInline
+                                            muted
+                                            loop
+                                            preload="metadata"
+                                            crossOrigin="anonymous"
+                                        />
                                     </div>
                                 </HoverCardContent>
                             </HoverCard>
                             <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none shadow-none">
                                 <DialogTitle className="sr-only">Video Preview</DialogTitle>
                                 <DialogDescription className="sr-only">Watching the uploaded survey video in full size</DialogDescription>
-                                <video src={item.answer as string} controls autoPlay className="w-full h-auto rounded-lg shadow-2xl" />
+                                <video
+                                    src={item.answer as string}
+                                    controls
+                                    autoPlay
+                                    playsInline
+                                    preload="auto"
+                                    crossOrigin="anonymous"
+                                    className="w-full h-auto rounded-lg shadow-2xl"
+                                />
                             </DialogContent>
                         </Dialog>
                     );
@@ -381,7 +397,14 @@ export const SurveyCard = ({
                         <div className="space-y-2 group relative">
                             <DialogTrigger asChild>
                                 <div className="relative aspect-video w-full overflow-hidden rounded-md bg-zinc-900 flex items-center justify-center cursor-pointer">
-                                    <video src={item.answer as string} className="w-full h-full object-cover opacity-80" />
+                                    <video
+                                        src={item.answer as string}
+                                        className="w-full h-full object-cover opacity-80"
+                                        playsInline
+                                        muted
+                                        preload="metadata"
+                                        crossOrigin="anonymous"
+                                    />
                                     <div className="absolute inset-0 flex items-center justify-center">
                                         <div className="bg-white/20 backdrop-blur-sm p-3 rounded-full group-hover:scale-110 transition-transform">
                                             <Play className="h-6 w-6 text-white fill-white" />
@@ -400,7 +423,15 @@ export const SurveyCard = ({
                         <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none shadow-none">
                             <DialogTitle className="sr-only">Video Player</DialogTitle>
                             <DialogDescription className="sr-only">Full screen survey video player</DialogDescription>
-                            <video src={item.answer as string} controls autoPlay className="w-full h-auto rounded-lg shadow-2xl" />
+                            <video
+                                src={item.answer as string}
+                                controls
+                                autoPlay
+                                playsInline
+                                preload="auto"
+                                crossOrigin="anonymous"
+                                className="w-full h-auto rounded-lg shadow-2xl"
+                            />
                         </DialogContent>
                     </Dialog>
                 );
@@ -481,7 +512,7 @@ export const SurveyCard = ({
                         style === "style-5" && "text-base"
                     )}>
                         <DollarSign className={cn("w-5 h-5 text-zinc-500", style === "style-5" && "w-4 h-4")} />
-                        {(item.answer as number).toLocaleString()} <span className="text-xs font-normal text-zinc-500 uppercase">{item.meta}</span>
+                        {(item.answer as number).toLocaleString('en-US')} <span className="text-xs font-normal text-zinc-500 uppercase">{item.meta}</span>
                     </div>
                 );
 
@@ -493,8 +524,8 @@ export const SurveyCard = ({
                     )}>
                         <Calendar className="w-4 h-4 text-zinc-500" />
                         {style === "style-5"
-                            ? new Date(item.answer as string).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
-                            : new Date(item.answer as string).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+                            ? new Date(item.answer as string).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+                            : new Date(item.answer as string).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
                         }
                     </div>
                 );
@@ -752,7 +783,15 @@ export const BulkSubmissionCard = ({
                             </HoverCardTrigger>
                             <HoverCardContent className="w-64 p-0 overflow-hidden border-none shadow-xl" side="left" align="start" sideOffset={10}>
                                 <div className="relative w-full aspect-video bg-black">
-                                    <video src={item.answer as string} className="w-full h-full object-cover" />
+                                    <video
+                                        src={item.answer as string}
+                                        className="w-full h-full object-cover"
+                                        playsInline
+                                        muted
+                                        loop
+                                        preload="metadata"
+                                        crossOrigin="anonymous"
+                                    />
                                     <div className="absolute inset-0 flex items-center justify-center">
                                         <Play className="w-8 h-8 text-white/50" />
                                     </div>
@@ -762,7 +801,16 @@ export const BulkSubmissionCard = ({
                         <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none shadow-none">
                             <DialogTitle className="sr-only">Bulk Video View</DialogTitle>
                             <DialogDescription className="sr-only">Full screen playback of the bulk submitted video</DialogDescription>
-                            <video src={item.answer as string} controls autoPlay loop className="w-full h-auto rounded-lg shadow-2xl" />
+                            <video
+                                src={item.answer as string}
+                                controls
+                                autoPlay
+                                loop
+                                playsInline
+                                preload="auto"
+                                crossOrigin="anonymous"
+                                className="w-full h-auto rounded-lg shadow-2xl"
+                            />
                         </DialogContent>
                     </Dialog>
                 );
@@ -872,7 +920,7 @@ export const BulkSubmissionCard = ({
                     <div className="flex items-center gap-2 text-zinc-900 dark:text-zinc-100">
                         <Calendar className="w-4 h-4 text-zinc-500" />
                         <span className="font-semibold text-base leading-snug">
-                            {new Date(item.answer as string).toLocaleDateString(undefined, {
+                            {new Date(item.answer as string).toLocaleDateString('en-US', {
                                 year: 'numeric',
                                 month: 'short',
                                 day: 'numeric'
