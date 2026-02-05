@@ -48,9 +48,17 @@ export const surveyData: SurveyItem[] = [
         id: "1",
         question: "What is your primary feedback on the MRV system?",
         type: "text",
-        answer: "The system provides accurate real-time data, but the dashboard load time could be improved in low-bandwidth areas.",
+        answer: "The real-time data accuracy is excellent for our needs.",
         label: "Text Input",
         description: "Best for displaying concise, single-line text data like names, titles, or short comments.",
+    },
+    {
+        id: "13",
+        question: "Describe any pest issues observed:",
+        type: "long-text",
+        answer: "During the initial inspection of the north-east quad, we observed significant yellowing of the lower leaves on approximately 15% of the crop. Further examination revealed small entrance holes near the base of the stalks, which strongly suggests an early-stage infestation of stem borers. Additionally, there are minor traces of aphid activity on the younger shoots. We recommend an immediate application of organic neem-based pesticides followed by a secondary review in 48 hours to prevent further spread to the adjacent healthy quadrants.",
+        label: "Text Area",
+        description: "Optimal for displaying long-form content, paragraphs, or detailed descriptions.",
     },
     {
         id: "2",
@@ -139,19 +147,10 @@ export const surveyData: SurveyItem[] = [
     {
         id: "12",
         question: "Did you verify the soil pH level?",
-
         type: "boolean",
         answer: true,
         label: "Boolean Toggle",
         description: "Best for indicating binary states like Yes/No, On/Off, or Active/Inactive.",
-    },
-    {
-        id: "13",
-        question: "Describe any pest issues observed:",
-        type: "long-text",
-        answer: "Observed minor yellowing of leaves in the north-east corner. Suspected nitrogen deficiency or early signs of stem borer. Recommend immediate testing.",
-        label: "Text Area",
-        description: "Optimal for displaying long-form content, paragraphs, or detailed descriptions.",
     },
     {
         id: "14",
@@ -202,6 +201,54 @@ const CopyableText = ({ text, children, icon }: { text: string; children: React.
 };
 
 
+// --- Expandable Text for Long Responses ---
+const ExpandableText = ({ text, style }: { text: string; style: string }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    return (
+        <HoverCard openDelay={200}>
+            <HoverCardTrigger asChild>
+                <div
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setIsExpanded(!isExpanded);
+                    }}
+                    className={cn(
+                        "cursor-pointer transition-all",
+                        !isExpanded && "line-clamp-2"
+                    )}
+                >
+                    <p className={cn(
+                        "text-zinc-500 dark:text-zinc-400 leading-relaxed",
+                        style === "style-5" ? "text-base font-semibold text-zinc-900 dark:text-zinc-100 leading-snug" : "text-sm",
+                        !isExpanded && "line-clamp-2"
+                    )}>
+                        {text}
+                    </p>
+                </div>
+            </HoverCardTrigger>
+            {!isExpanded && (
+                <HoverCardContent
+                    className="w-80 p-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xl rounded-xl z-[100]"
+                    side="left"
+                    align="start"
+                    sideOffset={10}
+                >
+                    <div className="space-y-2">
+                        <p className="text-sm text-zinc-900 dark:text-zinc-100 font-medium border-b border-zinc-100 dark:border-zinc-800 pb-2 mb-2">Full Response</p>
+                        <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">
+                            {text}
+                        </p>
+                        <p className="text-[10px] text-zinc-400 font-medium pt-2 italic">Click to expand in-line</p>
+                    </div>
+                </HoverCardContent>
+            )}
+        </HoverCard>
+    );
+};
+
+
+
 // --- Survey Card Component ---
 export const SurveyCard = ({
     item,
@@ -241,14 +288,19 @@ export const SurveyCard = ({
     const renderContent = () => {
         switch (item.type) {
             case "text":
-            case "long-text":
-            case "long-text":
                 return (
                     <CopyableText text={item.answer as string}>
                         <p className={cn(
                             "text-zinc-500 dark:text-zinc-400 leading-relaxed",
                             style === "style-5" ? "text-base font-semibold text-zinc-900 dark:text-zinc-100 leading-snug" : "text-sm"
                         )}>{item.answer as string}</p>
+                    </CopyableText>
+                );
+
+            case "long-text":
+                return (
+                    <CopyableText text={item.answer as string}>
+                        <ExpandableText text={item.answer as string} style={style} />
                     </CopyableText>
                 );
 
@@ -944,8 +996,14 @@ export const BulkSubmissionCard = ({
                         </p>
                     </CopyableText>
                 );
+            case "long-text":
+                return (
+                    <CopyableText text={item.answer as string}>
+                        <ExpandableText text={item.answer as string} style="style-4" />
+                    </CopyableText>
+                );
             default:
-                // Text, long-text, phone, email, etc.
+                // Text, phone, email, etc.
                 return (
                     <CopyableText text={item.answer as string}>
                         <p className="font-semibold text-zinc-900 dark:text-zinc-100 text-base leading-snug">
