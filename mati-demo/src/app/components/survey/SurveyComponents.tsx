@@ -365,13 +365,13 @@ export const SurveyCard = ({
                                 <HoverCardContent className="w-64 p-0 overflow-hidden border-none shadow-xl" side="left" align="start" sideOffset={10}>
                                     <div className="relative w-full aspect-video bg-black">
                                         <video
+                                            key={item.answer as string}
                                             src={item.answer as string}
                                             className="w-full h-full object-cover"
                                             playsInline
                                             muted
                                             loop
                                             preload="metadata"
-                                            crossOrigin="anonymous"
                                         />
                                     </div>
                                 </HoverCardContent>
@@ -380,12 +380,12 @@ export const SurveyCard = ({
                                 <DialogTitle className="sr-only">Video Preview</DialogTitle>
                                 <DialogDescription className="sr-only">Watching the uploaded survey video in full size</DialogDescription>
                                 <video
+                                    key={item.answer as string}
                                     src={item.answer as string}
                                     controls
                                     autoPlay
                                     playsInline
                                     preload="auto"
-                                    crossOrigin="anonymous"
                                     className="w-full h-auto rounded-lg shadow-2xl"
                                 />
                             </DialogContent>
@@ -398,12 +398,12 @@ export const SurveyCard = ({
                             <DialogTrigger asChild>
                                 <div className="relative aspect-video w-full overflow-hidden rounded-md bg-zinc-900 flex items-center justify-center cursor-pointer">
                                     <video
+                                        key={item.answer as string}
                                         src={item.answer as string}
                                         className="w-full h-full object-cover opacity-80"
                                         playsInline
                                         muted
                                         preload="metadata"
-                                        crossOrigin="anonymous"
                                     />
                                     <div className="absolute inset-0 flex items-center justify-center">
                                         <div className="bg-white/20 backdrop-blur-sm p-3 rounded-full group-hover:scale-110 transition-transform">
@@ -424,12 +424,12 @@ export const SurveyCard = ({
                             <DialogTitle className="sr-only">Video Player</DialogTitle>
                             <DialogDescription className="sr-only">Full screen survey video player</DialogDescription>
                             <video
+                                key={item.answer as string}
                                 src={item.answer as string}
                                 controls
                                 autoPlay
                                 playsInline
                                 preload="auto"
-                                crossOrigin="anonymous"
                                 className="w-full h-auto rounded-lg shadow-2xl"
                             />
                         </DialogContent>
@@ -784,13 +784,13 @@ export const BulkSubmissionCard = ({
                             <HoverCardContent className="w-64 p-0 overflow-hidden border-none shadow-xl" side="left" align="start" sideOffset={10}>
                                 <div className="relative w-full aspect-video bg-black">
                                     <video
+                                        key={item.answer as string}
                                         src={item.answer as string}
                                         className="w-full h-full object-cover"
                                         playsInline
                                         muted
                                         loop
                                         preload="metadata"
-                                        crossOrigin="anonymous"
                                     />
                                     <div className="absolute inset-0 flex items-center justify-center">
                                         <Play className="w-8 h-8 text-white/50" />
@@ -802,13 +802,13 @@ export const BulkSubmissionCard = ({
                             <DialogTitle className="sr-only">Bulk Video View</DialogTitle>
                             <DialogDescription className="sr-only">Full screen playback of the bulk submitted video</DialogDescription>
                             <video
+                                key={item.answer as string}
                                 src={item.answer as string}
                                 controls
                                 autoPlay
                                 loop
                                 playsInline
                                 preload="auto"
-                                crossOrigin="anonymous"
                                 className="w-full h-auto rounded-lg shadow-2xl"
                             />
                         </DialogContent>
