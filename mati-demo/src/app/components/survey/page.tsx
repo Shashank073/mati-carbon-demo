@@ -17,7 +17,7 @@ import { surveyData, SurveyCard, BulkSubmissionCard } from "./SurveyComponents";
 
 // --- Main Page Component ---
 export default function SurveyPage() {
-    const [currentStyle, setCurrentStyle] = useState<"current" | "style-1" | "style-2" | "style-3" | "style-4" | "style-5">("current");
+    const [currentStyle, setCurrentStyle] = useState<"current" | "style-1" | "style-2" | "style-3" | "style-4" | "style-5" | "style-5-feedback">("current");
     const [showDetails, setShowDetails] = useState(true);
 
     // Mock submissions for Style 4 (Bulk View)
@@ -62,7 +62,7 @@ export default function SurveyPage() {
                         {/* Style Selector */}
                         <div className="flex items-center gap-3">
                             <label className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Card Style:</label>
-                            <Select value={currentStyle} onValueChange={(val: "current" | "style-1" | "style-2" | "style-3" | "style-4" | "style-5") => setCurrentStyle(val)}>
+                            <Select value={currentStyle} onValueChange={(val: "current" | "style-1" | "style-2" | "style-3" | "style-4" | "style-5" | "style-5-feedback") => setCurrentStyle(val)}>
                                 <SelectTrigger className="w-[180px] bg-white dark:bg-zinc-900">
                                     <SelectValue placeholder="Select style" />
                                 </SelectTrigger>
@@ -72,6 +72,7 @@ export default function SurveyPage() {
                                     <SelectItem value="style-2">Style 2</SelectItem>
                                     <SelectItem value="style-3">Style 3</SelectItem>
                                     <SelectItem value="style-5">Style 5 (Compact)</SelectItem>
+                                    <SelectItem value="style-5-feedback">Style 5 (Feedback based)</SelectItem>
                                     <SelectItem value="style-4">Style 4 (Bulk View)</SelectItem>
                                 </SelectContent>
                             </Select>
@@ -83,7 +84,7 @@ export default function SurveyPage() {
                 <div className={cn(
                     "flex flex-col mx-auto transition-all duration-500",
                     currentStyle === "style-4" ? "max-w-4xl gap-6" : "max-w-3xl",
-                    currentStyle === "style-5" ? "gap-0" : "gap-6"
+                    (currentStyle === "style-5" || currentStyle === "style-5-feedback") ? "gap-0" : "gap-6"
                 )}>
                     {currentStyle === "style-4" ? (
                         <BulkSubmissionCard submissionId={2481} data={surveyData} showHeader={false} />

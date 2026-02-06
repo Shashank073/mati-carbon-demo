@@ -36,7 +36,7 @@ import { surveyData, SurveyCard, BulkSubmissionCard } from "../survey/SurveyComp
 
 export default function DashboardPreviewPage() {
     const [selectedFarmer, setSelectedFarmer] = useState("Farmer A");
-    const [currentStyle, setCurrentStyle] = useState<"style-1" | "style-2" | "style-3" | "style-4" | "style-5" | "current">("style-3");
+    const [currentStyle, setCurrentStyle] = useState<"style-1" | "style-2" | "style-3" | "style-4" | "style-5" | "style-5-feedback" | "current">("style-3");
     const [isReporting, setIsReporting] = useState(false);
     const [reportedIds, setReportedIds] = useState<string[]>([]);
 
@@ -224,7 +224,8 @@ export default function DashboardPreviewPage() {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="style-3">Style 3</SelectItem>
-                                    <SelectItem value="style-5">Style 5 (Compact)</SelectItem>
+                                    <SelectItem value="style-5">Style 5 (Compact Verifier)</SelectItem>
+                                    <SelectItem value="style-5-feedback">Style 5 (Feedback based)</SelectItem>
                                     <SelectItem value="style-4">Style 4 (Bulk View)</SelectItem>
                                     <SelectItem value="style-1">Style 1</SelectItem>
                                     <SelectItem value="style-2">Style 2</SelectItem>

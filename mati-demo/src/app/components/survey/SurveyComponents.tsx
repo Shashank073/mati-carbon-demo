@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { ArrowLeft, MapPin, Calendar, DollarSign, Check, X, Star, Image as ImageIcon, Video, FileText, Download, Play, Phone, Mail, Copy, Ruler, Package, AlertCircle } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -53,7 +53,7 @@ export const surveyData: SurveyItem[] = [
         description: "Best for displaying concise, single-line text data like names, titles, or short comments.",
     },
     {
-        id: "13",
+        id: "2",
         question: "Describe any pest issues observed:",
         type: "long-text",
         answer: "During the initial inspection of the north-east quad, we observed significant yellowing of the lower leaves on approximately 15% of the crop. Further examination revealed small entrance holes near the base of the stalks, which strongly suggests an early-stage infestation of stem borers. Additionally, there are minor traces of aphid activity on the younger shoots. We recommend an immediate application of organic neem-based pesticides followed by a secondary review in 48 hours to prevent further spread to the adjacent healthy quadrants.",
@@ -61,7 +61,7 @@ export const surveyData: SurveyItem[] = [
         description: "Optimal for displaying long-form content, paragraphs, or detailed descriptions.",
     },
     {
-        id: "2",
+        id: "3",
         question: "Select the crops currently being harvested:",
         type: "badge",
         answer: ["Rice (Basmati)", "Wheat", "Mustard"],
@@ -69,7 +69,7 @@ export const surveyData: SurveyItem[] = [
         description: "Ideal for rendering lists of tags, categories, or multiple selected attributes.",
     },
     {
-        id: "3",
+        id: "4",
         question: "Upload a photo of the soil sample:",
         type: "image",
         answer: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=300&auto=format&fit=crop", // Placeholder
@@ -77,7 +77,7 @@ export const surveyData: SurveyItem[] = [
         description: "Used to present visual assets, thumbnails, or document scans with a full-screen preview option.",
     },
     {
-        id: "4",
+        id: "5",
         question: "Record a video of the crop health:",
         type: "video",
         answer: "https://www.w3schools.com/html/mov_bbb.mp4", // Test video for fallback
@@ -85,7 +85,7 @@ export const surveyData: SurveyItem[] = [
         description: "Suitable for showcasing video content, replays, or dynamic visual reports.",
     },
     {
-        id: "5",
+        id: "6",
         question: "Attach the soil test report (PDF):",
         type: "file",
         answer: { name: "Soil_Analysis_Report_2024.pdf", size: "2.4 MB" },
@@ -93,7 +93,7 @@ export const surveyData: SurveyItem[] = [
         description: "Best for listing downloadable documents, reports, or external references.",
     },
     {
-        id: "6",
+        id: "7",
         question: "Confirm the location of the field:",
         type: "map",
         answer: "Anekal, Karnataka",
@@ -102,7 +102,7 @@ export const surveyData: SurveyItem[] = [
         description: "Designed to display geospatial coordinates or location names with an interactive map preview.",
     },
     {
-        id: "7",
+        id: "8",
         question: "Measure the total cultivated area:",
         type: "area",
         answer: 4.5,
@@ -111,7 +111,7 @@ export const surveyData: SurveyItem[] = [
         description: "Used for displaying surface area measurements in specific units (e.g., Acres, Hectares).",
     },
     {
-        id: "8",
+        id: "9",
         question: "Enter the quantity of seeds used:",
         type: "quantity",
         answer: 50,
@@ -120,7 +120,7 @@ export const surveyData: SurveyItem[] = [
         description: "Best for weight, volume, or unit counts of materials or produce.",
     },
     {
-        id: "9",
+        id: "10",
         question: "How would you rate the new fertilizer efficiency?",
         type: "rating",
         answer: 4, // out of 5
@@ -128,7 +128,7 @@ export const surveyData: SurveyItem[] = [
         description: "Perfect for visualizing satisfaction scores, product ratings, or quality levels.",
     },
     {
-        id: "10",
+        id: "11",
         question: "Estimated cost of inputs per acre:",
         type: "currency",
         answer: 12500,
@@ -137,7 +137,7 @@ export const surveyData: SurveyItem[] = [
         description: "Use this format to display monetary values, prices, or financial figures clearly.",
     },
     {
-        id: "11",
+        id: "12",
         question: "Date of sowing:",
         type: "date",
         answer: "2023-06-15",
@@ -145,7 +145,7 @@ export const surveyData: SurveyItem[] = [
         description: "Standard format for presenting calendar dates, deadlines, or timestamps.",
     },
     {
-        id: "12",
+        id: "13",
         question: "Did you verify the soil pH level?",
         type: "boolean",
         answer: true,
@@ -220,8 +220,9 @@ const ExpandableText = ({ text, style }: { text: string; style: string }) => {
                 >
                     <p className={cn(
                         "text-zinc-500 dark:text-zinc-400 leading-relaxed",
-                        style === "style-5" ? "text-base font-semibold text-zinc-900 dark:text-zinc-100 leading-snug" : "text-sm",
-                        !isExpanded && "line-clamp-2"
+                        (style === "style-5" || style === "style-5-feedback") ? "text-base font-semibold text-zinc-900 dark:text-zinc-100 leading-snug" : "text-sm",
+                        (style === "style-5" || style === "style-5-feedback") && !isExpanded && "line-clamp-1",
+                        style !== "style-5" && style !== "style-5-feedback" && !isExpanded && "line-clamp-2"
                     )}>
                         {text}
                     </p>
@@ -244,6 +245,44 @@ const ExpandableText = ({ text, style }: { text: string; style: string }) => {
                 </HoverCardContent>
             )}
         </HoverCard>
+    );
+};
+
+
+// --- Video Highlights Preview on Hover ---
+const VideoHighlightsPreview = ({ src }: { src: string }) => {
+    const videoRef = React.useRef<HTMLVideoElement>(null);
+    // Auto-play whenever this component is mounted (which happens when HoverCard opens)
+
+    React.useEffect(() => {
+        if (videoRef.current) {
+            videoRef.current.playbackRate = 2.0; // Play at 2x speed
+            videoRef.current.play().catch(() => { });
+        }
+
+        return () => {
+            if (videoRef.current) {
+                videoRef.current.pause();
+                videoRef.current.currentTime = 0;
+            }
+        };
+    }, []); // Run once on mount
+
+    return (
+        <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden group">
+            <video
+                ref={videoRef}
+                src={src}
+                className="w-full h-full object-cover"
+                muted
+                loop
+                playsInline
+                preload="metadata"
+            />
+            <div className="absolute bottom-2 right-2 px-2 py-0.5 bg-black/60 rounded text-[10px] text-white font-medium backdrop-blur-sm">
+                Previewing
+            </div>
+        </div>
     );
 };
 
@@ -272,17 +311,19 @@ export const SurveyCard = ({
         style === "style-1" && "bg-gradient-to-br from-white to-zinc-50 dark:from-zinc-900 dark:to-zinc-950 border-transparent shadow-lg hover:scale-[1.02] rounded-2xl ring-1 ring-zinc-200 dark:ring-zinc-800 p-5",
         style === "style-2" && "bg-transparent border border-zinc-200 dark:border-zinc-800 shadow-none rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-900 p-5",
         style === "style-3" && "bg-transparent border-0 border-b border-zinc-200 dark:border-zinc-800 shadow-none rounded-none p-4 px-0",
-        style === "style-5" && "bg-transparent border-0 border-b border-zinc-100 dark:border-zinc-800 shadow-none rounded-none py-3 px-0"
+        style === "style-5" && "bg-transparent border-0 border-b border-zinc-100 dark:border-zinc-800 shadow-none rounded-none py-3 px-0",
+        style === "style-5-feedback" && "bg-transparent border-0 border-b border-zinc-100 dark:border-zinc-800 shadow-none rounded-lg py-3 px-3 hover:bg-white dark:hover:bg-zinc-900 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
     );
 
     const questionStyles = cn(
         "font-bold leading-snug",
-        style !== "style-5" && "mb-2",
+        (style !== "style-5" && style !== "style-5-feedback") && "mb-2",
         style === "current" && "text-base text-zinc-900 dark:text-zinc-50",
         style === "style-1" && "text-lg text-zinc-800 dark:text-zinc-100",
         style === "style-2" && "text-sm text-zinc-900 dark:text-zinc-50 font-semibold mb-3",
         style === "style-3" && "text-base font-medium text-zinc-900 dark:text-zinc-100 mb-1",
-        style === "style-5" && "text-[13px] font-normal text-zinc-500 dark:text-zinc-400 leading-tight"
+        style === "style-5" && "text-[13px] font-normal text-zinc-500 dark:text-zinc-400 leading-tight",
+        style === "style-5-feedback" && "text-[13px] font-normal text-zinc-500 dark:text-zinc-400 leading-tight"
     );
 
     const renderContent = () => {
@@ -292,12 +333,20 @@ export const SurveyCard = ({
                     <CopyableText text={item.answer as string}>
                         <p className={cn(
                             "text-zinc-500 dark:text-zinc-400 leading-relaxed",
-                            style === "style-5" ? "text-base font-semibold text-zinc-900 dark:text-zinc-100 leading-snug" : "text-sm"
+                            style === "style-5" ? "text-base font-semibold text-zinc-900 dark:text-zinc-100 leading-snug" : "text-sm",
+                            style === "style-5-feedback" && "text-base font-semibold text-zinc-900 dark:text-zinc-100 leading-snug"
                         )}>{item.answer as string}</p>
                     </CopyableText>
                 );
 
             case "long-text":
+                if (style === "style-5" || style === "style-5-feedback") {
+                    return (
+                        <CopyableText text={item.answer as string}>
+                            <ExpandableText text={item.answer as string} style={style} />
+                        </CopyableText>
+                    );
+                }
                 return (
                     <CopyableText text={item.answer as string}>
                         <ExpandableText text={item.answer as string} style={style} />
@@ -305,11 +354,14 @@ export const SurveyCard = ({
                 );
 
             case "badge":
-                if (style === "style-5") {
+                if (style === "style-5" || style === "style-5-feedback") {
                     return (
                         <div className="flex flex-wrap gap-1.5">
                             {(item.answer as string[]).map((badge, idx) => (
-                                <Badge key={idx} variant="outline" className="text-xs bg-zinc-50 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800">
+                                <Badge key={idx} variant="outline" className={cn(
+                                    "text-xs border-zinc-200 dark:border-zinc-800",
+                                    style === "style-5" ? "bg-zinc-50 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                                )}>
                                     {badge}
                                 </Badge>
                             ))}
@@ -327,7 +379,7 @@ export const SurveyCard = ({
                 );
 
             case "image":
-                if (style === "style-5") {
+                if (style === "style-5" || style === "style-5-feedback") {
                     const fileName = (item.answer as string).split('/').pop()?.split('?')[0] || "image.jpg";
                     return (
                         <Dialog>
@@ -389,6 +441,52 @@ export const SurveyCard = ({
                 );
 
             case "video":
+                if (style === "style-5-feedback") {
+                    const fileName = (item.answer as string).split('/').pop()?.split('?')[0] || "video.mp4";
+                    return (
+                        <Dialog>
+                            <HoverCard openDelay={200}>
+                                <HoverCardTrigger asChild>
+                                    <div className="group relative w-full">
+                                        <DialogTrigger asChild>
+                                            <div className="flex items-center p-3 border border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer pr-10">
+                                                <div className="w-10 h-10 rounded overflow-hidden flex-shrink-0 border border-zinc-200 dark:border-zinc-700 bg-zinc-900 flex items-center justify-center mr-3">
+                                                    <Play className="w-4 h-4 text-white fill-white" />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{fileName}</p>
+                                                    <p className="text-xs text-zinc-500">12.8 MB</p>
+                                                </div>
+                                            </div>
+                                        </DialogTrigger>
+                                        <div className="absolute top-[50%] -translate-y-[50%] right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-zinc-200 dark:hover:bg-zinc-700">
+                                                <Download className="h-4 w-4 text-zinc-500" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </HoverCardTrigger>
+                                <HoverCardContent className="w-80 p-0 overflow-hidden border-none shadow-xl" side="left" align="start" sideOffset={10}>
+                                    <VideoHighlightsPreview src={item.answer as string} />
+                                </HoverCardContent>
+                            </HoverCard>
+                            <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none shadow-none">
+                                <DialogTitle className="sr-only">Video Player</DialogTitle>
+                                <DialogDescription className="sr-only">Full screen survey video player</DialogDescription>
+                                <video
+                                    key={item.answer as string}
+                                    src={item.answer as string}
+                                    controls
+                                    autoPlay
+                                    playsInline
+                                    preload="auto"
+                                    className="w-full h-auto rounded-lg shadow-2xl"
+                                />
+                            </DialogContent>
+                        </Dialog>
+                    );
+                }
+
                 if (style === "style-5") {
                     const fileName = (item.answer as string).split('/').pop()?.split('?')[0] || "video.mp4";
                     return (
@@ -561,9 +659,9 @@ export const SurveyCard = ({
                 return (
                     <div className={cn(
                         "flex items-center gap-2 text-lg font-semibold text-zinc-900 dark:text-zinc-100",
-                        style === "style-5" && "text-base"
+                        (style === "style-5" || style === "style-5-feedback") && "text-base"
                     )}>
-                        <DollarSign className={cn("w-5 h-5 text-zinc-500", style === "style-5" && "w-4 h-4")} />
+                        <DollarSign className={cn("w-5 h-5 text-zinc-500", (style === "style-5" || style === "style-5-feedback") && "w-4 h-4")} />
                         {(item.answer as number).toLocaleString('en-US')} <span className="text-xs font-normal text-zinc-500 uppercase">{item.meta}</span>
                     </div>
                 );
@@ -572,10 +670,10 @@ export const SurveyCard = ({
                 return (
                     <div className={cn(
                         "flex items-center gap-2 text-zinc-700 dark:text-zinc-300",
-                        style === "style-5" && "text-zinc-900 dark:text-zinc-100 font-semibold text-base"
+                        (style === "style-5" || style === "style-5-feedback") && "text-zinc-900 dark:text-zinc-100 font-semibold text-base"
                     )}>
                         <Calendar className="w-4 h-4 text-zinc-500" />
-                        {style === "style-5"
+                        {(style === "style-5" || style === "style-5-feedback")
                             ? new Date(item.answer as string).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
                             : new Date(item.answer as string).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
                         }
@@ -583,7 +681,7 @@ export const SurveyCard = ({
                 );
 
             case "boolean":
-                if (style === "style-5") {
+                if (style === "style-5" || style === "style-5-feedback") {
                     return (
                         <div className={cn(
                             "inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wide",
@@ -612,7 +710,7 @@ export const SurveyCard = ({
                     <CopyableText text={item.answer as string} icon={<Phone className="w-4 h-4" />}>
                         <span className={cn(
                             "font-medium text-zinc-900 dark:text-zinc-100",
-                            style === "style-5" && "font-semibold text-base"
+                            (style === "style-5" || style === "style-5-feedback") && "font-semibold text-base"
                         )}>{item.answer as string}</span>
                     </CopyableText>
                 );
@@ -622,7 +720,7 @@ export const SurveyCard = ({
                     <CopyableText text={item.answer as string} icon={<Mail className="w-4 h-4" />}>
                         <span className={cn(
                             "font-medium text-zinc-900 dark:text-zinc-100",
-                            style === "style-5" && "font-semibold text-base"
+                            (style === "style-5" || style === "style-5-feedback") && "font-semibold text-base"
                         )}>{item.answer as string}</span>
                     </CopyableText>
                 );
@@ -631,9 +729,9 @@ export const SurveyCard = ({
                 return (
                     <div className={cn(
                         "flex items-center gap-2 text-lg font-semibold text-zinc-900 dark:text-zinc-100",
-                        style === "style-5" && "text-base"
+                        (style === "style-5" || style === "style-5-feedback") && "text-base"
                     )}>
-                        <Ruler className={cn("w-5 h-5 text-zinc-500", style === "style-5" && "w-4 h-4")} />
+                        <Ruler className={cn("w-5 h-5 text-zinc-500", (style === "style-5" || style === "style-5-feedback") && "w-4 h-4")} />
                         {item.answer as number} <span className="text-xs font-normal text-zinc-500 uppercase">{item.meta}</span>
                     </div>
                 );
@@ -642,16 +740,16 @@ export const SurveyCard = ({
                 return (
                     <div className={cn(
                         "flex items-center gap-2 text-lg font-semibold text-zinc-900 dark:text-zinc-100",
-                        style === "style-5" && "text-base"
+                        (style === "style-5" || style === "style-5-feedback") && "text-base"
                     )}>
-                        <Package className={cn("w-5 h-5 text-zinc-500", style === "style-5" && "w-4 h-4")} />
+                        <Package className={cn("w-5 h-5 text-zinc-500", (style === "style-5" || style === "style-5-feedback") && "w-4 h-4")} />
                         {item.answer as number} <span className="text-xs font-normal text-zinc-500 uppercase">{item.meta}</span>
                     </div>
                 );
 
             default:
                 // Text, long-text, phone, email, etc.
-                if (style === "style-5") {
+                if (style === "style-5" || style === "style-5-feedback") {
                     return <p className="font-semibold text-zinc-900 dark:text-zinc-100 text-base leading-snug">{item.answer as string}</p>;
                 }
                 return null;
@@ -684,23 +782,24 @@ export const SurveyCard = ({
             <div className="w-full">
                 <div className={cn(
                     "flex items-center gap-2",
-                    style === "style-5" ? "mb-1" : "mb-3"
+                    (style === "style-5" || style === "style-5-feedback") ? "mb-1" : "mb-3"
                 )}>
                     {/* Only show ID if NOT Style 3 or Style 5 */}
                     {(style !== "style-3" && style !== "style-5") && (
                         <span className={cn(
                             "flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold",
                             style === "style-1" && "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900",
-                            style === "style-2" && "text-zinc-400 border border-zinc-200 dark:border-zinc-800"
+                            style === "style-2" && "text-zinc-400 border border-zinc-200 dark:border-zinc-800",
+                            style === "style-5-feedback" && "text-zinc-400 dark:text-zinc-500 text-[13px] font-normal w-auto h-auto rounded-none justify-start mr-0"
                         )}>
-                            {item.id}
+                            {style === "style-5-feedback" ? `${item.id}.` : item.id}
                         </span>
                     )}
-                    <h3 className={questionStyles}>
+                    <h3 className={cn(questionStyles, style === "style-5-feedback" && "relative z-10")}>
                         {item.question}
                     </h3>
                 </div>
-                <div className={cn((style !== "style-3" && style !== "style-5") && "pl-8")}>
+                <div className={cn((style !== "style-3" && style !== "style-5" && style !== "style-5-feedback") && "pl-8")}>
                     {renderContent()}
                 </div>
             </div>
@@ -708,8 +807,8 @@ export const SurveyCard = ({
     };
 
     return (
-        <div className={cn("w-full transition-all", style === "style-5" ? "mb-0" : "mb-2")}>
-            {(showDetails && style !== "style-5") && (
+        <div className={cn("w-full transition-all", (style === "style-5" || style === "style-5-feedback") ? "mb-0" : "mb-2")}>
+            {(showDetails && style !== "style-5" && style !== "style-5-feedback") && (
                 <div className="mb-2">
                     <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 pl-1">{item.label}</span>
                 </div>
