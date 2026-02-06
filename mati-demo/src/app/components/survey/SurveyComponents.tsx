@@ -221,8 +221,7 @@ const ExpandableText = ({ text, style }: { text: string; style: string }) => {
                     <p className={cn(
                         "text-zinc-500 dark:text-zinc-400 leading-relaxed",
                         (style === "style-5" || style === "style-5-feedback") ? "text-base font-semibold text-zinc-900 dark:text-zinc-100 leading-snug" : "text-sm",
-                        (style === "style-5" || style === "style-5-feedback") && !isExpanded && "line-clamp-1",
-                        style !== "style-5" && style !== "style-5-feedback" && !isExpanded && "line-clamp-2"
+                        !isExpanded && "line-clamp-2"
                     )}>
                         {text}
                     </p>
@@ -311,8 +310,11 @@ export const SurveyCard = ({
         style === "style-1" && "bg-gradient-to-br from-white to-zinc-50 dark:from-zinc-900 dark:to-zinc-950 border-transparent shadow-lg hover:scale-[1.02] rounded-2xl ring-1 ring-zinc-200 dark:ring-zinc-800 p-5",
         style === "style-2" && "bg-transparent border border-zinc-200 dark:border-zinc-800 shadow-none rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-900 p-5",
         style === "style-3" && "bg-transparent border-0 border-b border-zinc-200 dark:border-zinc-800 shadow-none rounded-none p-4 px-0",
-        style === "style-5" && "bg-transparent border-0 border-b border-zinc-100 dark:border-zinc-800 shadow-none rounded-none py-3 px-0",
-        style === "style-5-feedback" && "bg-transparent border-0 border-b border-zinc-100 dark:border-zinc-800 shadow-none rounded-lg py-3 px-3 hover:bg-white dark:hover:bg-zinc-900 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+        style === "style-5" && "bg-transparent border-0 border-b border-zinc-100 dark:border-zinc-800 shadow-none rounded-none py-2 px-0",
+        style === "style-5-feedback" && cn(
+            "bg-transparent border-0 border-b border-zinc-100 dark:border-zinc-800 shadow-none rounded-none py-2 px-0 transition-all duration-200",
+            !isSelected && "hover:bg-white dark:hover:bg-zinc-900/50"
+        )
     );
 
     const questionStyles = cn(
@@ -359,8 +361,7 @@ export const SurveyCard = ({
                         <div className="flex flex-wrap gap-1.5">
                             {(item.answer as string[]).map((badge, idx) => (
                                 <Badge key={idx} variant="outline" className={cn(
-                                    "text-xs border-zinc-200 dark:border-zinc-800",
-                                    style === "style-5" ? "bg-zinc-50 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                                    "text-xs border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300"
                                 )}>
                                     {badge}
                                 </Badge>
@@ -782,10 +783,10 @@ export const SurveyCard = ({
             <div className="w-full">
                 <div className={cn(
                     "flex items-center gap-2",
-                    (style === "style-5" || style === "style-5-feedback") ? "mb-1" : "mb-3"
+                    (style === "style-5" || style === "style-5-feedback") ? "mb-0.5" : "mb-3"
                 )}>
-                    {/* Only show ID if NOT Style 3 or Style 5 */}
-                    {(style !== "style-3" && style !== "style-5") && (
+                    {/* Only show ID if NOT Style 3 or Style 5. For Style 5 Feedback, hide it when reporting to match Style 5 alignment */}
+                    {(style !== "style-3" && style !== "style-5" && !(style === "style-5-feedback" && isReporting)) && (
                         <span className={cn(
                             "flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold",
                             style === "style-1" && "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900",
@@ -816,15 +817,15 @@ export const SurveyCard = ({
 
             <Card className={cn(
                 cardStyles,
-                (style !== "current" && style !== "style-3" && style !== "style-5") && "p-4",
+                (style !== "current" && style !== "style-3" && style !== "style-5" && style !== "style-5-feedback") && "p-4",
                 isReporting && isSelected && (
-                    style === "style-5"
+                    (style === "style-5" || style === "style-5-feedback")
                         ? "bg-red-50/50 dark:bg-red-900/10 border-l-2 border-l-red-500 pl-3 -ml-1 transition-all"
                         : "ring-1 ring-red-500 bg-red-50/30 dark:bg-red-900/10"
                 )
             )}>
                 {isReporting ? (
-                    <div className="flex items-start gap-4">
+                    <div className={cn("flex items-start", (style === "style-5" || style === "style-5-feedback") ? "gap-3" : "gap-4")}>
                         <div className="pt-1 flex-shrink-0">
                             <Checkbox
                                 checked={isSelected}

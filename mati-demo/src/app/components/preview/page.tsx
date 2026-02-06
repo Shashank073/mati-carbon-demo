@@ -266,7 +266,7 @@ export default function DashboardPreviewPage() {
                     <ScrollArea className="flex-1">
                         <div className={cn(
                             "p-4",
-                            currentStyle === "style-5" ? "space-y-0" : "space-y-6"
+                            (currentStyle === "style-5" || currentStyle === "style-5-feedback") ? "space-y-0" : "space-y-6"
                         )}>
                             {currentStyle === "style-4" ? (
                                 <BulkSubmissionCard
