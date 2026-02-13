@@ -73,3 +73,27 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom Google Maps InfoWindow Stylings */
+.gm-ui-hover-effect {
+  display: none !important;
+}
+
+.gm-style-iw-d {
+  overflow: hidden !important;
+  padding: 0 !important;
+}
+
+.gm-style-iw {
+  padding: 0 !important;
+  max-height: none !important;
+  max-width: none !important;
+}
+.gm-style-iw-tc::after {
+  background: white !important;
+}
+
+.dark .gm-style-iw-tc::after {
+  background: #09090b !important;
+}
+
