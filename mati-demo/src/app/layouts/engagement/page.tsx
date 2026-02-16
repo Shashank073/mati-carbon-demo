@@ -60,13 +60,16 @@ export default function EngagementPage() {
         if (activeTab === "Verified") {
             return defaultColumns
         }
-        return defaultColumns.filter(col => (col as any).accessorKey !== "verified")
+        // Filter out verification columns for Pending and Invalid tabs
+        return defaultColumns.filter(col => 
+            (col as any).id !== "verifiedBy" && (col as any).id !== "verifiedOn"
+        )
     }, [activeTab])
 
     return (
         <NavBarType4 activeItem="Engagement">
-            <div className="flex flex-col gap-6">
-                <div className="flex items-center justify-between">
+            <div className="flex flex-col h-full gap-6">
+                <div className="flex items-center justify-between shrink-0">
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Engagement</h1>
                         <p className="text-muted-foreground text-sm">Manage ongoing farmer interactions and feedback.</p>
@@ -81,7 +84,7 @@ export default function EngagementPage() {
                     </div>
                 </div>
 
-                <div className="bg-white dark:bg-zinc-950 overflow-hidden">
+                <div className="bg-white dark:bg-zinc-950 overflow-hidden flex-1 min-h-0 flex flex-col">
                     <EngagementTable
                         key={activeTab} // Re-mount table when tab changes for fresh state
                         data={filteredData}

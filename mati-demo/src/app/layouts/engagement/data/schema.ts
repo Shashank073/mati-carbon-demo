@@ -6,6 +6,7 @@ export interface EngagementRecord {
         name: string;
         id: string;
         avatar?: string;
+        phoneNumber?: string;
     };
     engagementType: string;
     village: string;
@@ -13,13 +14,16 @@ export interface EngagementRecord {
     surveyor: {
         name: string;
         id: string;
+        phoneNumber?: string;
     };
     verified?: {
         verifier: string;
         date: Date;
+        comment?: string;
     } | null;
     status: "Verified" | "Pending" | "Invalid";
     // Keeping some old fields for compatibility with the detail drawer if needed
     comments: string;
+    approvalComment?: string;
     score: number;
 }

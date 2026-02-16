@@ -229,7 +229,7 @@ const ExpandableText = ({ text, style }: { text: string; style: string }) => {
             </HoverCardTrigger>
             {!isExpanded && (
                 <HoverCardContent
-                    className="w-80 p-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xl rounded-xl z-[100]"
+                    className="w-80 p-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xl rounded-xl z-[300]"
                     side="left"
                     align="start"
                     sideOffset={10}
@@ -294,7 +294,8 @@ export const SurveyCard = ({
     showDetails,
     isReporting = false,
     isSelected = false,
-    onToggleSelect
+    onToggleSelect,
+    disableDialog = false
 }: {
     item: SurveyItem;
     style: string;
@@ -302,6 +303,7 @@ export const SurveyCard = ({
     isReporting?: boolean;
     isSelected?: boolean;
     onToggleSelect?: (id: string) => void;
+    disableDialog?: boolean;
 }) => {
     // Dynamic Styles based on selection
     const cardStyles = cn(
@@ -382,33 +384,39 @@ export const SurveyCard = ({
             case "image":
                 if (style === "style-5" || style === "style-5-feedback") {
                     const fileName = (item.answer as string).split('/').pop()?.split('?')[0] || "image.jpg";
-                    return (
-                        <Dialog>
-                            <HoverCard openDelay={200}>
-                                <HoverCardTrigger asChild>
-                                    <div className="group relative w-full">
-                                        <DialogTrigger asChild>
-                                            <div className="flex items-center p-3 border border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer pr-10">
-                                                <div className="w-10 h-10 rounded overflow-hidden flex-shrink-0 border border-zinc-200 dark:border-zinc-700 bg-zinc-200 mr-3">
-                                                    <img src={item.answer as string} alt="Thumbnail" className="w-full h-full object-cover" />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{fileName}</p>
-                                                    <p className="text-xs text-zinc-500">2.4 MB</p>
-                                                </div>
-                                            </div>
-                                        </DialogTrigger>
-                                        <div className="absolute top-[50%] -translate-y-[50%] right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-zinc-200 dark:hover:bg-zinc-700">
-                                                <Download className="h-4 w-4 text-zinc-500" />
-                                            </Button>
+                    const imageContent = (
+                        <HoverCard openDelay={200}>
+                            <HoverCardTrigger asChild>
+                                <div className="group relative w-full">
+                                    <div className="flex items-center p-3 border border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer pr-10">
+                                        <div className="w-10 h-10 rounded overflow-hidden flex-shrink-0 border border-zinc-200 dark:border-zinc-700 bg-zinc-200 mr-3">
+                                            <img src={item.answer as string} alt="Thumbnail" className="w-full h-full object-cover" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{fileName}</p>
+                                            <p className="text-xs text-zinc-500">2.4 MB</p>
                                         </div>
                                     </div>
-                                </HoverCardTrigger>
-                                <HoverCardContent className="w-64 p-0 overflow-hidden border-none shadow-xl" side="left" align="start" sideOffset={10}>
-                                    <img src={item.answer as string} alt="Preview" className="w-full h-auto" />
-                                </HoverCardContent>
-                            </HoverCard>
+                                    <div className="absolute top-[50%] -translate-y-[50%] right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-zinc-200 dark:hover:bg-zinc-700">
+                                            <Download className="h-4 w-4 text-zinc-500" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            </HoverCardTrigger>
+                            <HoverCardContent className="w-64 p-0 overflow-hidden border-none shadow-xl z-[300]" side="left" align="start" sideOffset={10}>
+                                <img src={item.answer as string} alt="Preview" className="w-full h-auto" />
+                            </HoverCardContent>
+                        </HoverCard>
+                    );
+
+                    if (disableDialog) return imageContent;
+
+                    return (
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                {imageContent}
+                            </DialogTrigger>
                             <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none shadow-none">
                                 <DialogTitle className="sr-only">Full Image View</DialogTitle>
                                 <DialogDescription className="sr-only">Detailed view of the uploaded survey image</DialogDescription>
@@ -444,33 +452,39 @@ export const SurveyCard = ({
             case "video":
                 if (style === "style-5-feedback") {
                     const fileName = (item.answer as string).split('/').pop()?.split('?')[0] || "video.mp4";
-                    return (
-                        <Dialog>
-                            <HoverCard openDelay={200}>
-                                <HoverCardTrigger asChild>
-                                    <div className="group relative w-full">
-                                        <DialogTrigger asChild>
-                                            <div className="flex items-center p-3 border border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer pr-10">
-                                                <div className="w-10 h-10 rounded overflow-hidden flex-shrink-0 border border-zinc-200 dark:border-zinc-700 bg-zinc-900 flex items-center justify-center mr-3">
-                                                    <Play className="w-4 h-4 text-white fill-white" />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{fileName}</p>
-                                                    <p className="text-xs text-zinc-500">12.8 MB</p>
-                                                </div>
-                                            </div>
-                                        </DialogTrigger>
-                                        <div className="absolute top-[50%] -translate-y-[50%] right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-zinc-200 dark:hover:bg-zinc-700">
-                                                <Download className="h-4 w-4 text-zinc-500" />
-                                            </Button>
+                    const videoContent = (
+                        <HoverCard openDelay={200}>
+                            <HoverCardTrigger asChild>
+                                <div className="group relative w-full">
+                                    <div className="flex items-center p-3 border border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer pr-10">
+                                        <div className="w-10 h-10 rounded overflow-hidden flex-shrink-0 border border-zinc-200 dark:border-zinc-700 bg-zinc-900 flex items-center justify-center mr-3">
+                                            <Play className="w-4 h-4 text-white fill-white" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{fileName}</p>
+                                            <p className="text-xs text-zinc-500">12.8 MB</p>
                                         </div>
                                     </div>
-                                </HoverCardTrigger>
-                                <HoverCardContent className="w-80 p-0 overflow-hidden border-none shadow-xl" side="left" align="start" sideOffset={10}>
+                                    <div className="absolute top-[50%] -translate-y-[50%] right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-zinc-200 dark:hover:bg-zinc-700">
+                                            <Download className="h-4 w-4 text-zinc-500" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            </HoverCardTrigger>
+                                <HoverCardContent className="w-80 p-0 overflow-hidden border-none shadow-xl z-[300]" side="left" align="start" sideOffset={10}>
                                     <VideoHighlightsPreview src={item.answer as string} />
                                 </HoverCardContent>
-                            </HoverCard>
+                        </HoverCard>
+                    );
+
+                    if (disableDialog) return videoContent;
+
+                    return (
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                {videoContent}
+                            </DialogTrigger>
                             <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none shadow-none">
                                 <DialogTitle className="sr-only">Video Player</DialogTitle>
                                 <DialogDescription className="sr-only">Full screen survey video player</DialogDescription>
@@ -513,19 +527,22 @@ export const SurveyCard = ({
                                         </div>
                                     </div>
                                 </HoverCardTrigger>
-                                <HoverCardContent className="w-64 p-0 overflow-hidden border-none shadow-xl" side="left" align="start" sideOffset={10}>
-                                    <div className="relative w-full aspect-video bg-black">
-                                        <video
-                                            key={item.answer as string}
-                                            src={item.answer as string}
-                                            className="w-full h-full object-cover"
-                                            playsInline
-                                            muted
-                                            loop
-                                            preload="metadata"
-                                        />
-                                    </div>
-                                </HoverCardContent>
+                                <HoverCardContent className="w-80 p-0 overflow-hidden border-none shadow-xl z-[300]" side="left" align="start" sideOffset={10}>
+                            <div className="relative w-full aspect-video bg-black">
+                                <video
+                                    key={item.answer as string}
+                                    src={item.answer as string}
+                                    className="w-full h-full object-cover"
+                                    playsInline
+                                    muted
+                                    loop
+                                    preload="metadata"
+                                />
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <Play className="w-8 h-8 text-white/50" />
+                                </div>
+                            </div>
+                        </HoverCardContent>
                             </HoverCard>
                             <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none shadow-none">
                                 <DialogTitle className="sr-only">Video Preview</DialogTitle>
@@ -622,7 +639,7 @@ export const SurveyCard = ({
                                 </div>
                             </div>
                         </HoverCardTrigger>
-                        <HoverCardContent className="w-80 p-0 overflow-hidden border-none shadow-2xl" side="left" align="start" sideOffset={10}>
+                        <HoverCardContent className="w-80 p-0 overflow-hidden border-none shadow-2xl z-[300]" side="left" align="start" sideOffset={10}>
                             <div className="relative h-40 bg-zinc-100">
                                 <img
                                     src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=1000&auto=format&fit=crop"
@@ -634,8 +651,8 @@ export const SurveyCard = ({
                                 </div>
                             </div>
                             <div className="p-3 bg-white dark:bg-zinc-950">
-                                <p className="text-sm font-semibold">{item.answer as string}</p>
-                                <p className="text-xs text-zinc-500 mt-1">{item.meta}</p>
+                                <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{item.answer as string}</p>
+                                <p className="text-xs text-zinc-500 mt-1">{item.meta || "GEO COORD"}</p>
                             </div>
                         </HoverCardContent>
                     </HoverCard>
@@ -897,7 +914,7 @@ export const BulkSubmissionCard = ({
                                     </div>
                                 </div>
                             </HoverCardTrigger>
-                            <HoverCardContent className="w-64 p-0 overflow-hidden border-none shadow-xl" side="left" align="start" sideOffset={10}>
+                            <HoverCardContent className="w-64 p-0 overflow-hidden border-none shadow-xl z-[300]" side="left" align="start" sideOffset={10}>
                                 <img src={item.answer as string} alt="Preview" className="w-full h-auto" />
                             </HoverCardContent>
                         </HoverCard>

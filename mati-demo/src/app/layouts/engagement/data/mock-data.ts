@@ -26,21 +26,25 @@ export const engagementData: EngagementRecord[] = Array.from({ length: 60 }, (_,
         farmer: {
             name: farmerName,
             id: `99658742${11 + i % 100}`,
-            avatar: `https://i.pravatar.cc/150?u=${farmerName.replace(' ', '')}`
+            avatar: `https://i.pravatar.cc/150?u=${farmerName.replace(' ', '')}`,
+            phoneNumber: `+91 98765 ${43210 + i}`
         },
         engagementType: engagementTypes[i % engagementTypes.length],
         village: villages[i % villages.length],
         azs: (i % 9) + 1,
         surveyor: {
             name: surveyorName,
-            id: `99658742${21 + i % 100}`
+            id: `99658742${21 + i % 100}`,
+            phoneNumber: `+91 91234 ${56789 + i}`
         },
         verified: status === "Verified" ? {
             verifier: verifierName,
-            date: verifiedDate
+            date: verifiedDate,
+            comment: i === 1 ? "The farmer has successfully implemented the new irrigation techniques. Yield is expected to increase by 20%." : undefined
         } : null,
         status,
         comments: "Routine interaction regarding crop health and water usage.",
+        approvalComment: i === 1 ? "The farmer has successfully implemented the new irrigation techniques. Yield is expected to increase by 20%." : undefined,
         score: (i % 5) + 1,
     };
 });

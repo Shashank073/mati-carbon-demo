@@ -195,7 +195,7 @@ function NavBarType4Content({ children, activeItem }: { children?: React.ReactNo
     const [baseSearch, setBaseSearch] = React.useState("")
 
     return (
-        <SidebarProvider>
+        <SidebarProvider className="h-screen w-full overflow-hidden">
             <Sidebar collapsible="icon">
                 <SidebarHeader className="h-14 flex items-center justify-center border-b">
                     {/* Default Logo Option */}
@@ -433,7 +433,7 @@ function NavBarType4Content({ children, activeItem }: { children?: React.ReactNo
                 </header>
 
                 {/* Main Content Area */}
-                <div className="flex flex-1 flex-col gap-4 p-6 bg-muted/5">
+                <div className="flex flex-1 flex-col gap-4 p-6 bg-muted/5 overflow-hidden">
                     {children || (
                         <div className="p-8 flex items-center justify-center text-muted-foreground h-full border border-dashed rounded-lg m-4">
                             Content Area
