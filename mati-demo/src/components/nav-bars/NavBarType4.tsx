@@ -54,15 +54,15 @@ import { MatiLogo } from "./components/mati-logo"
 import { data } from "./nav-data"
 
 
-export function NavBarType4({ children }: { children?: React.ReactNode }) {
+export function NavBarType4({ children, activeItem = "Qualification" }: { children?: React.ReactNode, activeItem?: string }) {
     return (
         <React.Suspense fallback={<div>Loading...</div>}>
-            <NavBarType4Content>{children}</NavBarType4Content>
+            <NavBarType4Content activeItem={activeItem}>{children}</NavBarType4Content>
         </React.Suspense>
     )
 }
 
-function NavBarType4Content({ children }: { children?: React.ReactNode }) {
+function NavBarType4Content({ children, activeItem }: { children?: React.ReactNode, activeItem: string }) {
     // Navigation structure based on the reference image
     const navStructure = [
         {
@@ -73,34 +73,34 @@ function NavBarType4Content({ children }: { children?: React.ReactNode }) {
                     icon: Leaf,
                     isActive: true, // Parent active
                     items: [
-                        { title: "Qualification", url: "#", isActive: true }, // Child active
-                        { title: "Deployment", url: "#" },
-                        { title: "Engagement", url: "#" },
-                        { title: "Conversation", url: "#" },
+                        { title: "Qualification", url: "#", isActive: activeItem === "Qualification" },
+                        { title: "Deployment", url: "#", isActive: activeItem === "Deployment" },
+                        { title: "Engagement", url: "#", isActive: activeItem === "Engagement" },
+                        { title: "Conversation", url: "#", isActive: activeItem === "Conversation" },
                     ],
                 },
                 {
                     title: "Warehouse app",
                     icon: Box,
                     items: [
-                        { title: "Overview", url: "#" },
-                        { title: "Dispatched", url: "#" },
+                        { title: "Overview", url: "#", isActive: activeItem === "Warehouse Overview" },
+                        { title: "Dispatched", url: "#", isActive: activeItem === "Dispatched" },
                     ],
                 },
                 {
                     title: "LAD app",
                     icon: Truck,
                     items: [
-                        { title: "Overview", url: "#" },
-                        { title: "Samples", url: "#" },
+                        { title: "Overview", url: "#", isActive: activeItem === "LAD Overview" },
+                        { title: "Samples", url: "#", isActive: activeItem === "Samples" },
                     ],
                 },
                 {
                     title: "Supply & Demand",
                     icon: BarChart3,
                     items: [
-                        { title: "Requests", url: "#" },
-                        { title: "History", url: "#" },
+                        { title: "Requests", url: "#", isActive: activeItem === "Requests" },
+                        { title: "History", url: "#", isActive: activeItem === "History" },
                     ],
                 },
                 {
@@ -216,12 +216,12 @@ function NavBarType4Content({ children }: { children?: React.ReactNode }) {
                                         <Collapsible
                                             key={item.title}
                                             asChild
-                                            defaultOpen={item.isActive}
+                                            defaultOpen={(item as any).isActive}
                                             className="group/collapsible"
                                         >
                                             <SidebarMenuItem>
                                                 <CollapsibleTrigger asChild>
-                                                    <SidebarMenuButton tooltip={item.title} isActive={item.isActive}>
+                                                    <SidebarMenuButton tooltip={item.title} isActive={(item as any).isActive}>
                                                         {item.icon && <item.icon />}
                                                         <span>{item.title}</span>
                                                         <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
@@ -433,7 +433,7 @@ function NavBarType4Content({ children }: { children?: React.ReactNode }) {
                 </header>
 
                 {/* Main Content Area */}
-                <div className="flex flex-1 flex-col gap-4 p-4 pt-0 bg-muted/5">
+                <div className="flex flex-1 flex-col gap-4 p-6 bg-muted/5">
                     {children || (
                         <div className="p-8 flex items-center justify-center text-muted-foreground h-full border border-dashed rounded-lg m-4">
                             Content Area

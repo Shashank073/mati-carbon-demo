@@ -32,7 +32,7 @@ export default function CellsPage() {
             <div className="max-w-7xl mx-auto space-y-8">
                 {/* Header Section */}
                 <div className="flex items-center space-x-4">
-                    <Link href="/layouts">
+                    <Link href="/layouts/table-layouts">
                         <Button variant="ghost" size="icon">
                             <ArrowLeft className="h-4 w-4" />
                         </Button>
