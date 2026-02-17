@@ -8,6 +8,15 @@ import {
     SheetTitle,
     SheetDescription,
 } from "@/components/ui/sheet"
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogPortal,
+    DialogOverlay,
+} from "@/components/ui/dialog"
 import { EngagementRecord } from "../data/schema"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -122,6 +131,8 @@ export function EngagementDetailSheet({
         libraries: LIBRARIES
     });
 
+    const [mapVisible, setMapVisible] = React.useState(false)
+
     // Reset state when record changes
     React.useEffect(() => {
         setComment("")
@@ -130,6 +141,16 @@ export function EngagementDetailSheet({
         setIsReporting(false)
         setReportedIds([])
         setPreviewItem(null);
+        
+        if (open) {
+            // Delay map visibility to sync with side module animation
+            const timer = setTimeout(() => {
+                setMapVisible(true);
+            }, 600); // Increased to ensure side module is fully settled
+            return () => clearTimeout(timer);
+        } else {
+            setMapVisible(false);
+        }
     }, [record?.id, open])
 
     if (!record) return null
@@ -170,61 +191,95 @@ export function EngagementDetailSheet({
     }
 
     // Determine if we should show the persistent map
-    const showPersistentMap = open && record;
+    const showPersistentMap = mapVisible && record;
+
     // Determine if we are previewing something else (image, video, file)
     const activePreview = previewItem && previewItem.type !== "map" ? previewItem : null;
 
+    const renderPreviewContent = (item: SurveyItem) => {
+        switch (item.type) {
+            case "image":
+                return (
+                    <img 
+                        src={item.answer as string} 
+                        alt="Preview" 
+                        className="w-full h-full object-contain animate-in zoom-in-95 duration-300" 
+                    />
+                );
+            case "video":
+                return (
+                    <video 
+                        src={item.answer as string} 
+                        controls 
+                        autoPlay 
+                        className="w-full h-full object-contain bg-black" 
+                    />
+                );
+            case "file":
+                return (
+                    <iframe 
+                        src="https://docs.google.com/viewer?url=https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf&embedded=true" 
+                        className="w-full h-full border-none bg-white"
+                        title="PDF Preview"
+                    />
+                );
+            default:
+                return null;
+        }
+    };
+
     return (
-        <Sheet open={open} onOpenChange={(val) => {
-            if (!val) {
-                handleCloseAll();
-            }
-        }}>
-            {/* Persistent Map Module - Elevated to z-[100] to be above backdrop */}
-            {showPersistentMap && (
-                <div 
-                    className="bottom-preview-module fixed inset-0 z-[100] bg-white dark:bg-zinc-950 flex flex-col animate-in fade-in slide-in-from-bottom duration-500 ease-in-out fill-mode-forwards"
-                    style={{ 
-                        width: "calc(100vw - 500px)", 
-                        height: "100vh",
-                        pointerEvents: "auto"
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    <div className="flex-1 overflow-hidden p-0 flex items-center justify-center bg-zinc-100 dark:bg-zinc-900/50">
-                        <div className="w-full h-full relative overflow-hidden">
-                            {isLoaded ? (
-                                <MapPreviewContent selectedFarmer={farmerData} />
-                            ) : (
-                                <div className="flex h-full items-center justify-center text-zinc-500">
-                                    Loading Map...
+        <>
+            {/* Persistent Map Module - Positioned next to the side module, sliding with it */}
+            <div 
+                className={cn(
+                    "map-preview-module fixed top-0 bottom-0 bg-white dark:bg-zinc-950 flex flex-col shadow-2xl border-r border-zinc-200 dark:border-zinc-800 transition-all duration-500 ease-in-out z-[100]",
+                    open ? "right-[500px] opacity-100" : "-right-full opacity-0"
+                )}
+                style={{ 
+                    width: "50vw", 
+                    pointerEvents: "auto"
+                }}
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="flex-1 overflow-hidden p-0 flex items-center justify-center bg-zinc-100 dark:bg-zinc-900/50">
+                    <div className="w-full h-full relative overflow-hidden">
+                        {isLoaded ? (
+                            <MapPreviewContent selectedFarmer={farmerData} />
+                        ) : (
+                            <div className="flex h-full items-center justify-center text-zinc-500">
+                                Loading Map...
+                            </div>
+                        )}
+                        <div className="absolute top-6 left-6 z-20 pointer-events-none">
+                            <div className="flex items-center gap-2 pointer-events-auto">
+                                <div className="px-3 py-1.5 bg-white/95 dark:bg-zinc-950/95 shadow-xl border border-zinc-200 dark:border-zinc-800 rounded-lg text-[14px] font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-50 whitespace-nowrap backdrop-blur-md">
+                                    {farmerData.calArea}
                                 </div>
-                            )}
-                            <div className="absolute top-6 left-6 z-20 pointer-events-none">
-                                <div className="flex items-center gap-2 pointer-events-auto">
-                                    <div className="px-3 py-1.5 bg-white/95 dark:bg-zinc-950/95 shadow-xl border border-zinc-200 dark:border-zinc-800 rounded-lg text-[14px] font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-50 whitespace-nowrap backdrop-blur-md">
-                                        {farmerData.calArea}
-                                    </div>
-                                    <div className="px-3 py-1.5 bg-white/95 dark:bg-zinc-950/95 shadow-xl border border-zinc-200 dark:border-zinc-800 rounded-lg text-[14px] font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-50 whitespace-nowrap backdrop-blur-md">
-                                        {farmerData.plots.length} Plots
-                                    </div>
+                                <div className="px-3 py-1.5 bg-white/95 dark:bg-zinc-950/95 shadow-xl border border-zinc-200 dark:border-zinc-800 rounded-lg text-[14px] font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-50 whitespace-nowrap backdrop-blur-md">
+                                    {farmerData.plots.length} Plots
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            )}
+            </div>
 
-            <SheetContent 
-                className="w-full sm:max-w-[500px] p-0 flex flex-col gap-0 border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-2xl overflow-visible z-[200]"
-                onPointerDownOutside={(e) => {
-                    const target = e.target as HTMLElement;
-                    if (target.closest('.bottom-preview-module')) {
-                        e.preventDefault();
-                    }
-                }}
-            >
-                {/* Header section */}
+            <Sheet open={open} onOpenChange={(val) => {
+                if (!val) {
+                    handleCloseAll();
+                }
+            }}>
+                <SheetContent 
+                    className="w-full sm:max-w-[500px] p-0 flex flex-col gap-0 border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-2xl overflow-visible z-[200]"
+                    onPointerDownOutside={(e) => {
+                        const target = e.target as HTMLElement;
+                        if (target.closest('.map-preview-module')) {
+                            e.preventDefault();
+                        }
+                    }}
+                >
+                    {/* Header section */}
                 <div className="p-5 border-b border-zinc-100 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md sticky top-0 z-30">
                     <div className="flex items-start justify-between">
                         <div className="flex items-center gap-4">
@@ -303,21 +358,46 @@ export function EngagementDetailSheet({
                             <span className="tracking-tight text-zinc-500 font-medium">AZ-{record.azs}</span>
                         </div>
 
-                        <div className="space-y-1">
-                            {surveyData.map((item) => (
-                                <div key={item.id} onClick={() => handleItemClick(item)} className="cursor-pointer">
-                                    <SurveyCard
-                                        item={item}
-                                        style="style-5-feedback"
-                                        showDetails={false}
-                                        isReporting={isReporting}
-                                        isSelected={reportedIds.includes(item.id) || previewItem?.id === item.id}
-                                        onToggleSelect={() => toggleReportId(item.id)}
-                                        disableDialog={true}
-                                    />
-                                </div>
-                            ))}
-                        </div>
+                            <div className="space-y-1">
+                                {surveyData.map((item) => {
+                                    // Custom question text logic for questions 8, 9, and 11
+                                    let displayQuestion = item.question;
+                                    if (item.id === "8") displayQuestion = "Measure the total cultivated area: (in Acres)";
+                                    if (item.id === "9") displayQuestion = "Enter the quantity of seeds used: (in Tons)";
+                                    if (item.id === "11") displayQuestion = "Estimated cost of inputs per acre: (in INR)";
+
+                                    return (
+                                        <div 
+                                            key={item.id} 
+                                            className="relative"
+                                        >
+                                            <div 
+                                                className="cursor-pointer"
+                                                onClick={(e) => {
+                                                    // If the click came from the attachment preview trigger, open the pop-up
+                                                    const target = e.target as HTMLElement;
+                                                    if (target.closest('.attachment-preview-trigger')) {
+                                                        handleItemClick(item);
+                                                    }
+                                                }}
+                                            >
+                                                <SurveyCard
+                                                    item={{
+                                                        ...item,
+                                                        question: displayQuestion
+                                                    }}
+                                                    style="style-5-feedback"
+                                                    showDetails={false}
+                                                    isReporting={isReporting}
+                                                    isSelected={reportedIds.includes(item.id)}
+                                                    onToggleSelect={() => toggleReportId(item.id)}
+                                                    disableDialog={true}
+                                                />
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
 
                         {/* Approval Comment Section for Pending */}
                         {record.status === "Pending" && !isReporting && (
@@ -472,67 +552,36 @@ export function EngagementDetailSheet({
                                 )}
                 </div>
 
-                {/* Overlay Preview Module (Image, Video, File) - Rendered INSIDE Sheet to be above backdrop */}
-                {activePreview && (
-                    <div 
-                        key={activePreview.id}
-                        className="bottom-preview-module fixed bottom-0 left-0 z-[300] bg-white dark:bg-zinc-950 border-t border-zinc-200 dark:border-zinc-800 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.2)] transition-all duration-500 animate-in slide-in-from-bottom flex flex-col"
-                        style={{ 
-                            width: "calc(100vw - 500px)", 
-                            height: "75vh",
-                            pointerEvents: "auto"
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div className="flex items-center justify-between p-4 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/50 relative z-[310]">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-lg bg-white dark:bg-zinc-800 shadow-sm border border-zinc-200 dark:border-zinc-700">
-                                    {activePreview.type === "image" && <ImageIcon className="h-4 w-4 text-zinc-500" />}
-                                    {activePreview.type === "video" && <Play className="h-4 w-4 text-zinc-500" />}
-                                    {activePreview.type === "file" && <FileText className="h-4 w-4 text-zinc-500" />}
-                                </div>
-                                <div>
-                                    <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">{activePreview.label}</h4>
-                                    <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-widest">Previewing Attachment</p>
-                                </div>
-                            </div>
-                            <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                className="h-8 w-8 rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-800 relative z-[320] pointer-events-auto"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    setPreviewItem(null);
-                                }}
-                            >
-                                <X className="h-4 w-4" />
-                            </Button>
-                        </div>
-                        <div className="flex-1 overflow-hidden p-0 flex items-center justify-center bg-zinc-100 dark:bg-zinc-900/50">
-                            {activePreview.type === "image" && (
-                                <div className="w-full h-full flex items-center justify-center">
-                                    <img src={activePreview.answer as string} alt="Preview" className="w-full h-full object-contain shadow-2xl" />
-                                </div>
-                            )}
-                            {activePreview.type === "video" && (
-                                <div className="w-full h-full bg-black flex items-center justify-center">
-                                    <video src={activePreview.answer as string} controls autoPlay className="w-full h-full object-contain" />
-                                </div>
-                            )}
-                            {activePreview.type === "file" && (
-                                <div className="w-full h-full flex flex-col bg-zinc-100 dark:bg-zinc-900">
-                                    <iframe 
-                                        src="https://docs.google.com/viewer?url=https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf&embedded=true" 
-                                        className="w-full h-full border-none"
-                                        title="PDF Preview"
-                                    />
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                )}
             </SheetContent>
         </Sheet>
+
+            {/* Pop-up Preview (Image, Video, File) */}
+            <Dialog open={!!activePreview} onOpenChange={(val) => {
+                if (!val) setPreviewItem(null);
+            }}>
+                <DialogPortal>
+                    <DialogContent className="max-w-[1200px] w-[95vw] h-[800px] max-h-[90vh] p-0 overflow-visible bg-zinc-950 border-none shadow-2xl z-[10001] flex items-center justify-center rounded-xl [&>button]:hidden">
+                        <DialogTitle className="sr-only">Attachment Preview</DialogTitle>
+                        <DialogDescription className="sr-only">Basic view of the survey attachment</DialogDescription>
+                        
+                        <div className="relative w-full h-full flex items-center justify-center bg-black/40 rounded-xl overflow-hidden">
+                            {activePreview && renderPreviewContent(activePreview)}
+                        </div>
+
+                        {/* Prominent Close Button - Wrapped in a div to avoid being hidden by [&>button]:hidden */}
+                        <div className="absolute -top-4 -right-4 z-[10002]">
+                            <Button 
+                                variant="secondary" 
+                                size="icon" 
+                                className="text-zinc-900 bg-white hover:bg-zinc-100 rounded-full h-10 w-10 shadow-2xl transition-all border-2 border-zinc-200 hover:scale-110 active:scale-95"
+                                onClick={() => setPreviewItem(null)}
+                            >
+                                <X className="h-5 w-5" />
+                            </Button>
+                        </div>
+                    </DialogContent>
+                </DialogPortal>
+            </Dialog>
+        </>
     )
 }

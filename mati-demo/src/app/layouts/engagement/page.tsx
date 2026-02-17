@@ -97,6 +97,7 @@ export default function EngagementPage() {
                             pending: pendingCount,
                             invalid: invalidCount,
                         }}
+                        selectedId={selectedRecord?.id}
                     />
                 </div>
 

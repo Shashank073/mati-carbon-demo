@@ -331,6 +331,8 @@ export const SurveyCard = ({
     );
 
     const renderContent = () => {
+        const isStyle5 = style === "style-5" || style === "style-5-feedback";
+
         switch (item.type) {
             case "text":
                 return (
@@ -384,11 +386,20 @@ export const SurveyCard = ({
             case "image":
                 if (style === "style-5" || style === "style-5-feedback") {
                     const fileName = (item.answer as string).split('/').pop()?.split('?')[0] || "image.jpg";
-                    const imageContent = (
+                                    const imageContent = (
                         <HoverCard openDelay={200}>
                             <HoverCardTrigger asChild>
                                 <div className="group relative w-full">
-                                    <div className="flex items-center p-3 border border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer pr-10">
+                                    <div 
+                                        className="flex items-center p-3 border border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer pr-10 attachment-preview-trigger"
+                                        onClick={(e) => {
+                                            if (disableDialog) {
+                                                // If dialog is disabled, we let the parent handle it via this class
+                                                // But we stop propagation to avoid triggering parent's generic card click if any
+                                                // e.stopPropagation(); 
+                                            }
+                                        }}
+                                    >
                                         <div className="w-10 h-10 rounded overflow-hidden flex-shrink-0 border border-zinc-200 dark:border-zinc-700 bg-zinc-200 mr-3">
                                             <img src={item.answer as string} alt="Thumbnail" className="w-full h-full object-cover" />
                                         </div>
@@ -417,10 +428,12 @@ export const SurveyCard = ({
                             <DialogTrigger asChild>
                                 {imageContent}
                             </DialogTrigger>
-                            <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none shadow-none">
+                            <DialogContent className="max-w-5xl w-[95vw] h-[85vh] p-0 overflow-hidden bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-2xl z-[500] sm:rounded-xl flex flex-col">
                                 <DialogTitle className="sr-only">Full Image View</DialogTitle>
                                 <DialogDescription className="sr-only">Detailed view of the uploaded survey image</DialogDescription>
-                                <img src={item.answer as string} alt="Full" className="w-full h-auto rounded-lg shadow-2xl" />
+                                <div className="flex-1 overflow-hidden p-0 flex items-center justify-center bg-zinc-100 dark:bg-zinc-900/50">
+                                    <img src={item.answer as string} alt="Full" className="max-w-full max-h-full object-contain shadow-2xl" />
+                                </div>
                             </DialogContent>
                         </Dialog>
                     );
@@ -441,10 +454,12 @@ export const SurveyCard = ({
                                 </Button>
                             </div>
                         </div>
-                        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none shadow-none">
+                        <DialogContent className="max-w-5xl w-[95vw] h-[85vh] p-0 overflow-hidden bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-2xl z-[500] sm:rounded-xl flex flex-col">
                             <DialogTitle className="sr-only">Survey Image Zoom</DialogTitle>
                             <DialogDescription className="sr-only">Zoomed in view of the submission image</DialogDescription>
-                            <img src={item.answer as string} alt="Survey upload full" className="w-full h-auto rounded-lg shadow-2xl" />
+                            <div className="flex-1 overflow-hidden p-0 flex items-center justify-center bg-zinc-100 dark:bg-zinc-900/50">
+                                <img src={item.answer as string} alt="Survey upload full" className="max-w-full max-h-full object-contain shadow-2xl" />
+                            </div>
                         </DialogContent>
                     </Dialog>
                 );
@@ -456,7 +471,14 @@ export const SurveyCard = ({
                         <HoverCard openDelay={200}>
                             <HoverCardTrigger asChild>
                                 <div className="group relative w-full">
-                                    <div className="flex items-center p-3 border border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer pr-10">
+                                    <div 
+                                        className="flex items-center p-3 border border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer pr-10 attachment-preview-trigger"
+                                        onClick={(e) => {
+                                            if (disableDialog) {
+                                                // Let parent handle it
+                                            }
+                                        }}
+                                    >
                                         <div className="w-10 h-10 rounded overflow-hidden flex-shrink-0 border border-zinc-200 dark:border-zinc-700 bg-zinc-900 flex items-center justify-center mr-3">
                                             <Play className="w-4 h-4 text-white fill-white" />
                                         </div>
@@ -485,18 +507,20 @@ export const SurveyCard = ({
                             <DialogTrigger asChild>
                                 {videoContent}
                             </DialogTrigger>
-                            <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none shadow-none">
+                            <DialogContent className="max-w-5xl w-[95vw] h-[85vh] p-0 overflow-hidden bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-2xl z-[500] sm:rounded-xl flex flex-col">
                                 <DialogTitle className="sr-only">Video Player</DialogTitle>
                                 <DialogDescription className="sr-only">Full screen survey video player</DialogDescription>
-                                <video
-                                    key={item.answer as string}
-                                    src={item.answer as string}
-                                    controls
-                                    autoPlay
-                                    playsInline
-                                    preload="auto"
-                                    className="w-full h-auto rounded-lg shadow-2xl"
-                                />
+                                <div className="flex-1 overflow-hidden p-0 flex items-center justify-center bg-black">
+                                    <video
+                                        key={item.answer as string}
+                                        src={item.answer as string}
+                                        controls
+                                        autoPlay
+                                        playsInline
+                                        preload="auto"
+                                        className="max-w-full max-h-full object-contain"
+                                    />
+                                </div>
                             </DialogContent>
                         </Dialog>
                     );
@@ -544,18 +568,20 @@ export const SurveyCard = ({
                             </div>
                         </HoverCardContent>
                             </HoverCard>
-                            <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none shadow-none">
+                            <DialogContent className="max-w-5xl w-[95vw] h-[85vh] p-0 overflow-hidden bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-2xl z-[500] sm:rounded-xl flex flex-col">
                                 <DialogTitle className="sr-only">Video Preview</DialogTitle>
                                 <DialogDescription className="sr-only">Watching the uploaded survey video in full size</DialogDescription>
-                                <video
-                                    key={item.answer as string}
-                                    src={item.answer as string}
-                                    controls
-                                    autoPlay
-                                    playsInline
-                                    preload="auto"
-                                    className="w-full h-auto rounded-lg shadow-2xl"
-                                />
+                                <div className="flex-1 overflow-hidden p-0 flex items-center justify-center bg-black">
+                                    <video
+                                        key={item.answer as string}
+                                        src={item.answer as string}
+                                        controls
+                                        autoPlay
+                                        playsInline
+                                        preload="auto"
+                                        className="max-w-full max-h-full object-contain"
+                                    />
+                                </div>
                             </DialogContent>
                         </Dialog>
                     );
@@ -588,18 +614,20 @@ export const SurveyCard = ({
                                 </Button>
                             </div>
                         </div>
-                        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none shadow-none">
+                        <DialogContent className="max-w-5xl w-[95vw] h-[85vh] p-0 overflow-hidden bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-2xl z-[500] sm:rounded-xl flex flex-col">
                             <DialogTitle className="sr-only">Video Player</DialogTitle>
                             <DialogDescription className="sr-only">Full screen survey video player</DialogDescription>
-                            <video
-                                key={item.answer as string}
-                                src={item.answer as string}
-                                controls
-                                autoPlay
-                                playsInline
-                                preload="auto"
-                                className="w-full h-auto rounded-lg shadow-2xl"
-                            />
+                            <div className="flex-1 overflow-hidden p-0 flex items-center justify-center bg-black">
+                                <video
+                                    key={item.answer as string}
+                                    src={item.answer as string}
+                                    controls
+                                    autoPlay
+                                    playsInline
+                                    preload="auto"
+                                    className="max-w-full max-h-full object-contain"
+                                />
+                            </div>
                         </DialogContent>
                     </Dialog>
                 );
@@ -607,7 +635,7 @@ export const SurveyCard = ({
             case "file":
                 return (
                     <div className="group relative">
-                        <div className="flex items-center p-3 border border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer pr-10">
+                        <div className="flex items-center p-3 border border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer pr-10 attachment-preview-trigger">
                             <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-md mr-3">
                                 <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                             </div>
@@ -677,10 +705,10 @@ export const SurveyCard = ({
                 return (
                     <div className={cn(
                         "flex items-center gap-2 text-lg font-semibold text-zinc-900 dark:text-zinc-100",
-                        (style === "style-5" || style === "style-5-feedback") && "text-base"
+                        isStyle5 && "text-base"
                     )}>
-                        <DollarSign className={cn("w-5 h-5 text-zinc-500", (style === "style-5" || style === "style-5-feedback") && "w-4 h-4")} />
-                        {(item.answer as number).toLocaleString('en-US')} <span className="text-xs font-normal text-zinc-500 uppercase">{item.meta}</span>
+                        {!isStyle5 && <DollarSign className={cn("w-5 h-5 text-zinc-500", isStyle5 && "w-4 h-4")} />}
+                        {(item.answer as number).toLocaleString('en-US')} {!isStyle5 && <span className="text-xs font-normal text-zinc-500 uppercase">{item.meta}</span>}
                     </div>
                 );
 
@@ -688,10 +716,10 @@ export const SurveyCard = ({
                 return (
                     <div className={cn(
                         "flex items-center gap-2 text-zinc-700 dark:text-zinc-300",
-                        (style === "style-5" || style === "style-5-feedback") && "text-zinc-900 dark:text-zinc-100 font-semibold text-base"
+                        isStyle5 && "text-zinc-900 dark:text-zinc-100 font-semibold text-base"
                     )}>
-                        <Calendar className="w-4 h-4 text-zinc-500" />
-                        {(style === "style-5" || style === "style-5-feedback")
+                        {!isStyle5 && <Calendar className="w-4 h-4 text-zinc-500" />}
+                        {isStyle5
                             ? new Date(item.answer as string).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
                             : new Date(item.answer as string).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
                         }
@@ -699,7 +727,7 @@ export const SurveyCard = ({
                 );
 
             case "boolean":
-                if (style === "style-5" || style === "style-5-feedback") {
+                if (isStyle5) {
                     return (
                         <div className={cn(
                             "inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wide",
@@ -725,20 +753,20 @@ export const SurveyCard = ({
 
             case "phone":
                 return (
-                    <CopyableText text={item.answer as string} icon={<Phone className="w-4 h-4" />}>
+                    <CopyableText text={item.answer as string} icon={!isStyle5 && <Phone className="w-4 h-4" />}>
                         <span className={cn(
                             "font-medium text-zinc-900 dark:text-zinc-100",
-                            (style === "style-5" || style === "style-5-feedback") && "font-semibold text-base"
+                            isStyle5 && "font-semibold text-base"
                         )}>{item.answer as string}</span>
                     </CopyableText>
                 );
 
             case "email":
                 return (
-                    <CopyableText text={item.answer as string} icon={<Mail className="w-4 h-4" />}>
+                    <CopyableText text={item.answer as string} icon={!isStyle5 && <Mail className="w-4 h-4" />}>
                         <span className={cn(
                             "font-medium text-zinc-900 dark:text-zinc-100",
-                            (style === "style-5" || style === "style-5-feedback") && "font-semibold text-base"
+                            isStyle5 && "font-semibold text-base"
                         )}>{item.answer as string}</span>
                     </CopyableText>
                 );
@@ -747,10 +775,10 @@ export const SurveyCard = ({
                 return (
                     <div className={cn(
                         "flex items-center gap-2 text-lg font-semibold text-zinc-900 dark:text-zinc-100",
-                        (style === "style-5" || style === "style-5-feedback") && "text-base"
+                        isStyle5 && "text-base"
                     )}>
-                        <Ruler className={cn("w-5 h-5 text-zinc-500", (style === "style-5" || style === "style-5-feedback") && "w-4 h-4")} />
-                        {item.answer as number} <span className="text-xs font-normal text-zinc-500 uppercase">{item.meta}</span>
+                        {!isStyle5 && <Ruler className={cn("w-5 h-5 text-zinc-500", isStyle5 && "w-4 h-4")} />}
+                        {item.answer as number} {!isStyle5 && <span className="text-xs font-normal text-zinc-500 uppercase">{item.meta}</span>}
                     </div>
                 );
 
@@ -758,21 +786,22 @@ export const SurveyCard = ({
                 return (
                     <div className={cn(
                         "flex items-center gap-2 text-lg font-semibold text-zinc-900 dark:text-zinc-100",
-                        (style === "style-5" || style === "style-5-feedback") && "text-base"
+                        isStyle5 && "text-base"
                     )}>
-                        <Package className={cn("w-5 h-5 text-zinc-500", (style === "style-5" || style === "style-5-feedback") && "w-4 h-4")} />
-                        {item.answer as number} <span className="text-xs font-normal text-zinc-500 uppercase">{item.meta}</span>
+                        {!isStyle5 && <Package className={cn("w-5 h-5 text-zinc-500", isStyle5 && "w-4 h-4")} />}
+                        {item.answer as number} {!isStyle5 && <span className="text-xs font-normal text-zinc-500 uppercase">{item.meta}</span>}
                     </div>
                 );
 
             default:
                 // Text, long-text, phone, email, etc.
-                if (style === "style-5" || style === "style-5-feedback") {
+                if (isStyle5) {
                     return <p className="font-semibold text-zinc-900 dark:text-zinc-100 text-base leading-snug">{item.answer as string}</p>;
                 }
                 return null;
         }
     };
+
 
     // Unified render structure for all styles
 
@@ -843,7 +872,7 @@ export const SurveyCard = ({
             )}>
                 {isReporting ? (
                     <div className={cn("flex items-start", (style === "style-5" || style === "style-5-feedback") ? "gap-3" : "gap-4")}>
-                        <div className="pt-1 flex-shrink-0">
+                        <div className="pt-1 flex-shrink-0 checkbox-container">
                             <Checkbox
                                 checked={isSelected}
                                 onCheckedChange={() => onToggleSelect?.(item.id)}
@@ -918,10 +947,12 @@ export const BulkSubmissionCard = ({
                                 <img src={item.answer as string} alt="Preview" className="w-full h-auto" />
                             </HoverCardContent>
                         </HoverCard>
-                        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none shadow-none">
+                        <DialogContent className="max-w-5xl w-[95vw] h-[85vh] p-0 overflow-hidden bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-2xl z-[500] sm:rounded-xl flex flex-col">
                             <DialogTitle className="sr-only">Bulk Image View</DialogTitle>
                             <DialogDescription className="sr-only">Enlarged view of the bulk submitted image</DialogDescription>
-                            <img src={item.answer as string} alt="Full" className="w-full h-auto rounded-lg shadow-2xl" />
+                            <div className="flex-1 overflow-hidden p-0 flex items-center justify-center bg-zinc-100 dark:bg-zinc-900/50">
+                                <img src={item.answer as string} alt="Full" className="max-w-full max-h-full object-contain shadow-2xl" />
+                            </div>
                         </DialogContent>
                     </Dialog>
                 );
@@ -967,19 +998,21 @@ export const BulkSubmissionCard = ({
                                 </div>
                             </HoverCardContent>
                         </HoverCard>
-                        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none shadow-none">
+                        <DialogContent className="max-w-5xl w-[95vw] h-[85vh] p-0 overflow-hidden bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-2xl z-[500] sm:rounded-xl flex flex-col">
                             <DialogTitle className="sr-only">Bulk Video View</DialogTitle>
                             <DialogDescription className="sr-only">Full screen playback of the bulk submitted video</DialogDescription>
-                            <video
-                                key={item.answer as string}
-                                src={item.answer as string}
-                                controls
-                                autoPlay
-                                loop
-                                playsInline
-                                preload="auto"
-                                className="w-full h-auto rounded-lg shadow-2xl"
-                            />
+                            <div className="flex-1 overflow-hidden p-0 flex items-center justify-center bg-black">
+                                <video
+                                    key={item.answer as string}
+                                    src={item.answer as string}
+                                    controls
+                                    autoPlay
+                                    loop
+                                    playsInline
+                                    preload="auto"
+                                    className="max-w-full max-h-full object-contain"
+                                />
+                            </div>
                         </DialogContent>
                     </Dialog>
                 );

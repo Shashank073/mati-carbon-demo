@@ -54,7 +54,7 @@ const FarmerHoverCard = ({ farmer }: { farmer: EngagementRecord["farmer"] }) => 
                         <AvatarFallback>{farmer.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col leading-tight">
-                        <span className="font-semibold text-sm group-hover:underline">{farmer.name}</span>
+                        <span className="font-semibold text-sm">{farmer.name}</span>
                         <span className="text-[10px] font-mono text-muted-foreground">
                             {farmer.phoneNumber?.replace(/.(?=.{4})/g, "*")}
                         </span>
@@ -85,7 +85,7 @@ const SurveyorHoverCard = ({ surveyor }: { surveyor: EngagementRecord["surveyor"
         <HoverCard>
             <HoverCardTrigger asChild>
                 <div className="flex flex-col leading-tight cursor-help group">
-                    <span className="font-semibold text-sm group-hover:underline">{surveyor.name}</span>
+                    <span className="font-semibold text-sm">{surveyor.name}</span>
                     <span className="text-[10px] font-mono text-muted-foreground">
                         {surveyor.phoneNumber?.replace(/.(?=.{4})/g, "*")}
                     </span>

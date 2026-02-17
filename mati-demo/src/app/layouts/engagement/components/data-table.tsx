@@ -27,6 +27,7 @@ import {
 
 import { DataTablePagination } from "./data-table-pagination"
 import { DataTableToolbar } from "./data-table-toolbar"
+import { cn } from "@/lib/utils"
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -39,6 +40,7 @@ interface DataTableProps<TData, TValue> {
         pending: number
         invalid: number
     }
+    selectedId?: string
 }
 
 export function EngagementTable<TData, TValue>({
@@ -48,6 +50,7 @@ export function EngagementTable<TData, TValue>({
     activeTab,
     setActiveTab,
     counts,
+    selectedId,
 }: DataTableProps<TData, TValue>) {
     const [rowSelection, setRowSelection] = React.useState({})
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
@@ -196,23 +199,29 @@ export function EngagementTable<TData, TValue>({
                         </thead>
                         <tbody className="[&_tr:last-child]:border-0">
                             {table.getRowModel().rows?.length ? (
-                                table.getRowModel().rows.map((row) => (
-                                    <tr
-                                        key={row.id}
-                                        data-state={row.getIsSelected() && "selected"}
-                                        className="border-b transition-colors cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900/50 data-[state=selected]:bg-muted"
-                                        onClick={() => onRowClick?.(row.original)}
-                                    >
-                                        {row.getVisibleCells().map((cell) => (
-                                            <td key={cell.id} className="p-4 align-middle py-2.5">
-                                                {flexRender(
-                                                    cell.column.columnDef.cell,
-                                                    cell.getContext()
-                                                )}
-                                            </td>
-                                        ))}
-                                    </tr>
-                                ))
+                                table.getRowModel().rows.map((row) => {
+                                    const isSelected = selectedId === (row.original as any).id
+                                    return (
+                                        <tr
+                                            key={row.id}
+                                            data-state={isSelected ? "selected" : undefined}
+                                            className={cn(
+                                                "border-b transition-colors cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900/50",
+                                                isSelected ? "bg-zinc-100/80 dark:bg-zinc-800/80" : ""
+                                            )}
+                                            onClick={() => onRowClick?.(row.original)}
+                                        >
+                                            {row.getVisibleCells().map((cell) => (
+                                                <td key={cell.id} className="p-4 align-middle py-2.5">
+                                                    {flexRender(
+                                                        cell.column.columnDef.cell,
+                                                        cell.getContext()
+                                                    )}
+                                                </td>
+                                            ))}
+                                        </tr>
+                                    )
+                                })
                             ) : (
                                 <tr>
                                     <td
