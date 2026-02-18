@@ -46,7 +46,7 @@ const PhoneNumberCell = ({ phoneNumber, showEyeByDefault = false }: { phoneNumbe
 
 const FarmerHoverCard = ({ farmer }: { farmer: EngagementRecord["farmer"] }) => {
     return (
-        <HoverCard>
+        <HoverCard openDelay={100} closeDelay={100}>
             <HoverCardTrigger asChild>
                 <div className="flex items-center gap-3 cursor-help group">
                     <Avatar className="h-9 w-9 border border-zinc-200 dark:border-zinc-800">
@@ -61,7 +61,7 @@ const FarmerHoverCard = ({ farmer }: { farmer: EngagementRecord["farmer"] }) => 
                     </div>
                 </div>
             </HoverCardTrigger>
-            <HoverCardContent className="w-80 z-[300] p-4">
+            <HoverCardContent align="start" side="bottom" className="w-80 z-[300] p-4">
                 <div className="flex items-start gap-4">
                     <Avatar className="h-12 w-12 border border-zinc-200 dark:border-zinc-800">
                         <AvatarImage src={farmer.avatar} />
@@ -82,7 +82,7 @@ const FarmerHoverCard = ({ farmer }: { farmer: EngagementRecord["farmer"] }) => 
 
 const SurveyorHoverCard = ({ surveyor }: { surveyor: EngagementRecord["surveyor"] }) => {
     return (
-        <HoverCard>
+        <HoverCard openDelay={100} closeDelay={100}>
             <HoverCardTrigger asChild>
                 <div className="flex flex-col leading-tight cursor-help group">
                     <span className="font-semibold text-sm">{surveyor.name}</span>
@@ -91,7 +91,7 @@ const SurveyorHoverCard = ({ surveyor }: { surveyor: EngagementRecord["surveyor"
                     </span>
                 </div>
             </HoverCardTrigger>
-            <HoverCardContent className="w-80 z-[300] p-4">
+            <HoverCardContent align="start" side="bottom" className="w-80 z-[300] p-4">
                 <div className="space-y-2">
                     <h4 className="text-sm font-semibold leading-none">{surveyor.name}</h4>
                     <div className="flex items-center gap-2 pt-1">
@@ -239,16 +239,15 @@ export const allColumns: ColumnDef<EngagementRecord>[] = [
             const status = row.original.status
             return (
                 <Badge
-                    variant={
-                        status === "Verified" ? "default" :
-                            status === "Invalid" ? "destructive" : "secondary"
-                    }
-                    className={`font-medium ${status === "Verified" ? "bg-green-500 hover:bg-green-600" :
-                        status === "Pending" ? "bg-amber-500 hover:bg-amber-600 text-white" :
-                            "bg-red-500 hover:bg-red-600"
-                        }`}
+                    variant="outline"
+                    className={cn(
+                        "font-semibold px-2.5 py-0.5 rounded-full border shadow-none",
+                        status === "Verified" && "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/50",
+                        status === "Pending" && "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50",
+                        status === "Invalid" && "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-900/50"
+                    )}
                 >
-                    {status}
+                    {status === "Invalid" ? "Need Correction" : status}
                 </Badge>
             )
         },

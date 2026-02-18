@@ -25,9 +25,15 @@ import { Calendar, XCircle } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, MessageSquareText, AlertCircle, CheckCircle2, X, Image as ImageIcon, Play, FileText, MapPin, Download, Info, MessageSquareWarning, Trash2 } from "lucide-react"
+import { ChevronLeft, ChevronRight, MessageSquareText, AlertCircle, CheckCircle2, X, Check, Image as ImageIcon, Play, FileText, MapPin, Download, Info, MessageSquareWarning, Trash2, ZoomIn, ZoomOut, RotateCw, Maximize2, Minimize2, Scaling, AlignCenter, SlidersHorizontal } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { SurveyItem, surveyData, SurveyCard } from "@/app/components/survey/SurveyComponents"
 import { GoogleMap, useJsApiLoader, Marker, Polygon, InfoWindow } from "@react-google-maps/api"
 import { MOCK_FARMERS } from "@/data/mockData"
@@ -107,6 +113,67 @@ interface EngagementDetailSheetProps {
     onPrevious: () => void
     isFirst: boolean
     isLast: boolean
+    currentIndex: number
+    totalCount: number
+}
+
+function ImagePreview({ item, zoom, rotation, imageMode }: { item: SurveyItem, zoom: number, rotation: number, imageMode: "fill" | "fit" | "stretch" | "center" }) {
+    const containerRef = React.useRef<HTMLDivElement>(null)
+    const [containerSize, setContainerSize] = React.useState({ width: 0, height: 0 })
+
+    React.useLayoutEffect(() => {
+        const updateSize = () => {
+            if (containerRef.current) {
+                setContainerSize({
+                    width: containerRef.current.offsetWidth,
+                    height: containerRef.current.offsetHeight
+                });
+            }
+        };
+
+        const observer = new ResizeObserver(updateSize);
+        if (containerRef.current) {
+            observer.observe(containerRef.current);
+            updateSize();
+        }
+
+        return () => observer.disconnect();
+    }, []);
+
+    const isRotated = rotation % 180 !== 0;
+    
+    // Calculate dimensions for the image wrapper when rotated
+    const wrapperStyle: React.CSSProperties = isRotated && containerSize.width > 0 ? {
+        width: `${containerSize.height}px`,
+        height: `${containerSize.width}px`,
+    } : {
+        width: "100%",
+        height: "100%",
+    };
+
+    return (
+        <div ref={containerRef} className="flex-1 w-full h-full overflow-hidden p-0 flex items-center justify-center bg-zinc-100 dark:bg-zinc-900/50 cursor-grab active:cursor-grabbing relative">
+            <div 
+                className="transition-all duration-300 ease-out flex items-center justify-center"
+                style={{ 
+                    ...wrapperStyle,
+                    transform: `scale(${zoom}) rotate(${rotation}deg)`,
+                }}
+            >
+                <img 
+                    src={item.answer as string} 
+                    alt="Preview" 
+                    className={cn(
+                        "transition-all duration-300",
+                        imageMode === "fill" && "w-full h-full object-cover",
+                        imageMode === "fit" && "w-full h-full object-contain",
+                        imageMode === "stretch" && "w-full h-full object-fill",
+                        imageMode === "center" && "max-w-none max-h-none w-auto h-auto object-none"
+                    )}
+                />
+            </div>
+        </div>
+    );
 }
 
 export function EngagementDetailSheet({
@@ -116,7 +183,9 @@ export function EngagementDetailSheet({
     onNext,
     onPrevious,
     isFirst,
-    isLast
+    isLast,
+    currentIndex,
+    totalCount
 }: EngagementDetailSheetProps) {
     const [comment, setComment] = React.useState("")
     const [isApproving, setIsApproving] = React.useState(false)
@@ -124,6 +193,12 @@ export function EngagementDetailSheet({
     const [isReporting, setIsReporting] = React.useState(false)
     const [reportedIds, setReportedIds] = React.useState<string[]>([])
     const [previewItem, setPreviewItem] = React.useState<SurveyItem | null>(null)
+    const [zoom, setZoom] = React.useState(1)
+    const [rotation, setRotation] = React.useState(0)
+    const [imageMode, setImageMode] = React.useState<"fill" | "fit" | "stretch" | "center">("fit")
+
+    // Determine if we are previewing something else (image, video, file)
+    const activePreview = previewItem && previewItem.type !== "map" ? previewItem : null;
 
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
@@ -141,6 +216,9 @@ export function EngagementDetailSheet({
         setIsReporting(false)
         setReportedIds([])
         setPreviewItem(null);
+        setZoom(1);
+        setRotation(0);
+        setImageMode("fit");
         
         if (open) {
             // Delay map visibility to sync with side module animation
@@ -193,35 +271,219 @@ export function EngagementDetailSheet({
     // Determine if we should show the persistent map
     const showPersistentMap = mapVisible && record;
 
-    // Determine if we are previewing something else (image, video, file)
-    const activePreview = previewItem && previewItem.type !== "map" ? previewItem : null;
-
     const renderPreviewContent = (item: SurveyItem) => {
         switch (item.type) {
             case "image":
+                const imgFileName = (item.answer as string).split('/').pop()?.split('?')[0] || "image.jpg";
                 return (
-                    <img 
-                        src={item.answer as string} 
-                        alt="Preview" 
-                        className="w-full h-full object-contain animate-in zoom-in-95 duration-300" 
-                    />
+                    <div className="w-full h-full flex flex-col bg-white overflow-hidden">
+                        {/* Header Bar */}
+                        <div className="p-4 border-b border-zinc-100 flex items-center justify-between bg-white shrink-0">
+                            <div className="flex items-center gap-3">
+                                <div className="bg-amber-50 p-2 rounded-lg">
+                                    <ImageIcon className="h-5 w-5 text-amber-600" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-bold text-zinc-900 leading-none">{imgFileName}</p>
+                                    <p className="text-[11px] text-zinc-500 mt-1 font-medium">2.4 MB</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-1">
+                                {/* Zoom Controls */}
+                                <div className="flex items-center gap-1 mr-2 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-full">
+                                    <Button 
+                                        variant="ghost" 
+                                        size="icon" 
+                                        className="h-7 w-7 rounded-full hover:bg-white dark:hover:bg-zinc-700" 
+                                        onClick={() => setZoom(prev => Math.max(0.5, prev - 0.25))}
+                                        title="Zoom Out"
+                                    >
+                                        <ZoomOut className="h-3.5 w-3.5" />
+                                    </Button>
+                                    <span className="text-[10px] font-bold w-8 text-center">{Math.round(zoom * 100)}%</span>
+                                    <Button 
+                                        variant="ghost" 
+                                        size="icon" 
+                                        className="h-7 w-7 rounded-full hover:bg-white dark:hover:bg-zinc-700" 
+                                        onClick={() => setZoom(prev => Math.min(3, prev + 0.25))}
+                                        title="Zoom In"
+                                    >
+                                        <ZoomIn className="h-3.5 w-3.5" />
+                                    </Button>
+                                </div>
+
+                                {/* Rotation */}
+                                <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-9 w-9 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-full"
+                                    onClick={() => setRotation(prev => (prev + 90) % 360)}
+                                    title="Rotate 90°"
+                                >
+                                    <RotateCw className="h-4 w-4" />
+                                </Button>
+
+                                {/* Fit/Mode Menu */}
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            className="h-9 w-9 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-full"
+                                            title="View Modes"
+                                        >
+                                            <SlidersHorizontal className="h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="w-[140px] z-[10005]">
+                                        <DropdownMenuItem onClick={() => setImageMode("fill")} className="flex items-center gap-2">
+                                            <Maximize2 className="h-3.5 w-3.5" />
+                                            <span>Fill</span>
+                                            {imageMode === "fill" && <Check className="ml-auto h-3.5 w-3.5" />}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setImageMode("fit")} className="flex items-center gap-2">
+                                            <Minimize2 className="h-3.5 w-3.5" />
+                                            <span>Fit</span>
+                                            {imageMode === "fit" && <Check className="ml-auto h-3.5 w-3.5" />}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setImageMode("stretch")} className="flex items-center gap-2">
+                                            <Scaling className="h-3.5 w-3.5" />
+                                            <span>Stretch</span>
+                                            {imageMode === "stretch" && <Check className="ml-auto h-3.5 w-3.5" />}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setImageMode("center")} className="flex items-center gap-2">
+                                            <AlignCenter className="h-3.5 w-3.5" />
+                                            <span>Center</span>
+                                            {imageMode === "center" && <Check className="ml-auto h-3.5 w-3.5" />}
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+
+                                <div className="w-px h-4 bg-zinc-200 dark:bg-zinc-800 mx-1" />
+
+                                <Button asChild variant="ghost" size="icon" className="h-9 w-9 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-full">
+                                    <a href={item.answer as string} download title="Download Image">
+                                        <Download className="h-4 w-4" />
+                                    </a>
+                                </Button>
+                                <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-9 w-9 text-zinc-500 hover:text-red-600 hover:bg-red-50 rounded-full"
+                                    onClick={() => setPreviewItem(null)}
+                                    title="Close"
+                                >
+                                    <X className="h-5 w-5" />
+                                </Button>
+                            </div>
+                        </div>
+                        <ImagePreview 
+                            item={item} 
+                            zoom={zoom} 
+                            rotation={rotation} 
+                            imageMode={imageMode} 
+                        />
+                    </div>
                 );
             case "video":
+                const vidFileName = (item.answer as string).split('/').pop()?.split('?')[0] || "video.mp4";
                 return (
-                    <video 
-                        src={item.answer as string} 
-                        controls 
-                        autoPlay 
-                        className="w-full h-full object-contain bg-black" 
-                    />
+                    <div className="w-full h-full flex flex-col bg-white overflow-hidden">
+                        {/* Header Bar */}
+                        <div className="p-4 border-b border-zinc-100 flex items-center justify-between bg-white shrink-0">
+                            <div className="flex items-center gap-3">
+                                <div className="bg-red-50 p-2 rounded-lg">
+                                    <Play className="h-5 w-5 text-red-600" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-bold text-zinc-900 leading-none">{vidFileName}</p>
+                                    <p className="text-[11px] text-zinc-500 mt-1 font-medium">12.8 MB</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-1">
+                                {/* Fit Toggle */}
+                                <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-9 w-9 rounded-full text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
+                                    onClick={() => setImageMode(prev => prev === "fill" ? "fit" : "fill")}
+                                    title={imageMode === "fill" ? "Switch to Fit" : "Switch to Fill"}
+                                >
+                                    {imageMode === "fill" ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                                </Button>
+
+                                <div className="w-px h-4 bg-zinc-200 dark:bg-zinc-800 mx-1" />
+
+                                <Button asChild variant="ghost" size="icon" className="h-9 w-9 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-full">
+                                    <a href={item.answer as string} download title="Download Video">
+                                        <Download className="h-4 w-4" />
+                                    </a>
+                                </Button>
+                                <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-9 w-9 text-zinc-500 hover:text-red-600 hover:bg-red-50 rounded-full"
+                                    onClick={() => setPreviewItem(null)}
+                                    title="Close"
+                                >
+                                    <X className="h-5 w-5" />
+                                </Button>
+                            </div>
+                        </div>
+                        <div className="flex-1 overflow-hidden p-0 flex items-center justify-center bg-black">
+                            <video 
+                                src={item.answer as string} 
+                                controls 
+                                autoPlay 
+                                className={cn(
+                                    "w-full h-full transition-all duration-300 bg-black",
+                                    imageMode === "fill" ? "object-cover" : "object-contain"
+                                )}
+                            />
+                        </div>
+                    </div>
                 );
             case "file":
                 return (
-                    <iframe 
-                        src="https://docs.google.com/viewer?url=https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf&embedded=true" 
-                        className="w-full h-full border-none bg-white"
-                        title="PDF Preview"
-                    />
+                    <div className="w-full h-full flex flex-col bg-white overflow-hidden">
+                        {/* Header Bar */}
+                        <div className="p-4 border-b border-zinc-100 flex items-center justify-between bg-white shrink-0">
+                            <div className="flex items-center gap-3">
+                                <div className="bg-blue-50 p-2 rounded-lg">
+                                    <FileText className="h-5 w-5 text-blue-600" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-bold text-zinc-900 leading-none">{(item.answer as { name: string }).name || "Document.pdf"}</p>
+                                    <p className="text-[11px] text-zinc-500 mt-1 font-medium">{(item.answer as { size: string }).size || "2.4 MB"}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Button asChild variant="ghost" size="icon" className="h-9 w-9 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-full">
+                                    <a href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" target="_blank" rel="noopener noreferrer" title="Download PDF">
+                                        <Download className="h-4 w-4" />
+                                    </a>
+                                </Button>
+                                <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-9 w-9 text-zinc-500 hover:text-red-600 hover:bg-red-50 rounded-full"
+                                    onClick={() => setPreviewItem(null)}
+                                    title="Close"
+                                >
+                                    <X className="h-5 w-5" />
+                                </Button>
+                            </div>
+                        </div>
+                        
+                        {/* PDF Content */}
+                        <div className="flex-1 w-full bg-zinc-100 flex items-center justify-center overflow-hidden">
+                            <iframe 
+                                src={`https://docs.google.com/viewer?url=https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf&embedded=true`}
+                                className="w-full h-full border-none"
+                                title="PDF Preview"
+                            />
+                        </div>
+                    </div>
                 );
             default:
                 return null;
@@ -279,51 +541,60 @@ export function EngagementDetailSheet({
                         }
                     }}
                 >
-                    {/* Header section */}
-                <div className="p-5 border-b border-zinc-100 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md sticky top-0 z-30">
-                    <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-4">
-                            <Avatar className="h-14 w-14 border-2 border-white dark:border-zinc-800 shadow-sm">
-                                <AvatarImage src={record.farmer.avatar} />
-                                <AvatarFallback className="bg-zinc-100 text-zinc-600 font-bold">{record.farmer.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                            </Avatar>
-                            <div className="text-left">
-                                <SheetTitle className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 leading-tight">
-                                    {record.farmer.name}
-                                </SheetTitle>
-                                <SheetDescription asChild>
-                                    <div className="flex items-center gap-2 mt-1.5">
-                                        <span className="flex items-center gap-1 text-xs text-zinc-500 font-medium">
-                                            <MapPin className="h-3 w-3" />
-                                            {record.village}
-                                        </span>
-                                    </div>
-                                </SheetDescription>
+                {/* Header section */}
+                <div className="shrink-0 border-b border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 z-30">
+                    <div className="p-5">
+                        <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-3">
+                                <Avatar className="h-12 w-12 border border-zinc-100 dark:border-zinc-800 shadow-sm">
+                                    <AvatarImage src={record.farmer.avatar} />
+                                    <AvatarFallback className="bg-zinc-100 text-zinc-600 font-bold">{record.farmer.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                                </Avatar>
+                                <div className="text-left">
+                                    <SheetTitle className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 leading-tight">
+                                        {record.farmer.name}
+                                    </SheetTitle>
+                                    <SheetDescription asChild>
+                                        <div className="flex items-center gap-2 mt-1.5">
+                                            <span className="flex items-center gap-1 text-xs text-zinc-500 font-medium">
+                                                <MapPin className="h-3 w-3" />
+                                                {record.village}
+                                            </span>
+                                        </div>
+                                    </SheetDescription>
+                                </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-2 h-14 justify-center">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all active:scale-95 -mr-1"
+                                    onClick={handleCloseAll}
+                                >
+                                    <X className="h-4 w-4" />
+                                </Button>
+                                <Badge
+                                    variant="outline"
+                                    className={cn(
+                                        "px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest rounded-full border shadow-none pointer-events-none select-none",
+                                        record.status === "Verified" && "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/50",
+                                        record.status === "Pending" && "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50",
+                                        record.status === "Invalid" && "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-900/50"
+                                    )}
+                                >
+                                    {record.status === "Invalid" ? "Need Correction" : record.status}
+                                </Badge>
                             </div>
                         </div>
-                        <div className="flex flex-col items-end gap-2 h-14 justify-center">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all active:scale-95 -mr-1"
-                                onClick={handleCloseAll}
-                            >
-                                <X className="h-4 w-4" />
-                            </Button>
-                            <Badge
-                                variant={
-                                    record.status === "Verified" ? "default" :
-                                        record.status === "Invalid" ? "destructive" : "secondary"
-                                }
-                                className={cn(
-                                    "px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest border-none shadow-none pointer-events-none select-none",
-                                    record.status === "Verified" ? "bg-green-500 text-white dark:bg-green-600" :
-                                        record.status === "Invalid" ? "bg-red-500 text-white dark:bg-red-600" :
-                                            "bg-amber-500 text-white dark:bg-amber-600"
-                                )}
-                            >
-                                {record.status}
-                            </Badge>
+                    </div>
+
+                    {/* Fixed Engagement Details Bar */}
+                    <div className="bg-white dark:bg-zinc-950 border-t border-zinc-100 dark:border-zinc-800 px-6 py-2.5 flex items-center justify-between text-[11px] font-bold uppercase tracking-wider">
+                        <div className="flex items-center gap-3">
+                            <span className="text-zinc-900 dark:text-zinc-50">{record.engagementType}</span>
+                        </div>
+                        <div className="text-zinc-400 font-medium">
+                            AZ-{record.azs}
                         </div>
                     </div>
                 </div>
@@ -352,14 +623,8 @@ export function EngagementDetailSheet({
                         </div>
                     )}
                     <div className="p-6">
-                        <div className="mb-4 flex items-center justify-between text-xs font-semibold text-zinc-900 dark:text-zinc-50 border-b border-zinc-100 dark:border-zinc-800 pb-3">
-                            <span className="tracking-tight">{record.engagementType}</span>
-                            <span className="text-zinc-300 dark:text-zinc-700 font-light">•</span>
-                            <span className="tracking-tight text-zinc-500 font-medium">AZ-{record.azs}</span>
-                        </div>
-
-                            <div className="space-y-1">
-                                {surveyData.map((item) => {
+                        <div className="space-y-1">
+                            {surveyData.map((item) => {
                                     // Custom question text logic for questions 8, 9, and 11
                                     let displayQuestion = item.question;
                                     if (item.id === "8") displayQuestion = "Measure the total cultivated area: (in Acres)";
@@ -480,7 +745,7 @@ export function EngagementDetailSheet({
                 {/* Footer section */}
                 <div className="p-4 border-t border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 z-20 flex items-center justify-between gap-4">
                     {/* Left: Navigation */}
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-3">
                         <Button
                             variant="ghost"
                             size="icon"
@@ -490,6 +755,9 @@ export function EngagementDetailSheet({
                         >
                             <ChevronLeft className="h-5 w-5" />
                         </Button>
+                        <span className="text-[11px] font-bold text-zinc-500 tabular-nums">
+                            {currentIndex + 1} / {totalCount}
+                        </span>
                         <Button
                             variant="ghost"
                             size="icon"
@@ -555,29 +823,16 @@ export function EngagementDetailSheet({
             </SheetContent>
         </Sheet>
 
-            {/* Pop-up Preview (Image, Video, File) */}
             <Dialog open={!!activePreview} onOpenChange={(val) => {
                 if (!val) setPreviewItem(null);
             }}>
                 <DialogPortal>
-                    <DialogContent className="max-w-[1200px] w-[95vw] h-[800px] max-h-[90vh] p-0 overflow-visible bg-zinc-950 border-none shadow-2xl z-[10001] flex items-center justify-center rounded-xl [&>button]:hidden">
+                    <DialogContent className="max-w-[1200px] w-[95vw] h-[800px] max-h-[90vh] p-0 overflow-hidden bg-white dark:bg-zinc-950 border-none shadow-2xl z-[10001] flex items-center justify-center rounded-2xl [&>button]:hidden">
                         <DialogTitle className="sr-only">Attachment Preview</DialogTitle>
                         <DialogDescription className="sr-only">Basic view of the survey attachment</DialogDescription>
                         
-                        <div className="relative w-full h-full flex items-center justify-center bg-black/40 rounded-xl overflow-hidden">
+                        <div className="relative w-full h-full flex flex-col items-center justify-center bg-black/5">
                             {activePreview && renderPreviewContent(activePreview)}
-                        </div>
-
-                        {/* Prominent Close Button - Wrapped in a div to avoid being hidden by [&>button]:hidden */}
-                        <div className="absolute -top-4 -right-4 z-[10002]">
-                            <Button 
-                                variant="secondary" 
-                                size="icon" 
-                                className="text-zinc-900 bg-white hover:bg-zinc-100 rounded-full h-10 w-10 shadow-2xl transition-all border-2 border-zinc-200 hover:scale-110 active:scale-95"
-                                onClick={() => setPreviewItem(null)}
-                            >
-                                <X className="h-5 w-5" />
-                            </Button>
                         </div>
                     </DialogContent>
                 </DialogPortal>

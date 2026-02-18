@@ -60,7 +60,7 @@ export default function EngagementPage() {
         if (activeTab === "Verified") {
             return defaultColumns
         }
-        // Filter out verification columns for Pending and Invalid tabs
+        // Filter out verification columns for Pending and Need Correction tabs
         return defaultColumns.filter(col => 
             (col as any).id !== "verifiedBy" && (col as any).id !== "verifiedOn"
         )
@@ -68,19 +68,13 @@ export default function EngagementPage() {
 
     return (
         <NavBarType4 activeItem="Engagement">
-            <div className="flex flex-col h-full gap-6">
-                <div className="flex items-center justify-between shrink-0">
-                    <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Engagement</h1>
-                        <p className="text-muted-foreground text-sm">Manage ongoing farmer interactions and feedback.</p>
-                    </div>
-                    <div className="relative">
-                        <Button variant="outline" size="icon" className="h-10 w-10 border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
-                            <MessageSquare className="h-5 w-5 text-zinc-900 dark:text-zinc-50" />
-                        </Button>
-                        <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white shadow-sm">
-                            5
-                        </span>
+            <div className="flex flex-col h-full gap-6 overflow-hidden">
+                <div className="shrink-0">
+                    <div className="flex items-center justify-between px-1">
+                        <div>
+                            <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Engagement</h1>
+                            <p className="text-muted-foreground text-sm">Manage ongoing farmer interactions and feedback.</p>
+                        </div>
                     </div>
                 </div>
 
@@ -109,6 +103,8 @@ export default function EngagementPage() {
                     onPrevious={handlePrevious}
                     isFirst={isFirst}
                     isLast={isLast}
+                    currentIndex={currentIndex}
+                    totalCount={filteredData.length}
                 />
             </div>
         </NavBarType4>

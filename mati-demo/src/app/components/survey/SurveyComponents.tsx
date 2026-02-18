@@ -203,47 +203,15 @@ const CopyableText = ({ text, children, icon }: { text: string; children: React.
 
 // --- Expandable Text for Long Responses ---
 const ExpandableText = ({ text, style }: { text: string; style: string }) => {
-    const [isExpanded, setIsExpanded] = useState(false);
-
     return (
-        <HoverCard openDelay={200}>
-            <HoverCardTrigger asChild>
-                <div
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        setIsExpanded(!isExpanded);
-                    }}
-                    className={cn(
-                        "cursor-pointer transition-all",
-                        !isExpanded && "line-clamp-2"
-                    )}
-                >
-                    <p className={cn(
-                        "text-zinc-500 dark:text-zinc-400 leading-relaxed",
-                        (style === "style-5" || style === "style-5-feedback") ? "text-base font-semibold text-zinc-900 dark:text-zinc-100 leading-snug" : "text-sm",
-                        !isExpanded && "line-clamp-2"
-                    )}>
-                        {text}
-                    </p>
-                </div>
-            </HoverCardTrigger>
-            {!isExpanded && (
-                <HoverCardContent
-                    className="w-80 p-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xl rounded-xl z-[300]"
-                    side="left"
-                    align="start"
-                    sideOffset={10}
-                >
-                    <div className="space-y-2">
-                        <p className="text-sm text-zinc-900 dark:text-zinc-100 font-medium border-b border-zinc-100 dark:border-zinc-800 pb-2 mb-2">Full Response</p>
-                        <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">
-                            {text}
-                        </p>
-                        <p className="text-[10px] text-zinc-400 font-medium pt-2 italic">Click to expand in-line</p>
-                    </div>
-                </HoverCardContent>
-            )}
-        </HoverCard>
+        <div className="w-full">
+            <p className={cn(
+                "text-zinc-500 dark:text-zinc-400 leading-relaxed",
+                (style === "style-5" || style === "style-5-feedback") ? "text-base font-semibold text-zinc-900 dark:text-zinc-100 leading-snug" : "text-sm"
+            )}>
+                {text}
+            </p>
+        </div>
     );
 };
 

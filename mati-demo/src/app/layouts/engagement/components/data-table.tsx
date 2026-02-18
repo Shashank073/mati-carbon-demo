@@ -63,6 +63,10 @@ export function EngagementTable<TData, TValue>({
     const scrollContainerRef = React.useRef<HTMLDivElement>(null)
     const [scrollbarThumb, setScrollbarThumb] = React.useState({ height: 0, top: 0 })
 
+    const activeColumnIds = React.useMemo(() => {
+        return columns.map(col => (col as any).id || (col as any).accessorKey).filter(Boolean)
+    }, [columns])
+
     const table = useReactTable({
         data,
         columns,
@@ -138,6 +142,7 @@ export function EngagementTable<TData, TValue>({
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
                 counts={counts}
+                activeColumns={activeColumnIds}
             />
             <div className="rounded-md border bg-white dark:bg-zinc-950 flex-1 min-h-0 overflow-hidden relative">
                 <style jsx>{`
