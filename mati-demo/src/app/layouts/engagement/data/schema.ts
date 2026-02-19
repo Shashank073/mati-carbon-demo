@@ -11,6 +11,7 @@ export interface EngagementRecord {
     engagementType: string;
     village: string;
     azs: number;
+    azName?: string;
     surveyor: {
         name: string;
         id: string;

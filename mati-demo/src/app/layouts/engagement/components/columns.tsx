@@ -141,9 +141,16 @@ export const columns: ColumnDef<EngagementRecord>[] = [
     {
         accessorKey: "azs",
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="AZs" />
+            <DataTableColumnHeader column={column} title="AZ code" />
         ),
         cell: ({ row }) => <div className="text-sm">{row.getValue("azs")}</div>,
+    },
+    {
+        accessorKey: "azName",
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="AZ name" />
+        ),
+        cell: ({ row }) => <div className="text-sm">{row.getValue("azName")}</div>,
     },
     {
         accessorKey: "surveyor",
@@ -217,9 +224,16 @@ export const allColumns: ColumnDef<EngagementRecord>[] = [
     {
         accessorKey: "azs",
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="AZs" />
+            <DataTableColumnHeader column={column} title="AZ code" />
         ),
         cell: ({ row }) => <div className="text-sm">{row.getValue("azs")}</div>,
+    },
+    {
+        accessorKey: "azName",
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="AZ name" />
+        ),
+        cell: ({ row }) => <div className="text-sm">{row.getValue("azName")}</div>,
     },
     {
         accessorKey: "surveyor",

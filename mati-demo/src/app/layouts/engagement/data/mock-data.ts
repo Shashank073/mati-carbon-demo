@@ -5,6 +5,7 @@ const surveyorNames = ["Surveyor A", "Surveyor B", "Surveyor C"];
 const verifierNames = ["Verifier B", "Verifier E", "Verifier G", "Verifier H", "Verifier I"];
 const villages = ["Village A", "Village B", "Village C"];
 const engagementTypes = ["Engagement 1", "Con. Engagement 1", "Engagement 4", "Engagement 2", "Engagement 3"];
+const cropNames = ["Wheat", "Rice", "Maize", "Cotton", "Sugarcane", "Soybean", "Barley", "Mustard", "Potato", "Tomato", "Onion"];
 
 export const engagementData: EngagementRecord[] = Array.from({ length: 60 }, (_, i) => {
     const status: "Verified" | "Pending" | "Invalid" =
@@ -20,6 +21,9 @@ export const engagementData: EngagementRecord[] = Array.from({ length: 60 }, (_,
     const verifiedDate = new Date(submittedOn);
     verifiedDate.setMonth(verifiedDate.getMonth() + 2);
 
+    const azCode = (i % 9) + 1;
+    const azName = cropNames[(azCode - 1) % cropNames.length];
+
     return {
         id: 2481 + i,
         submittedOn,
@@ -31,7 +35,8 @@ export const engagementData: EngagementRecord[] = Array.from({ length: 60 }, (_,
         },
         engagementType: engagementTypes[i % engagementTypes.length],
         village: villages[i % villages.length],
-        azs: (i % 9) + 1,
+        azs: azCode,
+        azName: azName,
         surveyor: {
             name: surveyorName,
             id: `99658742${21 + i % 100}`,

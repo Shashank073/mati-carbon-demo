@@ -205,11 +205,6 @@ export function EngagementDetailSheet({
     const [reportSuccess, setReportSuccess] = React.useState(false)
     const [isReportCommentMinimized, setIsReportCommentMinimized] = React.useState(false)
 
-    // Approval countdown states
-    const [countdown, setCountdown] = React.useState<number | null>(null)
-    const [isHoveringApprove, setIsHoveringApprove] = React.useState(false)
-    const countdownTimerRef = React.useRef<NodeJS.Timeout | null>(null)
-
     // Determine if we are previewing something else (image, video, file)
     const activePreview = previewItem && previewItem.type !== "map" ? previewItem : null;
 
@@ -220,13 +215,6 @@ export function EngagementDetailSheet({
     });
 
     const [mapVisible, setMapVisible] = React.useState(false)
-
-    // Cleanup timer on unmount
-    React.useEffect(() => {
-        return () => {
-            if (countdownTimerRef.current) clearInterval(countdownTimerRef.current)
-        }
-    }, [])
 
     // Reset state when record changes
     React.useEffect(() => {
@@ -273,38 +261,17 @@ export function EngagementDetailSheet({
     }
 
     const handleApprove = () => {
-        if (countdown !== null) {
-            // Cancel process
-            if (countdownTimerRef.current) clearInterval(countdownTimerRef.current)
-            setCountdown(null)
-            setIsApproving(false)
-            return
-        }
-
         setIsApproving(true)
-        setCountdown(3)
-
-        countdownTimerRef.current = setInterval(() => {
-            setCountdown(prev => {
-                if (prev === null) return null
-                if (prev <= 1) {
-                    if (countdownTimerRef.current) clearInterval(countdownTimerRef.current)
-                    // Final approval logic
-                    console.log("Approving record:", record.id, "with comment:", comment)
-                    
-                    // Move to next record if available, otherwise close
-                    if (!isLast) {
-                        onNext()
-                        setCountdown(null)
-                        setIsApproving(false)
-                    } else {
-                        onOpenChange(false)
-                    }
-                    return null
-                }
-                return prev - 1
-            })
-        }, 1000)
+        // Final approval logic
+        console.log("Approving record:", record.id, "with comment:", comment)
+        
+        // Move to next record if available, otherwise close
+        if (!isLast) {
+            onNext()
+            setIsApproving(false)
+        } else {
+            onOpenChange(false)
+        }
     }
 
     const handleItemClick = (item: SurveyItem) => {
@@ -670,38 +637,30 @@ export function EngagementDetailSheet({
                         <div className="flex items-center gap-3">
                             <span className="text-zinc-900 dark:text-zinc-50">{record.engagementType}</span>
                         </div>
-                        <div className="text-zinc-400 font-medium">
-                            AZ-{record.azs}
+                        <div className="flex items-center gap-2 text-zinc-400 font-medium">
+                            <span>AZ-{record.azs}</span>
+                            {record.azName && (
+                                <>
+                                    <span className="text-zinc-200 dark:text-zinc-800">•</span>
+                                    <span className="text-zinc-500 dark:text-zinc-400">{record.azName}</span>
+                                </>
+                            )}
                         </div>
                     </div>
 
                     {/* Report Comment Bar for Need Correction */}
                     {record.status === "Invalid" && (
-                        <div className="bg-red-50 dark:bg-red-950/20 border-t border-red-100 dark:border-red-900/30 px-6 py-3 flex flex-col gap-2">
-                            <div 
-                                className="flex items-center justify-between cursor-pointer group"
-                                onClick={() => setIsReportCommentMinimized(!isReportCommentMinimized)}
-                            >
-                                <div className="flex items-center gap-3">
-                                    <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400 shrink-0" />
-                                    <p className="text-[10px] font-bold text-red-800 dark:text-red-400 uppercase tracking-widest">Report Comment</p>
-                                </div>
-                                <Button 
-                                    variant="ghost" 
-                                    size="icon" 
-                                    className="h-5 w-5 text-red-400 group-hover:text-red-600 transition-colors"
-                                >
-                                    <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-300", isReportCommentMinimized ? "rotate-0" : "rotate-180")} />
-                                </Button>
+                        <div className="bg-red-50 dark:bg-red-950/20 border-t border-red-100 dark:border-red-900/30 px-6 py-3 flex flex-col gap-1">
+                            <div className="flex items-center gap-3">
+                                <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400 shrink-0" />
+                                <p className="text-[10px] font-bold text-red-800 dark:text-red-400 uppercase tracking-widest">Report Comment</p>
                             </div>
-                            {!isReportCommentMinimized && (
-                                <div className="flex items-start gap-3 animate-in fade-in slide-in-from-top-1 duration-200">
-                                    <div className="w-4 shrink-0" /> {/* Spacer to align with icon above */}
-                                    <p className="text-xs text-red-700 dark:text-red-300 leading-relaxed font-medium">
-                                        {record.reportComment || "The soil analysis report seems to be missing the nitrogen levels. Please re-upload the correct document."}
-                                    </p>
-                                </div>
-                            )}
+                            <div className="flex items-start gap-3">
+                                <div className="w-4 shrink-0" /> {/* Spacer to align with icon above */}
+                                <p className="text-xs text-red-700 dark:text-red-300 leading-relaxed font-medium">
+                                    {record.reportComment || "The soil analysis report seems to be missing the nitrogen levels. Please re-upload the correct document."}
+                                </p>
+                            </div>
                         </div>
                     )}
                 </div>
@@ -906,38 +865,11 @@ export function EngagementDetailSheet({
                                         {/* Only show Approve button for Pending records and when not in reporting mode */}
                                         {record.status === "Pending" && !isReporting && (
                                             <Button
-                                                className={cn(
-                                                    "h-9 px-5 text-xs font-bold shadow-md transition-all duration-500 ease-in-out overflow-hidden",
-                                                    countdown !== null 
-                                                        ? isHoveringApprove
-                                                            ? "w-[145px] bg-red-50 text-red-600 hover:bg-red-100 border-red-100"
-                                                            : "w-[145px] bg-zinc-100 text-muted-foreground border-zinc-200"
-                                                        : "bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900"
-                                                )}
+                                                className="h-9 px-5 text-xs font-bold shadow-md transition-all active:scale-[0.98] bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900"
                                                 onClick={handleApprove}
-                                                onMouseEnter={() => setIsHoveringApprove(true)}
-                                                onMouseLeave={() => setIsHoveringApprove(false)}
                                             >
-                                                <div className="flex items-center justify-center gap-2 w-full transition-all duration-300">
-                                                    {countdown !== null ? (
-                                                        isHoveringApprove ? (
-                                                            <>
-                                                                <X className="h-3.5 w-3.5 animate-in fade-in zoom-in duration-300" />
-                                                                <span className="animate-in fade-in slide-in-from-right-2 duration-300">Cancel</span>
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <Loader2 className="h-3.5 w-3.5 animate-spin duration-1000" />
-                                                                <span className="animate-in fade-in slide-in-from-left-2 duration-300">Approving in {countdown}</span>
-                                                            </>
-                                                        )
-                                                    ) : (
-                                                        <>
-                                                            <CheckCircle2 className="mr-2 h-3.5 w-3.5" />
-                                                            <span>Approve</span>
-                                                        </>
-                                                    )}
-                                                </div>
+                                                <CheckCircle2 className="mr-2 h-3.5 w-3.5" />
+                                                <span>Approve</span>
                                             </Button>
                                         )}
 

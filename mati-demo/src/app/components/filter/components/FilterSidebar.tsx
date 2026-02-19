@@ -7,7 +7,8 @@ import {
     Search,
     RotateCcw,
     ChevronDown,
-    Check
+    Check,
+    Plus
 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -26,19 +27,7 @@ import {
     SheetTitle,
     SheetFooter,
 } from "@/components/ui/sheet";
-import {
-    DropdownMenu,
-    DropdownMenuCheckboxItem,
-    DropdownMenuContent,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -84,7 +73,18 @@ const STATUS_OPTIONS = [
     "Invalid",
 ];
 
-const AZ_OPTIONS = Array.from({ length: 10 }, (_, i) => `AZ ${i + 1}`);
+const AZ_OPTIONS = [
+    "AZ 1 - Wheat",
+    "AZ 2 - Rice",
+    "AZ 3 - Maize",
+    "AZ 4 - Cotton",
+    "AZ 5 - Sugarcane",
+    "AZ 6 - Soybean",
+    "AZ 7 - Barley",
+    "AZ 8 - Mustard",
+    "AZ 9 - Potato",
+    "AZ 10 - Tomato",
+];
 
 const SURVEYOR_OPTIONS = [
     "Surveyor A",
@@ -100,22 +100,134 @@ const VERIFIER_OPTIONS = [
 
 const DEFAULT_FILTERS: FilterValue = {
     farmers: [],
-    engagementTypes: [...ENGAGEMENT_TYPES],
-    villages: [...VILLAGES],
-    azs: [...AZ_OPTIONS],
-    surveyors: [...SURVEYOR_OPTIONS],
-    statuses: [...STATUS_OPTIONS],
-    verifiedBy: [...VERIFIER_OPTIONS],
+    engagementTypes: [],
+    villages: [],
+    azs: [],
+    surveyors: [],
+    statuses: [],
+    verifiedBy: [],
     matiDeployed: { min: undefined, max: undefined },
 };
 
-const COLUMN_MAPPING: Record<string, string[]> = {
-    engagementTypes: ENGAGEMENT_TYPES,
-    villages: VILLAGES,
-    azs: AZ_OPTIONS,
-    surveyors: SURVEYOR_OPTIONS,
-    statuses: STATUS_OPTIONS,
-    verifiedBy: VERIFIER_OPTIONS,
+const FilterMultiSelect = ({ 
+    label, 
+    field, 
+    options, 
+    currentFilters, 
+    onFilterChange,
+    onReset
+}: { 
+    label: string, 
+    field: keyof FilterValue, 
+    options: string[],
+    currentFilters: FilterValue,
+    onFilterChange: (field: keyof FilterValue, next: string[]) => void,
+    onReset: (field: keyof FilterValue) => void
+}) => {
+    const [search, setSearch] = React.useState("");
+    const currentSelected = (currentFilters[field] as string[]) || [];
+    const filteredOptions = options.filter(opt => opt.toLowerCase().includes(search.toLowerCase()));
+
+    const toggleOption = (value: string) => {
+        const next = currentSelected.includes(value)
+            ? currentSelected.filter(v => v !== value)
+            : [...currentSelected, value];
+        onFilterChange(field, next);
+    };
+    
+    return (
+        <div className="p-4 space-y-4 border-b border-zinc-100 dark:border-zinc-800">
+            <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium text-zinc-900 dark:text-zinc-50">{label}</Label>
+                {currentSelected.length > 0 && (
+                    <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-auto p-0 text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors" 
+                        onClick={() => onReset(field)}
+                    >
+                        Reset
+                    </Button>
+                )}
+            </div>
+            <div className="space-y-3">
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <div className="flex flex-wrap gap-2 min-h-[40px] p-2 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 cursor-pointer hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors">
+                            {currentSelected.length === 0 ? (
+                                <span className="text-xs text-zinc-400 px-1 py-1">Select</span>
+                            ) : (
+                                currentSelected.map(option => (
+                                    <Badge key={option} variant="secondary" className="pl-2 pr-1 py-1 gap-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-none text-[10px] font-medium" onClick={(e) => e.stopPropagation()}>
+                                        {option}
+                                        <button 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                const next = currentSelected.filter(v => v !== option);
+                                                onFilterChange(field, next);
+                                            }} 
+                                            className="hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-full p-0.5 transition-colors"
+                                        >
+                                            <X className="h-3 w-3" />
+                                        </button>
+                                    </Badge>
+                                ))
+                            )}
+                            <div className="ml-auto flex items-center pr-1">
+                                <ChevronDown className="h-4 w-4 text-zinc-400 opacity-50" />
+                            </div>
+                        </div>
+                    </PopoverTrigger>
+                    <PopoverContent 
+                        className="w-[348px] p-0" 
+                        align="start" 
+                        side="bottom" 
+                        sideOffset={4}
+                        onOpenAutoFocus={(e) => e.preventDefault()}
+                        onWheel={(e) => e.stopPropagation()}
+                    >
+                        <div className="p-2 border-b border-zinc-100 dark:border-zinc-800">
+                            <div className="relative">
+                                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
+                                <Input
+                                    placeholder={`Search ${label.toLowerCase()}...`}
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    className="h-9 pl-9 text-xs border-none bg-zinc-50 dark:bg-zinc-900 focus-visible:ring-0"
+                                />
+                            </div>
+                        </div>
+                        <ScrollArea className="h-[240px]" onWheel={(e) => e.stopPropagation()}>
+                            <div className="p-1 space-y-0.5">
+                                {filteredOptions.length === 0 ? (
+                                    <div className="py-6 text-center text-xs text-zinc-500 font-medium">No results found</div>
+                                ) : (
+                                    filteredOptions.map((option) => (
+                                        <div
+                                            key={option}
+                                            className="flex items-center gap-2.5 rounded-sm px-2 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors group"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                toggleOption(option);
+                                            }}
+                                        >
+                                            <Checkbox 
+                                                checked={currentSelected.includes(option)}
+                                                onCheckedChange={() => toggleOption(option)}
+                                                onClick={(e) => e.stopPropagation()}
+                                            />
+                                            <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-zinc-50">{option}</span>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </ScrollArea>
+                    </PopoverContent>
+                </Popover>
+            </div>
+        </div>
+    );
 };
 
 export function FilterSidebar({ open, onOpenChange, onApply, initialFilters, activeColumns = [] }: FilterSidebarProps & { activeColumns?: string[] }) {
@@ -138,7 +250,6 @@ export function FilterSidebar({ open, onOpenChange, onApply, initialFilters, act
             if (field === 'surveyors') return activeColumns.includes('surveyor');
             if (field === 'statuses') return activeColumns.includes('status');
             if (field === 'matiDeployed') return activeColumns.includes('matiDeployed');
-            // Date fields and search fields often match their column IDs
             return activeColumns.includes(field);
         });
     }, [activeColumns]);
@@ -150,25 +261,13 @@ export function FilterSidebar({ open, onOpenChange, onApply, initialFilters, act
         }));
     };
 
+    const handleFilterChange = (field: keyof FilterValue, next: string[]) => {
+        setFilters(prev => ({ ...prev, [field]: next }));
+    };
+
     const resetAll = () => {
         setFilters(DEFAULT_FILTERS);
         setFarmerInput("");
-    };
-
-    const toggleMultiSelect = (field: keyof FilterValue, value: string, allOptions: string[]) => {
-        setFilters(prev => {
-            const current = prev[field] as string[];
-            
-            if (value === "all") {
-                const next = current.length === allOptions.length ? [] : [...allOptions];
-                return { ...prev, [field]: next };
-            }
-
-            const next = current.includes(value)
-                ? current.filter(v => v !== value)
-                : [...current, value];
-            return { ...prev, [field]: next };
-        });
     };
 
     const addFarmer = (e: React.KeyboardEvent) => {
@@ -184,96 +283,22 @@ export function FilterSidebar({ open, onOpenChange, onApply, initialFilters, act
         setFilters(prev => ({ ...prev, farmers: prev.farmers.filter(f => f !== name) }));
     };
 
-    const FilterMultiSelect = ({ label, field, options }: { label: string, field: keyof FilterValue, options: string[] }) => {
-        const [search, setSearch] = React.useState("");
-        const selected = (filters[field] as string[]) || [];
-        const isAllSelected = selected.length === options.length;
-        const filteredOptions = options.filter(opt => opt.toLowerCase().includes(search.toLowerCase()));
-        
-        return (
-            <div className="p-4 space-y-4 border-b border-zinc-100 dark:border-zinc-800">
-                <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium text-zinc-900 dark:text-zinc-50">{label}</Label>
-                    <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-auto p-0 text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors" 
-                        onClick={() => handleResetField(field)}
-                    >
-                        Reset
-                    </Button>
-                </div>
-                <DropdownMenu onOpenChange={(open) => !open && setSearch("")}>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="w-full justify-between h-10 px-3 text-xs border-zinc-200 dark:border-zinc-800 font-normal">
-                            <span className="truncate">
-                                {isAllSelected ? "All" : 
-                                 selected.length === 0 ? "None selected" : 
-                                 `${selected.length} selected`}
-                            </span>
-                            <ChevronDown className="h-4 w-4 opacity-50" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-[348px] p-0" align="start">
-                        <div className="p-2 border-b border-zinc-100 dark:border-zinc-800">
-                            <div className="relative">
-                                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
-                                <Input
-                                    placeholder={`Search ${label.toLowerCase()}...`}
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    className="h-9 pl-9 text-xs border-none bg-zinc-50 dark:bg-zinc-900 focus-visible:ring-0"
-                                />
-                            </div>
-                        </div>
-                        <ScrollArea className="h-[240px]">
-                            <div className="p-1">
-                                {!search && (
-                                    <DropdownMenuCheckboxItem
-                                        checked={isAllSelected}
-                                        onCheckedChange={() => toggleMultiSelect(field, "all", options)}
-                                        onSelect={(e) => e.preventDefault()}
-                                        className="text-xs"
-                                    >
-                                        All
-                                    </DropdownMenuCheckboxItem>
-                                )}
-                                {filteredOptions.length === 0 ? (
-                                    <div className="py-6 text-center text-xs text-zinc-500 font-medium">No results found</div>
-                                ) : (
-                                    filteredOptions.map((option) => (
-                                        <DropdownMenuCheckboxItem
-                                            key={option}
-                                            checked={selected.includes(option)}
-                                            onCheckedChange={() => toggleMultiSelect(field, option, options)}
-                                            onSelect={(e) => e.preventDefault()}
-                                            className="text-xs"
-                                        >
-                                            {option}
-                                        </DropdownMenuCheckboxItem>
-                                    ))
-                                )}
-                            </div>
-                        </ScrollArea>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
-        );
-    };
-
     const renderDateRange = (label: string, field: 'submittedOn' | 'verifiedOn') => {
+        const hasValue = filters[field]?.from || filters[field]?.to;
         return (
             <div className="p-4 space-y-4 border-b border-zinc-100 dark:border-zinc-800">
                 <div className="flex items-center justify-between">
                     <Label className="text-sm font-medium text-zinc-900 dark:text-zinc-50">{label}</Label>
-                    <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-auto p-0 text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors" 
-                        onClick={() => handleResetField(field)}
-                    >
-                        Reset
-                    </Button>
+                    {hasValue && (
+                        <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-auto p-0 text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors" 
+                            onClick={() => handleResetField(field)}
+                        >
+                            Reset
+                        </Button>
+                    )}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                     <Popover>
@@ -283,7 +308,11 @@ export function FilterSidebar({ open, onOpenChange, onApply, initialFilters, act
                                 <CalendarIcon className="h-4 w-4 opacity-50" />
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
+                        <PopoverContent 
+                        className="w-auto p-0" 
+                        align="start"
+                        onWheel={(e) => e.stopPropagation()}
+                    >
                             <Calendar mode="single" selected={filters[field]?.from} onSelect={(d) => setFilters(prev => ({ ...prev, [field]: { ...prev[field], from: d } }))} />
                         </PopoverContent>
                     </Popover>
@@ -294,7 +323,11 @@ export function FilterSidebar({ open, onOpenChange, onApply, initialFilters, act
                                 <CalendarIcon className="h-4 w-4 opacity-50" />
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
+                        <PopoverContent 
+                        className="w-auto p-0" 
+                        align="start"
+                        onWheel={(e) => e.stopPropagation()}
+                    >
                             <Calendar mode="single" selected={filters[field]?.to} onSelect={(d) => setFilters(prev => ({ ...prev, [field]: { ...prev[field], to: d } }))} />
                         </PopoverContent>
                     </Popover>
@@ -304,18 +337,21 @@ export function FilterSidebar({ open, onOpenChange, onApply, initialFilters, act
     };
 
     const renderNumberRange = (label: string, field: 'matiDeployed') => {
+        const hasValue = filters[field]?.min !== undefined || filters[field]?.max !== undefined;
         return (
             <div className="p-4 space-y-4 border-b border-zinc-100 dark:border-zinc-800">
                 <div className="flex items-center justify-between">
                     <Label className="text-sm font-medium text-zinc-900 dark:text-zinc-50">{label}</Label>
-                    <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-auto p-0 text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors" 
-                        onClick={() => handleResetField(field)}
-                    >
-                        Reset
-                    </Button>
+                    {hasValue && (
+                        <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-auto p-0 text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors" 
+                            onClick={() => handleResetField(field)}
+                        >
+                            Reset
+                        </Button>
+                    )}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                     <Input 
@@ -343,58 +379,6 @@ export function FilterSidebar({ open, onOpenChange, onApply, initialFilters, act
         );
     };
 
-    const renderMultiSelectDropdown = (label: string, field: keyof FilterValue, options: string[]) => {
-        const selected = (filters[field] as string[]) || [];
-        const isAllSelected = selected.length === options.length;
-        
-        return (
-            <div className="p-4 space-y-4 border-b border-zinc-100 dark:border-zinc-800">
-                <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium text-zinc-900 dark:text-zinc-50">{label}</Label>
-                    <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-auto p-0 text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors" 
-                        onClick={() => handleResetField(field)}
-                    >
-                        Reset
-                    </Button>
-                </div>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="w-full justify-between h-10 px-3 text-xs border-zinc-200 dark:border-zinc-800 font-normal">
-                            <span className="truncate">
-                                {isAllSelected ? "All" : 
-                                 selected.length === 0 ? "None selected" : 
-                                 `${selected.length} selected`}
-                            </span>
-                            <ChevronDown className="h-4 w-4 opacity-50" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-[348px]" align="start">
-                        <DropdownMenuCheckboxItem
-                            checked={isAllSelected}
-                            onCheckedChange={() => toggleMultiSelect(field, "all", options)}
-                            onSelect={(e) => e.preventDefault()}
-                        >
-                            All
-                        </DropdownMenuCheckboxItem>
-                        {options.map((option) => (
-                            <DropdownMenuCheckboxItem
-                                key={option}
-                                checked={selected.includes(option)}
-                                onCheckedChange={() => toggleMultiSelect(field, option, options)}
-                                onSelect={(e) => e.preventDefault()}
-                            >
-                                {option}
-                            </DropdownMenuCheckboxItem>
-                        ))}
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
-        );
-    };
-
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
             <SheetContent className="w-full sm:max-w-[380px] p-0 flex flex-col gap-0 border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-xl">
@@ -404,20 +388,22 @@ export function FilterSidebar({ open, onOpenChange, onApply, initialFilters, act
                     </SheetTitle>
                 </SheetHeader>
 
-                <ScrollArea className="flex-1">
+                <ScrollArea className="flex-1" onWheel={(e) => e.stopPropagation()}>
                     {visibleFields.includes('submittedOn') && renderDateRange("Submitted on", "submittedOn")}
                     {visibleFields.includes('farmers') && (
                         <div className="p-4 space-y-4 border-b border-zinc-100 dark:border-zinc-800">
                             <div className="flex items-center justify-between">
                                 <Label className="text-sm font-medium text-zinc-900 dark:text-zinc-50">Farmers</Label>
-                                <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="h-auto p-0 text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors" 
-                                    onClick={() => handleResetField('farmers')}
-                                >
-                                    Reset
-                                </Button>
+                                {filters.farmers.length > 0 && (
+                                    <Button 
+                                        variant="ghost" 
+                                        size="sm" 
+                                        className="h-auto p-0 text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors" 
+                                        onClick={() => handleResetField('farmers')}
+                                    >
+                                        Reset
+                                    </Button>
+                                )}
                             </div>
                             <div className="space-y-3">
                                 <div className="relative">
@@ -432,9 +418,9 @@ export function FilterSidebar({ open, onOpenChange, onApply, initialFilters, act
                                 </div>
                                 <div className="flex flex-wrap gap-2">
                                     {filters.farmers.map(farmer => (
-                                        <Badge key={farmer} variant="secondary" className="pl-2 pr-1 py-1 gap-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-none">
+                                        <Badge key={farmer} variant="secondary" className="pl-2 pr-1 py-1 gap-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-none text-[10px] font-medium">
                                             {farmer}
-                                            <button onClick={() => removeFarmer(farmer)} className="hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-full p-0.5">
+                                            <button onClick={() => removeFarmer(farmer)} className="hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-full p-0.5 transition-colors">
                                                 <X className="h-3 w-3" />
                                             </button>
                                         </Badge>
@@ -444,13 +430,67 @@ export function FilterSidebar({ open, onOpenChange, onApply, initialFilters, act
                         </div>
                     )}
 
-                    {visibleFields.includes('engagementTypes') && <FilterMultiSelect label="Engagement type" field="engagementTypes" options={ENGAGEMENT_TYPES} />}
-                    {visibleFields.includes('villages') && <FilterMultiSelect label="Village" field="villages" options={VILLAGES} />}
-                    {visibleFields.includes('azs') && <FilterMultiSelect label="AZs" field="azs" options={AZ_OPTIONS} />}
-                    {visibleFields.includes('surveyors') && <FilterMultiSelect label="Surveyor" field="surveyors" options={SURVEYOR_OPTIONS} />}
+                    {visibleFields.includes('engagementTypes') && (
+                        <FilterMultiSelect 
+                            label="Engagement type" 
+                            field="engagementTypes" 
+                            options={ENGAGEMENT_TYPES} 
+                            currentFilters={filters}
+                            onFilterChange={handleFilterChange}
+                            onReset={handleResetField}
+                        />
+                    )}
+                    {visibleFields.includes('villages') && (
+                        <FilterMultiSelect 
+                            label="Village" 
+                            field="villages" 
+                            options={VILLAGES} 
+                            currentFilters={filters}
+                            onFilterChange={handleFilterChange}
+                            onReset={handleResetField}
+                        />
+                    )}
+                    {visibleFields.includes('azs') && (
+                        <FilterMultiSelect 
+                            label="AZs" 
+                            field="azs" 
+                            options={AZ_OPTIONS} 
+                            currentFilters={filters}
+                            onFilterChange={handleFilterChange}
+                            onReset={handleResetField}
+                        />
+                    )}
+                    {visibleFields.includes('surveyors') && (
+                        <FilterMultiSelect 
+                            label="Surveyor" 
+                            field="surveyors" 
+                            options={SURVEYOR_OPTIONS} 
+                            currentFilters={filters}
+                            onFilterChange={handleFilterChange}
+                            onReset={handleResetField}
+                        />
+                    )}
                     {visibleFields.includes('matiDeployed') && renderNumberRange("Mati Deployed (in Tons)", "matiDeployed")}
-                    {visibleFields.includes('statuses') && <FilterMultiSelect label="Status" field="statuses" options={STATUS_OPTIONS} />}
-                    {visibleFields.includes('verifiedBy') && <FilterMultiSelect label="Verified By" field="verifiedBy" options={VERIFIER_OPTIONS} />}
+                    {visibleFields.includes('statuses') && (
+                        <FilterMultiSelect 
+                            label="Status" 
+                            field="statuses" 
+                            options={STATUS_OPTIONS} 
+                            currentFilters={filters}
+                            onFilterChange={handleFilterChange}
+                            onReset={handleResetField}
+                        />
+                    )}
+                    {visibleFields.includes('verifiedBy') && (
+                        <FilterMultiSelect 
+                            label="Verified By" 
+                            field="verifiedBy" 
+                            options={VERIFIER_OPTIONS} 
+                            currentFilters={filters}
+                            onFilterChange={handleFilterChange}
+                            onReset={handleResetField}
+                        />
+                    )}
                     {visibleFields.includes('verifiedOn') && renderDateRange("Verified On", "verifiedOn")}
                 </ScrollArea>
 
