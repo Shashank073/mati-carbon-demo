@@ -22,6 +22,7 @@ export interface EngagementRecord {
         comment?: string;
     } | null;
     status: "Verified" | "Pending" | "Invalid";
+    reportComment?: string;
     // Keeping some old fields for compatibility with the detail drawer if needed
     comments: string;
     approvalComment?: string;

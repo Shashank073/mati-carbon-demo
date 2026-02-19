@@ -121,6 +121,12 @@ export function DataTableToolbar<TData>({
             table.getColumn("verifiedBy")?.setFilterValue(undefined)
         }
 
+        if (filters.matiDeployed?.min !== undefined || filters.matiDeployed?.max !== undefined) {
+            table.getColumn("matiDeployed")?.setFilterValue([filters.matiDeployed.min, filters.matiDeployed.max])
+        } else {
+            table.getColumn("matiDeployed")?.setFilterValue(undefined)
+        }
+
         if (filters.verifiedOn?.from || filters.verifiedOn?.to) {
             table.getColumn("verifiedOn")?.setFilterValue([filters.verifiedOn.from, filters.verifiedOn.to])
         } else {

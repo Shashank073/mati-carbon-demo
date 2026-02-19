@@ -25,9 +25,10 @@ import { Calendar, XCircle } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, MessageSquareText, AlertCircle, CheckCircle2, X, Check, Image as ImageIcon, Play, FileText, MapPin, Download, Info, MessageSquareWarning, Trash2, ZoomIn, ZoomOut, RotateCw, Maximize2, Minimize2, Scaling, AlignCenter, SlidersHorizontal } from "lucide-react"
+import { ChevronLeft, ChevronRight, MessageSquareText, AlertCircle, CheckCircle2, X, Check, Image as ImageIcon, Play, FileText, MapPin, Download, Info, MessageSquareWarning, Trash2, ZoomIn, ZoomOut, RotateCw, Maximize2, Minimize2, Scaling, AlignCenter, SlidersHorizontal, RotateCcw, Loader2, ChevronDown } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -196,6 +197,18 @@ export function EngagementDetailSheet({
     const [zoom, setZoom] = React.useState(1)
     const [rotation, setRotation] = React.useState(0)
     const [imageMode, setImageMode] = React.useState<"fill" | "fit" | "stretch" | "center">("fit")
+    
+    // Reporting states
+    const [isReportingFinalStep, setIsReportingFinalStep] = React.useState(false)
+    const [reportComment, setReportComment] = React.useState("")
+    const [isSubmittingReport, setIsSubmittingReport] = React.useState(false)
+    const [reportSuccess, setReportSuccess] = React.useState(false)
+    const [isReportCommentMinimized, setIsReportCommentMinimized] = React.useState(false)
+
+    // Approval countdown states
+    const [countdown, setCountdown] = React.useState<number | null>(null)
+    const [isHoveringApprove, setIsHoveringApprove] = React.useState(false)
+    const countdownTimerRef = React.useRef<NodeJS.Timeout | null>(null)
 
     // Determine if we are previewing something else (image, video, file)
     const activePreview = previewItem && previewItem.type !== "map" ? previewItem : null;
@@ -207,6 +220,13 @@ export function EngagementDetailSheet({
     });
 
     const [mapVisible, setMapVisible] = React.useState(false)
+
+    // Cleanup timer on unmount
+    React.useEffect(() => {
+        return () => {
+            if (countdownTimerRef.current) clearInterval(countdownTimerRef.current)
+        }
+    }, [])
 
     // Reset state when record changes
     React.useEffect(() => {
@@ -253,8 +273,38 @@ export function EngagementDetailSheet({
     }
 
     const handleApprove = () => {
-        console.log("Approving record:", record.id, "with comment:", comment)
-        onOpenChange(false)
+        if (countdown !== null) {
+            // Cancel process
+            if (countdownTimerRef.current) clearInterval(countdownTimerRef.current)
+            setCountdown(null)
+            setIsApproving(false)
+            return
+        }
+
+        setIsApproving(true)
+        setCountdown(3)
+
+        countdownTimerRef.current = setInterval(() => {
+            setCountdown(prev => {
+                if (prev === null) return null
+                if (prev <= 1) {
+                    if (countdownTimerRef.current) clearInterval(countdownTimerRef.current)
+                    // Final approval logic
+                    console.log("Approving record:", record.id, "with comment:", comment)
+                    
+                    // Move to next record if available, otherwise close
+                    if (!isLast) {
+                        onNext()
+                        setCountdown(null)
+                        setIsApproving(false)
+                    } else {
+                        onOpenChange(false)
+                    }
+                    return null
+                }
+                return prev - 1
+            })
+        }, 1000)
     }
 
     const handleItemClick = (item: SurveyItem) => {
@@ -265,7 +315,34 @@ export function EngagementDetailSheet({
 
     const handleCloseAll = () => {
         setPreviewItem(null)
+        setIsReportingFinalStep(false)
         onOpenChange(false)
+    }
+
+    const handleReportSubmit = () => {
+        setIsSubmittingReport(true)
+        // Simulate API call
+        setTimeout(() => {
+            console.log("Reporting items:", reportedIds, "with comment:", reportComment)
+            setIsSubmittingReport(false)
+            setReportSuccess(true)
+            
+            // Show success state for 1.5 seconds then move to next
+            setTimeout(() => {
+                setReportSuccess(false)
+                setIsReportingFinalStep(false)
+                setIsReporting(false)
+                setReportedIds([])
+                setReportComment("")
+                
+                // Move to next record if available, otherwise close
+                if (!isLast) {
+                    onNext()
+                } else {
+                    onOpenChange(false)
+                }
+            }, 1500)
+        }, 1000)
     }
 
     // Determine if we should show the persistent map
@@ -597,31 +674,40 @@ export function EngagementDetailSheet({
                             AZ-{record.azs}
                         </div>
                     </div>
+
+                    {/* Report Comment Bar for Need Correction */}
+                    {record.status === "Invalid" && (
+                        <div className="bg-red-50 dark:bg-red-950/20 border-t border-red-100 dark:border-red-900/30 px-6 py-3 flex flex-col gap-2">
+                            <div 
+                                className="flex items-center justify-between cursor-pointer group"
+                                onClick={() => setIsReportCommentMinimized(!isReportCommentMinimized)}
+                            >
+                                <div className="flex items-center gap-3">
+                                    <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400 shrink-0" />
+                                    <p className="text-[10px] font-bold text-red-800 dark:text-red-400 uppercase tracking-widest">Report Comment</p>
+                                </div>
+                                <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-5 w-5 text-red-400 group-hover:text-red-600 transition-colors"
+                                >
+                                    <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-300", isReportCommentMinimized ? "rotate-0" : "rotate-180")} />
+                                </Button>
+                            </div>
+                            {!isReportCommentMinimized && (
+                                <div className="flex items-start gap-3 animate-in fade-in slide-in-from-top-1 duration-200">
+                                    <div className="w-4 shrink-0" /> {/* Spacer to align with icon above */}
+                                    <p className="text-xs text-red-700 dark:text-red-300 leading-relaxed font-medium">
+                                        {record.reportComment || "The soil analysis report seems to be missing the nitrogen levels. Please re-upload the correct document."}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {/* Content section - Style 5 (Feedback based) */}
                 <ScrollArea className="flex-1">
-                    {isReporting && (
-                        <div className="sticky top-0 z-20 bg-amber-50 dark:bg-[#1a1608] border-b border-amber-100 dark:border-amber-900/30 px-6 py-2 flex items-center justify-between animate-in fade-in slide-in-from-top-2 duration-200 shadow-sm">
-                            <div className="flex items-center gap-3">
-                                <Checkbox 
-                                    id="select-all" 
-                                    checked={reportedIds.length === surveyData.length}
-                                    onCheckedChange={toggleSelectAll}
-                                    className="h-4 w-4 border-amber-400 data-[state=checked]:bg-amber-600 data-[state=checked]:border-amber-600 rounded"
-                                />
-                                <label 
-                                    htmlFor="select-all" 
-                                    className="text-[10px] font-bold text-amber-800 dark:text-amber-500 uppercase tracking-widest cursor-pointer"
-                                >
-                                    Report whole survey
-                                </label>
-                            </div>
-                            <span className="text-[9px] font-bold text-amber-700 dark:text-amber-500 uppercase tracking-widest bg-white dark:bg-zinc-900 px-2 py-0.5 rounded-full border border-amber-100 dark:border-amber-900/40">
-                                {reportedIds.length} SELECTED
-                            </span>
-                        </div>
-                    )}
                     <div className="p-6">
                         <div className="space-y-1">
                             {surveyData.map((item) => {
@@ -743,8 +829,32 @@ export function EngagementDetailSheet({
                 </ScrollArea>
 
                 {/* Footer section */}
-                <div className="p-4 border-t border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 z-20 flex items-center justify-between gap-4">
-                    {/* Left: Navigation */}
+                <div className="border-t border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 z-20 flex flex-col">
+                    {/* Report Selection Bar - Only visible during reporting */}
+                    {isReporting && (
+                        <div className="bg-amber-50/50 dark:bg-[#1a1608]/50 border-b border-amber-100/50 dark:border-amber-900/20 px-6 py-2 flex items-center justify-between animate-in fade-in slide-in-from-bottom-2 duration-300">
+                            <div className="flex items-center gap-3">
+                                <Checkbox 
+                                    id="select-all-footer" 
+                                    checked={reportedIds.length === surveyData.length}
+                                    onCheckedChange={toggleSelectAll}
+                                    className="h-4 w-4 border-amber-400 data-[state=checked]:bg-amber-600 data-[state=checked]:border-amber-600 rounded"
+                                />
+                                <label 
+                                    htmlFor="select-all-footer" 
+                                    className="text-[10px] font-bold text-amber-800 dark:text-amber-500 uppercase tracking-widest cursor-pointer select-none"
+                                >
+                                    Report whole survey
+                                </label>
+                            </div>
+                            <span className="text-[9px] font-bold text-amber-700 dark:text-amber-500 uppercase tracking-widest bg-white dark:bg-zinc-900 px-2 py-0.5 rounded-full border border-amber-100 dark:border-amber-900/40">
+                                {reportedIds.length} SELECTED
+                            </span>
+                        </div>
+                    )}
+
+                    <div className="p-4 flex items-center justify-between gap-4">
+                        {/* Left: Navigation */}
                     <div className="flex items-center gap-3">
                         <Button
                             variant="ghost"
@@ -770,7 +880,7 @@ export function EngagementDetailSheet({
                     </div>
 
                                 {/* Right: Actions */}
-                                {record.status !== "Verified" && (
+                                {record.status !== "Verified" && record.status !== "Invalid" && (
                                     <div className="flex items-center gap-2">
                                         {isReporting ? (
                                             <Button
@@ -796,10 +906,38 @@ export function EngagementDetailSheet({
                                         {/* Only show Approve button for Pending records and when not in reporting mode */}
                                         {record.status === "Pending" && !isReporting && (
                                             <Button
-                                                className="h-9 px-5 text-xs font-bold shadow-md transition-all active:scale-[0.98] bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900"
+                                                className={cn(
+                                                    "h-9 px-5 text-xs font-bold shadow-md transition-all duration-500 ease-in-out overflow-hidden",
+                                                    countdown !== null 
+                                                        ? isHoveringApprove
+                                                            ? "w-[145px] bg-red-50 text-red-600 hover:bg-red-100 border-red-100"
+                                                            : "w-[145px] bg-zinc-100 text-muted-foreground border-zinc-200"
+                                                        : "bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900"
+                                                )}
                                                 onClick={handleApprove}
+                                                onMouseEnter={() => setIsHoveringApprove(true)}
+                                                onMouseLeave={() => setIsHoveringApprove(false)}
                                             >
-                                                <CheckCircle2 className="mr-2 h-3.5 w-3.5" /> Approve
+                                                <div className="flex items-center justify-center gap-2 w-full transition-all duration-300">
+                                                    {countdown !== null ? (
+                                                        isHoveringApprove ? (
+                                                            <>
+                                                                <X className="h-3.5 w-3.5 animate-in fade-in zoom-in duration-300" />
+                                                                <span className="animate-in fade-in slide-in-from-right-2 duration-300">Cancel</span>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <Loader2 className="h-3.5 w-3.5 animate-spin duration-1000" />
+                                                                <span className="animate-in fade-in slide-in-from-left-2 duration-300">Approving in {countdown}</span>
+                                                            </>
+                                                        )
+                                                    ) : (
+                                                        <>
+                                                            <CheckCircle2 className="mr-2 h-3.5 w-3.5" />
+                                                            <span>Approve</span>
+                                                        </>
+                                                    )}
+                                                </div>
                                             </Button>
                                         )}
 
@@ -809,7 +947,7 @@ export function EngagementDetailSheet({
                                                 className={cn(
                                                     "h-9 px-5 text-xs font-bold shadow-md transition-all active:scale-[0.98] bg-red-600 text-white hover:bg-red-700 dark:bg-red-600 dark:text-white"
                                                 )}
-                                                onClick={() => { /* Report logic */ }}
+                                                onClick={() => setIsReportingFinalStep(true)}
                                                 disabled={reportedIds.length === 0}
                                             >
                                                 <AlertCircle className="mr-2 h-3.5 w-3.5" />
@@ -818,6 +956,7 @@ export function EngagementDetailSheet({
                                         )}
                                     </div>
                                 )}
+                    </div>
                 </div>
 
             </SheetContent>
@@ -836,6 +975,86 @@ export function EngagementDetailSheet({
                         </div>
                     </DialogContent>
                 </DialogPortal>
+            </Dialog>
+
+            {/* New Report Comment Pop-up */}
+            <Dialog open={isReportingFinalStep} onOpenChange={setIsReportingFinalStep}>
+                <DialogContent className="max-w-[480px] p-0 overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-lg z-[10002] rounded-xl [&>button]:hidden">
+                    <DialogTitle className="sr-only">Finalize Report</DialogTitle>
+                    <DialogDescription className="sr-only">Add additional comments before submitting the report</DialogDescription>
+                    
+                    <div className="bg-white dark:bg-zinc-950">
+                        {reportSuccess ? (
+                            <div className="p-12 flex flex-col items-center justify-center text-center space-y-4 animate-in fade-in zoom-in duration-300">
+                                <div className="h-16 w-16 rounded-full bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center mb-2">
+                                    <CheckCircle2 className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
+                                </div>
+                                <div className="space-y-1">
+                                    <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">Reported Successfully</h3>
+                                    <p className="text-sm text-zinc-500 dark:text-zinc-400">Moving to the next farmer...</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <>
+                                {/* Header */}
+                                <div className="p-6 pb-0 flex items-start justify-between">
+                                    <div className="space-y-1">
+                                        <h3 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Report Survey</h3>
+                                        <p className="text-sm text-muted-foreground leading-relaxed">
+                                            You are reporting <span className="font-semibold text-zinc-900 dark:text-zinc-100">{reportedIds.length} items</span>.
+                                        </p>
+                                    </div>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-all"
+                                        onClick={() => setIsReportingFinalStep(false)}
+                                    >
+                                        <X className="h-4 w-4" />
+                                    </Button>
+                                </div>
+
+                                {/* Body */}
+                                <div className="p-6 space-y-4">
+                                    <div className="space-y-2">
+                                        <Label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Additional Comments <span className="text-red-500">*</span></Label>
+                                        <Textarea 
+                                            placeholder="Describe what needs to be corrected..."
+                                            className="min-h-[120px] resize-none border-zinc-200 dark:border-zinc-800 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-50 rounded-md bg-transparent p-3 text-sm leading-relaxed"
+                                            value={reportComment}
+                                            onChange={(e) => setReportComment(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Footer */}
+                                <div className="p-6 pt-0 flex items-center justify-end gap-3">
+                                    <Button 
+                                        variant="outline"
+                                        className="h-9 px-4 text-xs font-bold"
+                                        onClick={() => setIsReportingFinalStep(false)}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button 
+                                        className="h-9 px-4 text-xs font-bold bg-red-600 hover:bg-red-700 text-white shadow-none"
+                                        onClick={handleReportSubmit}
+                                        disabled={isSubmittingReport || !reportComment.trim()}
+                                    >
+                                        {isSubmittingReport ? (
+                                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                        ) : (
+                                            <>
+                                                <AlertCircle className="mr-2 h-3.5 w-3.5" />
+                                                Submit Report
+                                            </>
+                                        )}
+                                    </Button>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </DialogContent>
             </Dialog>
         </>
     )

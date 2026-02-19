@@ -54,6 +54,7 @@ export interface FilterValue {
     surveyors: string[];
     statuses: string[];
     verifiedBy: string[];
+    matiDeployed?: { min?: number; max?: number };
 }
 
 interface FilterSidebarProps {
@@ -105,6 +106,7 @@ const DEFAULT_FILTERS: FilterValue = {
     surveyors: [...SURVEYOR_OPTIONS],
     statuses: [...STATUS_OPTIONS],
     verifiedBy: [...VERIFIER_OPTIONS],
+    matiDeployed: { min: undefined, max: undefined },
 };
 
 const COLUMN_MAPPING: Record<string, string[]> = {
@@ -124,7 +126,7 @@ export function FilterSidebar({ open, onOpenChange, onApply, initialFilters, act
     const visibleFields = React.useMemo(() => {
         const fields: (keyof FilterValue)[] = [
             'submittedOn', 'farmers', 'engagementTypes', 'villages', 
-            'azs', 'surveyors', 'statuses', 'verifiedBy', 'verifiedOn'
+            'azs', 'surveyors', 'statuses', 'matiDeployed', 'verifiedBy', 'verifiedOn'
         ];
         
         if (activeColumns.length === 0) return fields;
@@ -135,6 +137,7 @@ export function FilterSidebar({ open, onOpenChange, onApply, initialFilters, act
             if (field === 'villages') return activeColumns.includes('village');
             if (field === 'surveyors') return activeColumns.includes('surveyor');
             if (field === 'statuses') return activeColumns.includes('status');
+            if (field === 'matiDeployed') return activeColumns.includes('matiDeployed');
             // Date fields and search fields often match their column IDs
             return activeColumns.includes(field);
         });
@@ -181,6 +184,83 @@ export function FilterSidebar({ open, onOpenChange, onApply, initialFilters, act
         setFilters(prev => ({ ...prev, farmers: prev.farmers.filter(f => f !== name) }));
     };
 
+    const FilterMultiSelect = ({ label, field, options }: { label: string, field: keyof FilterValue, options: string[] }) => {
+        const [search, setSearch] = React.useState("");
+        const selected = (filters[field] as string[]) || [];
+        const isAllSelected = selected.length === options.length;
+        const filteredOptions = options.filter(opt => opt.toLowerCase().includes(search.toLowerCase()));
+        
+        return (
+            <div className="p-4 space-y-4 border-b border-zinc-100 dark:border-zinc-800">
+                <div className="flex items-center justify-between">
+                    <Label className="text-sm font-medium text-zinc-900 dark:text-zinc-50">{label}</Label>
+                    <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-auto p-0 text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors" 
+                        onClick={() => handleResetField(field)}
+                    >
+                        Reset
+                    </Button>
+                </div>
+                <DropdownMenu onOpenChange={(open) => !open && setSearch("")}>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" className="w-full justify-between h-10 px-3 text-xs border-zinc-200 dark:border-zinc-800 font-normal">
+                            <span className="truncate">
+                                {isAllSelected ? "All" : 
+                                 selected.length === 0 ? "None selected" : 
+                                 `${selected.length} selected`}
+                            </span>
+                            <ChevronDown className="h-4 w-4 opacity-50" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-[348px] p-0" align="start">
+                        <div className="p-2 border-b border-zinc-100 dark:border-zinc-800">
+                            <div className="relative">
+                                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
+                                <Input
+                                    placeholder={`Search ${label.toLowerCase()}...`}
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    className="h-9 pl-9 text-xs border-none bg-zinc-50 dark:bg-zinc-900 focus-visible:ring-0"
+                                />
+                            </div>
+                        </div>
+                        <ScrollArea className="h-[240px]">
+                            <div className="p-1">
+                                {!search && (
+                                    <DropdownMenuCheckboxItem
+                                        checked={isAllSelected}
+                                        onCheckedChange={() => toggleMultiSelect(field, "all", options)}
+                                        onSelect={(e) => e.preventDefault()}
+                                        className="text-xs"
+                                    >
+                                        All
+                                    </DropdownMenuCheckboxItem>
+                                )}
+                                {filteredOptions.length === 0 ? (
+                                    <div className="py-6 text-center text-xs text-zinc-500 font-medium">No results found</div>
+                                ) : (
+                                    filteredOptions.map((option) => (
+                                        <DropdownMenuCheckboxItem
+                                            key={option}
+                                            checked={selected.includes(option)}
+                                            onCheckedChange={() => toggleMultiSelect(field, option, options)}
+                                            onSelect={(e) => e.preventDefault()}
+                                            className="text-xs"
+                                        >
+                                            {option}
+                                        </DropdownMenuCheckboxItem>
+                                    ))
+                                )}
+                            </div>
+                        </ScrollArea>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+        );
+    };
+
     const renderDateRange = (label: string, field: 'submittedOn' | 'verifiedOn') => {
         return (
             <div className="p-4 space-y-4 border-b border-zinc-100 dark:border-zinc-800">
@@ -218,6 +298,46 @@ export function FilterSidebar({ open, onOpenChange, onApply, initialFilters, act
                             <Calendar mode="single" selected={filters[field]?.to} onSelect={(d) => setFilters(prev => ({ ...prev, [field]: { ...prev[field], to: d } }))} />
                         </PopoverContent>
                     </Popover>
+                </div>
+            </div>
+        );
+    };
+
+    const renderNumberRange = (label: string, field: 'matiDeployed') => {
+        return (
+            <div className="p-4 space-y-4 border-b border-zinc-100 dark:border-zinc-800">
+                <div className="flex items-center justify-between">
+                    <Label className="text-sm font-medium text-zinc-900 dark:text-zinc-50">{label}</Label>
+                    <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-auto p-0 text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors" 
+                        onClick={() => handleResetField(field)}
+                    >
+                        Reset
+                    </Button>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                    <Input 
+                        type="number" 
+                        placeholder="Min"
+                        className="h-10 text-xs border-zinc-200 dark:border-zinc-800"
+                        value={filters[field]?.min ?? ""}
+                        onChange={(e) => {
+                            const val = e.target.value === "" ? undefined : Number(e.target.value);
+                            setFilters(prev => ({ ...prev, [field]: { ...prev[field], min: val } }));
+                        }}
+                    />
+                    <Input 
+                        type="number" 
+                        placeholder="Max"
+                        className="h-10 text-xs border-zinc-200 dark:border-zinc-800"
+                        value={filters[field]?.max ?? ""}
+                        onChange={(e) => {
+                            const val = e.target.value === "" ? undefined : Number(e.target.value);
+                            setFilters(prev => ({ ...prev, [field]: { ...prev[field], max: val } }));
+                        }}
+                    />
                 </div>
             </div>
         );
@@ -324,12 +444,13 @@ export function FilterSidebar({ open, onOpenChange, onApply, initialFilters, act
                         </div>
                     )}
 
-                    {visibleFields.includes('engagementTypes') && renderMultiSelectDropdown("Engagement type", "engagementTypes", ENGAGEMENT_TYPES)}
-                    {visibleFields.includes('villages') && renderMultiSelectDropdown("Village", "villages", VILLAGES)}
-                    {visibleFields.includes('azs') && renderMultiSelectDropdown("AZs", "azs", AZ_OPTIONS)}
-                    {visibleFields.includes('surveyors') && renderMultiSelectDropdown("Surveyor", "surveyors", SURVEYOR_OPTIONS)}
-                    {visibleFields.includes('statuses') && renderMultiSelectDropdown("Status", "statuses", STATUS_OPTIONS)}
-                    {visibleFields.includes('verifiedBy') && renderMultiSelectDropdown("Verified By", "verifiedBy", VERIFIER_OPTIONS)}
+                    {visibleFields.includes('engagementTypes') && <FilterMultiSelect label="Engagement type" field="engagementTypes" options={ENGAGEMENT_TYPES} />}
+                    {visibleFields.includes('villages') && <FilterMultiSelect label="Village" field="villages" options={VILLAGES} />}
+                    {visibleFields.includes('azs') && <FilterMultiSelect label="AZs" field="azs" options={AZ_OPTIONS} />}
+                    {visibleFields.includes('surveyors') && <FilterMultiSelect label="Surveyor" field="surveyors" options={SURVEYOR_OPTIONS} />}
+                    {visibleFields.includes('matiDeployed') && renderNumberRange("Mati Deployed (in Tons)", "matiDeployed")}
+                    {visibleFields.includes('statuses') && <FilterMultiSelect label="Status" field="statuses" options={STATUS_OPTIONS} />}
+                    {visibleFields.includes('verifiedBy') && <FilterMultiSelect label="Verified By" field="verifiedBy" options={VERIFIER_OPTIONS} />}
                     {visibleFields.includes('verifiedOn') && renderDateRange("Verified On", "verifiedOn")}
                 </ScrollArea>
 
