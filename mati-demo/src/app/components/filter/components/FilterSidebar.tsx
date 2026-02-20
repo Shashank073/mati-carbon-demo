@@ -125,6 +125,7 @@ const FilterMultiSelect = ({
     onReset: (field: keyof FilterValue) => void
 }) => {
     const [search, setSearch] = React.useState("");
+    const [isOpen, setIsOpen] = React.useState(false);
     const currentSelected = (currentFilters[field] as string[]) || [];
     const filteredOptions = options.filter(opt => opt.toLowerCase().includes(search.toLowerCase()));
 
@@ -151,7 +152,7 @@ const FilterMultiSelect = ({
                 )}
             </div>
             <div className="space-y-3">
-                <Popover>
+                <Popover open={isOpen} onOpenChange={setIsOpen}>
                     <PopoverTrigger asChild>
                         <div className="flex flex-wrap gap-2 min-h-[40px] p-2 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 cursor-pointer hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors">
                             {currentSelected.length === 0 ? (
@@ -178,22 +179,27 @@ const FilterMultiSelect = ({
                             </div>
                         </div>
                     </PopoverTrigger>
-                    <PopoverContent 
-                        className="w-[348px] p-0" 
-                        align="start" 
-                        side="bottom" 
-                        sideOffset={4}
-                        onOpenAutoFocus={(e) => e.preventDefault()}
-                        onWheel={(e) => e.stopPropagation()}
-                    >
+                        <PopoverContent 
+                            className="w-[348px] p-0 overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-md rounded-md" 
+                            align="start" 
+                            side="bottom" 
+                            sideOffset={4}
+                            onOpenAutoFocus={(e) => {
+                                e.preventDefault();
+                                // Find the input within this popover and focus it
+                                const input = document.querySelector(`[data-search-input="${field}"]`) as HTMLInputElement;
+                                if (input) input.focus();
+                            }}
+                        >
                         <div className="p-2 border-b border-zinc-100 dark:border-zinc-800">
                             <div className="relative">
                                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
                                 <Input
+                                    data-search-input={field}
                                     placeholder={`Search ${label.toLowerCase()}...`}
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
-                                    className="h-9 pl-9 text-xs border-none bg-zinc-50 dark:bg-zinc-900 focus-visible:ring-0"
+                                    className="h-9 pl-9 text-xs border-zinc-200 dark:border-zinc-800 bg-transparent focus-visible:ring-1 focus-visible:ring-zinc-950 dark:focus-visible:ring-zinc-300"
                                 />
                             </div>
                         </div>
@@ -215,6 +221,7 @@ const FilterMultiSelect = ({
                                             <Checkbox 
                                                 checked={currentSelected.includes(option)}
                                                 onCheckedChange={() => toggleOption(option)}
+                                                className="h-4 w-4"
                                                 onClick={(e) => e.stopPropagation()}
                                             />
                                             <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-zinc-50">{option}</span>
@@ -223,6 +230,28 @@ const FilterMultiSelect = ({
                                 )}
                             </div>
                         </ScrollArea>
+                        <div className="p-1 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-1">
+                            <Button
+                                variant="ghost"
+                                className="flex-1 justify-center h-8 text-[11px] font-bold text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    onFilterChange(field, []);
+                                }}
+                            >
+                                Clear
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                className="flex-1 justify-center h-8 text-[11px] font-bold text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    setIsOpen(false);
+                                }}
+                            >
+                                Close
+                            </Button>
+                        </div>
                     </PopoverContent>
                 </Popover>
             </div>
@@ -309,7 +338,7 @@ export function FilterSidebar({ open, onOpenChange, onApply, initialFilters, act
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent 
-                        className="w-auto p-0" 
+                        className="w-auto p-0 overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-md rounded-md" 
                         align="start"
                         onWheel={(e) => e.stopPropagation()}
                     >
@@ -324,7 +353,7 @@ export function FilterSidebar({ open, onOpenChange, onApply, initialFilters, act
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent 
-                        className="w-auto p-0" 
+                        className="w-auto p-0 overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-md rounded-md" 
                         align="start"
                         onWheel={(e) => e.stopPropagation()}
                     >
