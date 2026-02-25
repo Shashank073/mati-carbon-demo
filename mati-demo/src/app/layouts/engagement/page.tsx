@@ -68,17 +68,17 @@ export default function EngagementPage() {
 
     return (
         <NavBarType4 activeItem="Engagement">
-            <div className="flex flex-col h-full gap-6 overflow-hidden">
+            <div className="flex flex-col h-full gap-4">
                 <div className="shrink-0">
-                    <div className="flex items-center justify-between px-1">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div>
-                            <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Engagement</h1>
-                            <p className="text-muted-foreground text-sm">Manage ongoing farmer interactions and feedback.</p>
+                            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Engagement</h1>
+                            <p className="text-muted-foreground text-xs sm:text-sm">Manage ongoing farmer interactions and feedback.</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white dark:bg-zinc-950 overflow-hidden flex-1 min-h-0 flex flex-col">
+                <div className="bg-white dark:bg-zinc-950 flex-1 min-h-0 flex flex-col">
                     <EngagementTable
                         key={activeTab} // Re-mount table when tab changes for fresh state
                         data={filteredData}
@@ -110,4 +110,3 @@ export default function EngagementPage() {
         </NavBarType4>
     )
 }
-

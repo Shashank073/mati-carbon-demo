@@ -258,7 +258,7 @@ function NavBarType4Content({ children, activeItem }: { children?: React.ReactNo
                 {/* Implicit Footer (User Profile) - kept simple as per standard sidebar practices if not explicitly different in sidebar image */}
                 <SidebarRail />
             </Sidebar>
-            <SidebarInset>
+            <SidebarInset className="min-w-0 flex-1">
                 <header className="flex h-14 shrink-0 items-center justify-between gap-2 border-b bg-background px-4 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
 
                     {/* Left: Context Switchers & Breadcrumbs */}
@@ -433,7 +433,7 @@ function NavBarType4Content({ children, activeItem }: { children?: React.ReactNo
                 </header>
 
                 {/* Main Content Area */}
-                <div className="flex flex-1 flex-col gap-4 p-6 bg-muted/5 overflow-hidden">
+                <div className="flex flex-1 flex-col gap-4 p-2 sm:p-4 lg:p-6 bg-muted/5 min-h-0">
                     {children || (
                         <div className="p-8 flex items-center justify-center text-muted-foreground h-full border border-dashed rounded-lg m-4">
                             Content Area

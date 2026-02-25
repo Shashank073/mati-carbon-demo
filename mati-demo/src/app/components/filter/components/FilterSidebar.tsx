@@ -92,6 +92,17 @@ const SURVEYOR_OPTIONS = [
     "Surveyor C",
 ];
 
+const FARMER_OPTIONS = [
+    "Farmer A",
+    "Farmer B",
+    "Farmer C",
+    "Farmer D",
+    "Farmer E",
+    "Farmer F",
+    "Farmer G",
+    "Farmer H",
+];
+
 const VERIFIER_OPTIONS = [
     "Verifier A",
     "Verifier B",
@@ -261,7 +272,6 @@ const FilterMultiSelect = ({
 
 export function FilterSidebar({ open, onOpenChange, onApply, initialFilters, activeColumns = [] }: FilterSidebarProps & { activeColumns?: string[] }) {
     const [filters, setFilters] = React.useState<FilterValue>(initialFilters || DEFAULT_FILTERS);
-    const [farmerInput, setFarmerInput] = React.useState("");
 
     // Filter out options based on active columns
     const visibleFields = React.useMemo(() => {
@@ -296,24 +306,12 @@ export function FilterSidebar({ open, onOpenChange, onApply, initialFilters, act
 
     const resetAll = () => {
         setFilters(DEFAULT_FILTERS);
-        setFarmerInput("");
-    };
-
-    const addFarmer = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter' && farmerInput.trim()) {
-            if (!filters.farmers.includes(farmerInput.trim())) {
-                setFilters(prev => ({ ...prev, farmers: [...prev.farmers, farmerInput.trim()] }));
-            }
-            setFarmerInput("");
-        }
-    };
-
-    const removeFarmer = (name: string) => {
-        setFilters(prev => ({ ...prev, farmers: prev.farmers.filter(f => f !== name) }));
     };
 
     const renderDateRange = (label: string, field: 'submittedOn' | 'verifiedOn') => {
         const hasValue = filters[field]?.from || filters[field]?.to;
+        const showTime = field === 'submittedOn';
+        
         return (
             <div className="p-4 space-y-4 border-b border-zinc-100 dark:border-zinc-800">
                 <div className="flex items-center justify-between">
@@ -333,7 +331,7 @@ export function FilterSidebar({ open, onOpenChange, onApply, initialFilters, act
                     <Popover>
                         <PopoverTrigger asChild>
                             <Button variant="outline" className={cn("w-full justify-between h-10 px-3 text-xs border-zinc-200 dark:border-zinc-800", !filters[field]?.from && "text-muted-foreground")}>
-                                {filters[field]?.from ? format(filters[field]!.from!, "yyyy-MM-dd") : "From"}
+                                {filters[field]?.from ? format(filters[field]!.from!, showTime ? "yyyy-MM-dd hh:mm a" : "yyyy-MM-dd") : "From"}
                                 <CalendarIcon className="h-4 w-4 opacity-50" />
                             </Button>
                         </PopoverTrigger>
@@ -342,13 +340,31 @@ export function FilterSidebar({ open, onOpenChange, onApply, initialFilters, act
                         align="start"
                         onWheel={(e) => e.stopPropagation()}
                     >
-                            <Calendar mode="single" selected={filters[field]?.from} onSelect={(d) => setFilters(prev => ({ ...prev, [field]: { ...prev[field], from: d } }))} />
+                            <Calendar 
+                                mode="single" 
+                                selected={filters[field]?.from} 
+                                onSelect={(d) => setFilters(prev => ({ ...prev, [field]: { ...prev[field], from: d } }))}
+                                showTime={showTime}
+                                timeValue={filters[field]?.from ? format(filters[field]!.from!, "hh:mm a") : "12:00 AM"}
+                                onTimeChange={(time) => {
+                                    if (filters[field]?.from) {
+                                        const [t, p] = time.split(' ');
+                                        const [h, m] = t.split(':');
+                                        const newDate = new Date(filters[field]!.from!);
+                                        let hours = parseInt(h);
+                                        if (p === 'PM' && hours < 12) hours += 12;
+                                        if (p === 'AM' && hours === 12) hours = 0;
+                                        newDate.setHours(hours, parseInt(m));
+                                        setFilters(prev => ({ ...prev, [field]: { ...prev[field], from: newDate } }));
+                                    }
+                                }}
+                            />
                         </PopoverContent>
                     </Popover>
                     <Popover>
                         <PopoverTrigger asChild>
                             <Button variant="outline" className={cn("w-full justify-between h-10 px-3 text-xs border-zinc-200 dark:border-zinc-800", !filters[field]?.to && "text-muted-foreground")}>
-                                {filters[field]?.to ? format(filters[field]!.to!, "yyyy-MM-dd") : "To"}
+                                {filters[field]?.to ? format(filters[field]!.to!, showTime ? "yyyy-MM-dd hh:mm a" : "yyyy-MM-dd") : "To"}
                                 <CalendarIcon className="h-4 w-4 opacity-50" />
                             </Button>
                         </PopoverTrigger>
@@ -357,7 +373,25 @@ export function FilterSidebar({ open, onOpenChange, onApply, initialFilters, act
                         align="start"
                         onWheel={(e) => e.stopPropagation()}
                     >
-                            <Calendar mode="single" selected={filters[field]?.to} onSelect={(d) => setFilters(prev => ({ ...prev, [field]: { ...prev[field], to: d } }))} />
+                            <Calendar 
+                                mode="single" 
+                                selected={filters[field]?.to} 
+                                onSelect={(d) => setFilters(prev => ({ ...prev, [field]: { ...prev[field], to: d } }))}
+                                showTime={showTime}
+                                timeValue={filters[field]?.to ? format(filters[field]!.to!, "hh:mm a") : "11:59 PM"}
+                                onTimeChange={(time) => {
+                                    if (filters[field]?.to) {
+                                        const [t, p] = time.split(' ');
+                                        const [h, m] = t.split(':');
+                                        const newDate = new Date(filters[field]!.to!);
+                                        let hours = parseInt(h);
+                                        if (p === 'PM' && hours < 12) hours += 12;
+                                        if (p === 'AM' && hours === 12) hours = 0;
+                                        newDate.setHours(hours, parseInt(m));
+                                        setFilters(prev => ({ ...prev, [field]: { ...prev[field], to: newDate } }));
+                                    }
+                                }}
+                            />
                         </PopoverContent>
                     </Popover>
                 </div>
@@ -420,43 +454,14 @@ export function FilterSidebar({ open, onOpenChange, onApply, initialFilters, act
                 <ScrollArea className="flex-1" onWheel={(e) => e.stopPropagation()}>
                     {visibleFields.includes('submittedOn') && renderDateRange("Submitted on", "submittedOn")}
                     {visibleFields.includes('farmers') && (
-                        <div className="p-4 space-y-4 border-b border-zinc-100 dark:border-zinc-800">
-                            <div className="flex items-center justify-between">
-                                <Label className="text-sm font-medium text-zinc-900 dark:text-zinc-50">Farmers</Label>
-                                {filters.farmers.length > 0 && (
-                                    <Button 
-                                        variant="ghost" 
-                                        size="sm" 
-                                        className="h-auto p-0 text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors" 
-                                        onClick={() => handleResetField('farmers')}
-                                    >
-                                        Reset
-                                    </Button>
-                                )}
-                            </div>
-                            <div className="space-y-3">
-                                <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
-                                    <Input
-                                        className="h-10 pl-9 text-xs border-zinc-200 dark:border-zinc-800"
-                                        placeholder="Type name and press Enter..."
-                                        value={farmerInput}
-                                        onChange={(e) => setFarmerInput(e.target.value)}
-                                        onKeyDown={addFarmer}
-                                    />
-                                </div>
-                                <div className="flex flex-wrap gap-2">
-                                    {filters.farmers.map(farmer => (
-                                        <Badge key={farmer} variant="secondary" className="pl-2 pr-1 py-1 gap-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-none text-[10px] font-medium">
-                                            {farmer}
-                                            <button onClick={() => removeFarmer(farmer)} className="hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-full p-0.5 transition-colors">
-                                                <X className="h-3 w-3" />
-                                            </button>
-                                        </Badge>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
+                        <FilterMultiSelect 
+                            label="Farmers" 
+                            field="farmers" 
+                            options={FARMER_OPTIONS} 
+                            currentFilters={filters}
+                            onFilterChange={handleFilterChange}
+                            onReset={handleResetField}
+                        />
                     )}
 
                     {visibleFields.includes('engagementTypes') && (

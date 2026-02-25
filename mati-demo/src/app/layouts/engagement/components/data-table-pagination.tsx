@@ -19,20 +19,29 @@ import {
 
 interface DataTablePaginationProps<TData> {
     table: Table<TData>
+    selectedId?: string
 }
 
 export function DataTablePagination<TData>({
     table,
+    selectedId,
 }: DataTablePaginationProps<TData>) {
+    const selectedRowIndex = selectedId 
+        ? table.getFilteredRowModel().rows.findIndex(row => (row.original as any).id === selectedId)
+        : -1
+
     return (
-        <div className="flex items-center justify-between px-2">
-            <div className="flex-1 text-sm text-muted-foreground">
-                {table.getFilteredSelectedRowModel().rows.length} of{" "}
-                {table.getFilteredRowModel().rows.length} row(s) selected.
+        <div className="flex flex-col sm:flex-row items-center justify-between px-2 gap-4">
+            <div className="flex-1 text-sm text-muted-foreground whitespace-nowrap">
+                {selectedRowIndex !== -1 ? (
+                    <span>{selectedRowIndex + 1} of {table.getFilteredRowModel().rows.length}</span>
+                ) : (
+                    <span>{table.getFilteredRowModel().rows.length} row(s)</span>
+                )}
             </div>
-            <div className="flex items-center space-x-6 lg:space-x-8">
+            <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 lg:space-x-8 w-full sm:w-auto">
                 <div className="flex items-center space-x-2">
-                    <p className="text-sm font-medium">Rows per page</p>
+                    <p className="text-sm font-medium whitespace-nowrap">Rows per page</p>
                     <Select
                         value={`${table.getState().pagination.pageSize}`}
                         onValueChange={(value) => {
@@ -51,7 +60,7 @@ export function DataTablePagination<TData>({
                         </SelectContent>
                     </Select>
                 </div>
-                <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+                <div className="flex w-full sm:w-[100px] items-center justify-center text-sm font-medium whitespace-nowrap">
                     Page {table.getState().pagination.pageIndex + 1} of{" "}
                     {table.getPageCount()}
                 </div>

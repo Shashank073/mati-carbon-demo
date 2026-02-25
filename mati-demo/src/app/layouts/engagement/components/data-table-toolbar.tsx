@@ -1,49 +1,22 @@
-import { ListFilter, X, Eye, Settings2, SlidersHorizontal, ChevronRight, Check, MoreVertical, Filter, Columns } from "lucide-react"
+import { X, Eye, Filter } from "lucide-react"
 import { Table } from "@tanstack/react-table"
 import * as React from "react"
 
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
-    DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
-    DropdownMenuSub,
-    DropdownMenuSubContent,
-    DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 import { FilterSidebar, FilterValue } from "@/app/components/filter/components/FilterSidebar"
-
-// Options
-const villages = [
-    { label: "Village A", value: "Village A" },
-    { label: "Village B", value: "Village B" },
-    { label: "Village C", value: "Village C" },
-]
-
-const types = [
-    { label: "Engagement 1", value: "Engagement 1" },
-    { label: "Engagement 2", value: "Engagement 2" },
-    { label: "Engagement 3", value: "Engagement 3" },
-    { label: "Engagement 4", value: "Engagement 4" },
-    { label: "Con. Engagement 1", value: "Con. Engagement 1" },
-]
-
-const surveyors = [
-    { label: "Surveyor A", value: "Surveyor A" },
-    { label: "Surveyor B", value: "Surveyor B" },
-    { label: "Surveyor C", value: "Surveyor C" },
-]
-
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { flexRender } from "@tanstack/react-table"
 
 interface DataTableToolbarProps<TData> {
     table: Table<TData>
@@ -135,41 +108,41 @@ export function DataTableToolbar<TData>({
     }
 
     return (
-        <div className="flex items-center justify-between px-1 py-1">
-            <div className="flex items-center space-x-2">
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="h-10">
-                    <TabsList>
+        <div className="flex flex-row items-center justify-between gap-4 w-full">
+            <div className="flex items-center min-w-0 flex-1">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                    <TabsList className="w-max lg:w-auto justify-start h-10 bg-muted/50 p-1 overflow-x-auto overflow-y-hidden scrollbar-none">
                         <TabsTrigger
                             value="All"
-                            className="text-xs"
+                            className="lg:flex-none text-xs px-2 sm:px-4 whitespace-nowrap"
                         >
-                            All <span className="ml-2 opacity-50">{counts.verified + counts.pending + counts.invalid}</span>
+                            All <span className="ml-1 sm:ml-2 opacity-50">{counts.verified + counts.pending + counts.invalid}</span>
                         </TabsTrigger>
                         <TabsTrigger
                             value="Verified"
-                            className="text-xs"
+                            className="lg:flex-none text-xs px-2 sm:px-4 whitespace-nowrap"
                         >
-                            Verified <span className="ml-2 opacity-50">{counts.verified}</span>
+                            Verified <span className="ml-1 sm:ml-2 opacity-50">{counts.verified}</span>
                         </TabsTrigger>
                         <TabsTrigger
                             value="Pending"
-                            className="text-xs"
+                            className="lg:flex-none text-xs px-2 sm:px-4 whitespace-nowrap"
                         >
-                            Pending <span className="ml-2 opacity-50">{counts.pending}</span>
+                            Pending <span className="ml-1 sm:ml-2 opacity-50">{counts.pending}</span>
                         </TabsTrigger>
                         <TabsTrigger
                             value="Invalid"
-                            className="text-xs"
+                            className="lg:flex-none text-xs px-2 sm:px-4 whitespace-nowrap"
                         >
-                            Need Correction <span className="ml-2 opacity-50">{counts.invalid}</span>
+                            Need Correction <span className="ml-1 sm:ml-2 opacity-50">{counts.invalid}</span>
                         </TabsTrigger>
                     </TabsList>
                 </Tabs>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 justify-end shrink-0">
                 {isFiltered && (
-                    <div className="flex items-center gap-1.5 px-2.5 h-10 rounded-md bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-sm transition-all">
+                    <div className="flex items-center gap-1.5 px-2.5 h-10 rounded-md bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-sm transition-all shrink-0">
                         <button
                             onClick={() => setFilterSidebarOpen(true)}
                             className="text-xs font-semibold text-zinc-900 dark:text-zinc-50 hover:opacity-70 transition-opacity"
@@ -193,7 +166,7 @@ export function DataTableToolbar<TData>({
                 <Button
                     variant="outline"
                     size="icon"
-                    className="h-10 w-10"
+                    className="h-10 w-10 shrink-0"
                     onClick={() => setFilterSidebarOpen(true)}
                     title="Filters"
                 >
@@ -202,7 +175,7 @@ export function DataTableToolbar<TData>({
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="icon" className="h-10 w-10 relative overflow-visible" title="Columns">
+                        <Button variant="outline" size="icon" className="h-10 w-10 relative overflow-visible shrink-0" title="Columns">
                             <Eye className="h-4 w-4" />
                         </Button>
                     </DropdownMenuTrigger>
