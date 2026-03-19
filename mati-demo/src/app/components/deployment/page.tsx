@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { GoogleMap, useJsApiLoader, Polygon, Marker } from "@react-google-maps/api";
 import { 
   ArrowLeft, 
