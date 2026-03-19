@@ -11,11 +11,22 @@ import { EngagementTable } from "./components/data-table"
 import { EngagementDetailSheet } from "./components/engagement-detail-sheet"
 import { EngagementRecord } from "./data/schema"
 import { cn } from "@/lib/utils"
+import { surveyData } from "@/app/components/survey/SurveyComponents"
 
 export default function EngagementPage() {
     const [selectedRecord, setSelectedRecord] = React.useState<EngagementRecord | null>(null)
     const [isDrawerOpen, setIsDrawerOpen] = React.useState(false)
     const [activeTab, setActiveTab] = React.useState<"All" | "Verified" | "Pending" | "Invalid">("Verified")
+    const [isLoading, setIsLoading] = React.useState(false)
+
+    const handleTabChange = (val: string) => {
+        setIsLoading(true)
+        setActiveTab(val as any)
+        // Simulate API loading with 1 second deliberate delay
+        setTimeout(() => {
+            setIsLoading(false)
+        }, 1000)
+    }
 
     const handleRecordClick = (record: EngagementRecord) => {
         setSelectedRecord(record)
@@ -52,6 +63,24 @@ export default function EngagementPage() {
     const pendingCount = engagementData.filter(item => item.status === "Pending").length
     const invalidCount = engagementData.filter(item => item.status === "Invalid").length
 
+    // Filter survey data to only show questions 1-16 (hide 17-28)
+    const filteredSurveyData = React.useMemo(() => {
+        const baseData = surveyData.filter(item => {
+            const idNum = parseInt(item.id);
+            return idNum >= 1 && idNum <= 16;
+        });
+
+        // If the selected farmer has status "Invalid" and is "Farmer E", return all questions with empty answers
+        if (selectedRecord?.status === "Invalid" && selectedRecord?.farmer.name === "Farmer E") {
+            return baseData.map(item => ({
+                ...item,
+                answer: item.type === "badge" || item.type === "rank" || item.type === "repeater" ? [] : ""
+            }));
+        }
+
+        return baseData;
+    }, [selectedRecord?.id]);
+
     // Dynamic columns
     const activeColumns = React.useMemo(() => {
         if (activeTab === "All") {
@@ -85,13 +114,14 @@ export default function EngagementPage() {
                         columns={activeColumns}
                         onRowClick={handleRecordClick}
                         activeTab={activeTab}
-                        setActiveTab={(val) => setActiveTab(val as any)}
+                        setActiveTab={handleTabChange}
                         counts={{
                             verified: verifiedCount,
                             pending: pendingCount,
                             invalid: invalidCount,
                         }}
                         selectedId={selectedRecord?.id}
+                        isLoading={isLoading}
                     />
                 </div>
 
@@ -105,6 +135,7 @@ export default function EngagementPage() {
                     isLast={isLast}
                     currentIndex={currentIndex}
                     totalCount={filteredData.length}
+                    surveyData={filteredSurveyData}
                 />
             </div>
         </NavBarType4>

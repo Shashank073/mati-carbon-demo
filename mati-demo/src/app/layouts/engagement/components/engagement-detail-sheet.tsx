@@ -44,7 +44,7 @@ const LIBRARIES: ("drawing" | "geometry")[] = ["drawing", "geometry"];
 const DEFAULT_CENTER = { lat: 20.5, lng: 78.9 };
 const DEFAULT_ZOOM = 5;
 
-function MapPreviewContent({ selectedFarmer }: { selectedFarmer: Farmer | null }) {
+function MapPreviewContent({ selectedFarmer, onIdle }: { selectedFarmer: Farmer | null, onIdle?: () => void }) {
     const mapRef = React.useRef<google.maps.Map | null>(null);
 
     const onLoad = React.useCallback((map: google.maps.Map) => {
@@ -69,6 +69,7 @@ function MapPreviewContent({ selectedFarmer }: { selectedFarmer: Farmer | null }
             center={selectedFarmer?.location || DEFAULT_CENTER}
             zoom={selectedFarmer ? 17 : DEFAULT_ZOOM}
             onLoad={onLoad}
+            onIdle={onIdle}
             onUnmount={onUnmount}
             mapTypeId="satellite"
             options={{
@@ -116,6 +117,7 @@ interface EngagementDetailSheetProps {
     isLast: boolean
     currentIndex: number
     totalCount: number
+    surveyData?: SurveyItem[]
 }
 
 function ImagePreview({ item, zoom, rotation, imageMode }: { item: SurveyItem, zoom: number, rotation: number, imageMode: "fill" | "fit" | "stretch" | "center" }) {
@@ -186,7 +188,8 @@ export function EngagementDetailSheet({
     isFirst,
     isLast,
     currentIndex,
-    totalCount
+    totalCount,
+    surveyData: customSurveyData
 }: EngagementDetailSheetProps) {
     const [comment, setComment] = React.useState("")
     const [isApproving, setIsApproving] = React.useState(false)
@@ -197,7 +200,11 @@ export function EngagementDetailSheet({
     const [zoom, setZoom] = React.useState(1)
     const [rotation, setRotation] = React.useState(0)
     const [imageMode, setImageMode] = React.useState<"fill" | "fit" | "stretch" | "center">("fit")
+    const [isDataLoading, setIsDataLoading] = React.useState(false)
     
+    // Use custom survey data if provided, otherwise fallback to default surveyData
+    const activeSurveyData = customSurveyData || surveyData;
+
     // Reporting states
     const [isReportingFinalStep, setIsReportingFinalStep] = React.useState(false)
     const [reportComment, setReportComment] = React.useState("")
@@ -215,6 +222,13 @@ export function EngagementDetailSheet({
     });
 
     const [mapVisible, setMapVisible] = React.useState(false)
+    const [isMapReady, setIsMapReady] = React.useState(false)
+
+    const onMapIdle = React.useCallback(() => {
+        if (!isMapReady) {
+            setIsMapReady(true);
+        }
+    }, [isMapReady]);
 
     // Reset state when record changes
     React.useEffect(() => {
@@ -227,15 +241,18 @@ export function EngagementDetailSheet({
         setZoom(1);
         setRotation(0);
         setImageMode("fit");
+        setIsMapReady(false); // Reset map ready state
         
         if (open) {
-            // Delay map visibility to sync with side module animation
+            setMapVisible(true);
+            setIsDataLoading(true);
             const timer = setTimeout(() => {
-                setMapVisible(true);
-            }, 600); // Increased to ensure side module is fully settled
+                setIsDataLoading(false);
+            }, 1000);
             return () => clearTimeout(timer);
         } else {
             setMapVisible(false);
+            setIsDataLoading(false);
         }
     }, [record?.id, open])
 
@@ -253,25 +270,27 @@ export function EngagementDetailSheet({
     };
 
     const toggleSelectAll = () => {
-        if (reportedIds.length === surveyData.length) {
+        if (reportedIds.length === activeSurveyData.length) {
             setReportedIds([])
         } else {
-            setReportedIds(surveyData.map(item => item.id))
+            setReportedIds(activeSurveyData.map(item => item.id))
         }
     }
 
     const handleApprove = () => {
         setIsApproving(true)
-        // Final approval logic
-        console.log("Approving record:", record.id, "with comment:", comment)
-        
-        // Move to next record if available, otherwise close
-        if (!isLast) {
-            onNext()
-            setIsApproving(false)
-        } else {
-            onOpenChange(false)
-        }
+        // Simulate API call with 1 second delay
+        setTimeout(() => {
+            console.log("Approving record:", record.id, "with comment:", comment)
+            
+            // Move to next record if available, otherwise close
+            if (!isLast) {
+                onNext()
+                setIsApproving(false)
+            } else {
+                onOpenChange(false)
+            }
+        }, 1000)
     }
 
     const handleItemClick = (item: SurveyItem) => {
@@ -536,48 +555,13 @@ export function EngagementDetailSheet({
 
     return (
         <>
-            {/* Persistent Map Module - Positioned next to the side module, sliding with it */}
-            <div 
-                className={cn(
-                    "map-preview-module fixed top-0 bottom-0 bg-white dark:bg-zinc-950 flex flex-col shadow-2xl border-r border-zinc-200 dark:border-zinc-800 transition-all duration-500 ease-in-out z-[100]",
-                    open ? "right-[500px] opacity-100" : "-right-full opacity-0"
-                )}
-                style={{ 
-                    width: "50vw", 
-                    pointerEvents: "auto"
-                }}
-                onClick={(e) => e.stopPropagation()}
-            >
-                <div className="flex-1 overflow-hidden p-0 flex items-center justify-center bg-zinc-100 dark:bg-zinc-900/50">
-                    <div className="w-full h-full relative overflow-hidden">
-                        {isLoaded ? (
-                            <MapPreviewContent selectedFarmer={farmerData} />
-                        ) : (
-                            <div className="flex h-full items-center justify-center text-zinc-500">
-                                Loading Map...
-                            </div>
-                        )}
-                        <div className="absolute top-6 left-6 z-20 pointer-events-none">
-                            <div className="flex items-center gap-2 pointer-events-auto">
-                                <div className="px-3 py-1.5 bg-white/95 dark:bg-zinc-950/95 shadow-xl border border-zinc-200 dark:border-zinc-800 rounded-lg text-[14px] font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-50 whitespace-nowrap backdrop-blur-md">
-                                    {farmerData.calArea}
-                                </div>
-                                <div className="px-3 py-1.5 bg-white/95 dark:bg-zinc-950/95 shadow-xl border border-zinc-200 dark:border-zinc-800 rounded-lg text-[14px] font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-50 whitespace-nowrap backdrop-blur-md">
-                                    {farmerData.plots.length} Plots
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <Sheet open={open} onOpenChange={(val) => {
                 if (!val) {
                     handleCloseAll();
                 }
             }}>
                 <SheetContent 
-                    className="w-full sm:max-w-[500px] p-0 flex flex-col gap-0 border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-2xl overflow-visible z-[200]"
+                    className="w-full sm:max-w-[500px] p-0 flex flex-col gap-0 border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-2xl overflow-visible z-[200] transition-all duration-500 ease-in-out"
                     onPointerDownOutside={(e) => {
                         const target = e.target as HTMLElement;
                         if (target.closest('.map-preview-module')) {
@@ -585,6 +569,52 @@ export function EngagementDetailSheet({
                         }
                     }}
                 >
+                    {/* Persistent Map Module - Positioned next to the side module, sliding with it */}
+                    <div 
+                        className={cn(
+                            "map-preview-module absolute top-0 bottom-0 bg-white dark:bg-zinc-950 flex flex-col border-r border-zinc-200 dark:border-zinc-800 transition-all duration-500 ease-in-out z-[-1]",
+                            open ? "opacity-100" : "opacity-0"
+                        )}
+                        style={{ 
+                            width: "50vw", 
+                            right: "100%",
+                            pointerEvents: "auto"
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex-1 overflow-hidden p-0 flex items-center justify-center bg-zinc-100 dark:bg-zinc-900/50 relative">
+                            {/* Map Loader Overlay */}
+                            <div className={cn(
+                                "absolute inset-0 z-10 bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center transition-opacity duration-300",
+                                isMapReady ? "opacity-0 pointer-events-none" : "opacity-100"
+                            )}>
+                                <div className="text-center space-y-3">
+                                    <Loader2 className="h-8 w-8 mx-auto text-zinc-400 animate-spin" />
+                                    <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider">Initializing Map...</p>
+                                </div>
+                            </div>
+
+                            <div className="w-full h-full relative overflow-hidden">
+                                {isLoaded ? (
+                                    <MapPreviewContent selectedFarmer={farmerData} onIdle={onMapIdle} />
+                                ) : (
+                                    <div className="flex h-full items-center justify-center text-zinc-500">
+                                        Loading Map...
+                                    </div>
+                                )}
+                                <div className="absolute top-6 left-6 z-20 pointer-events-none">
+                                    <div className="flex items-center gap-2 pointer-events-auto">
+                                        <div className="px-3 py-1.5 bg-white/95 dark:bg-zinc-950/95 shadow-xl border border-zinc-200 dark:border-zinc-800 rounded-lg text-[14px] font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-50 whitespace-nowrap backdrop-blur-md">
+                                            {farmerData.calArea}
+                                        </div>
+                                        <div className="px-3 py-1.5 bg-white/95 dark:bg-zinc-950/95 shadow-xl border border-zinc-200 dark:border-zinc-800 rounded-lg text-[14px] font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-50 whitespace-nowrap backdrop-blur-md">
+                                            {farmerData.plots.length} Plots
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 {/* Header section */}
                 <div className="shrink-0 border-b border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 z-30">
                     <div className="p-5">
@@ -650,140 +680,161 @@ export function EngagementDetailSheet({
 
                     {/* Report Comment Bar for Need Correction */}
                     {record.status === "Invalid" && (
-                        <div className="bg-red-50 dark:bg-red-950/20 border-t border-red-100 dark:border-red-900/30 px-6 py-3 flex flex-col gap-1">
-                            <div className="flex items-center gap-3">
-                                <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400 shrink-0" />
-                                <p className="text-[10px] font-bold text-red-800 dark:text-red-400 uppercase tracking-widest">Report Comment</p>
-                            </div>
-                            <div className="flex items-start gap-3">
-                                <div className="w-4 shrink-0" /> {/* Spacer to align with icon above */}
-                                <p className="text-xs text-red-700 dark:text-red-300 leading-relaxed font-medium">
-                                    {record.reportComment || "The soil analysis report seems to be missing the nitrogen levels. Please re-upload the correct document."}
-                                </p>
-                            </div>
+                        <div className="bg-red-50 dark:bg-red-950/20 border-t border-red-100 dark:border-red-900/30 px-6 py-3 flex flex-col gap-1 min-h-[72px] relative overflow-hidden">
+                            {isDataLoading ? (
+                                <div className="absolute inset-0 flex items-center justify-center bg-red-50/50 dark:bg-red-950/10 animate-in fade-in duration-300">
+                                    <div className="flex items-center gap-2">
+                                        <Loader2 className="h-3 w-3 text-red-400 animate-spin" />
+                                        <span className="text-[10px] font-bold text-red-400 uppercase tracking-widest">Loading Report...</span>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="animate-in fade-in slide-in-from-top-1 duration-500">
+                                    <div className="flex items-center gap-3">
+                                        <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400 shrink-0" />
+                                        <p className="text-[10px] font-bold text-red-800 dark:text-red-400 uppercase tracking-widest">Report Comment</p>
+                                    </div>
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-4 shrink-0" /> {/* Spacer to align with icon above */}
+                                        <p className="text-xs text-red-700 dark:text-red-300 leading-relaxed font-medium">
+                                            {record.reportComment || "The soil analysis report seems to be missing the nitrogen levels. Please re-upload the correct document."}
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
 
                 {/* Content section - Style 5 (Feedback based) */}
-                <ScrollArea className="flex-1">
+                <ScrollArea className="flex-1 relative">
                     <div className="p-6">
                         <div className="space-y-1">
-                            {surveyData.map((item) => {
-                                    // Custom question text logic for questions 8, 9, and 11
-                                    let displayQuestion = item.question;
-                                    if (item.id === "8") displayQuestion = "Measure the total cultivated area: (in Acres)";
-                                    if (item.id === "9") displayQuestion = "Enter the quantity of seeds used: (in Tons)";
-                                    if (item.id === "11") displayQuestion = "Estimated cost of inputs per acre: (in INR)";
+                            {isDataLoading ? (
+                                <div className="flex flex-col items-center justify-center min-h-[400px] w-full gap-3 animate-in fade-in duration-500">
+                                    <Loader2 className="h-8 w-8 text-zinc-300 animate-spin" />
+                                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em]">Loading Records...</p>
+                                </div>
+                            ) : (
+                                <>
+                                    {activeSurveyData.map((item) => {
+                                        // Custom question text logic for questions 8, 9, and 11
+                                        let displayQuestion = item.question;
+                                        if (item.id === "8") displayQuestion = "Measure the total cultivated area: (in Acres)";
+                                        if (item.id === "9") displayQuestion = "Enter the quantity of seeds used: (in Tons)";
+                                        if (item.id === "11") displayQuestion = "Estimated cost of inputs per acre: (in INR)";
 
-                                    return (
-                                        <div 
-                                            key={item.id} 
-                                            className="relative"
-                                        >
+                                        return (
                                             <div 
-                                                className="cursor-pointer"
-                                                onClick={(e) => {
-                                                    // If the click came from the attachment preview trigger, open the pop-up
-                                                    const target = e.target as HTMLElement;
-                                                    if (target.closest('.attachment-preview-trigger')) {
-                                                        handleItemClick(item);
-                                                    }
-                                                }}
+                                                key={item.id} 
+                                                className="relative"
                                             >
-                                                <SurveyCard
-                                                    item={{
-                                                        ...item,
-                                                        question: displayQuestion
+                                                <div 
+                                                    className="cursor-pointer"
+                                                    onClick={(e) => {
+                                                        // If the click came from the attachment preview trigger, open the pop-up
+                                                        const target = e.target as HTMLElement;
+                                                        if (target.closest('.attachment-preview-trigger')) {
+                                                            handleItemClick(item);
+                                                        }
                                                     }}
-                                                    style="style-5-feedback"
-                                                    showDetails={false}
-                                                    isReporting={isReporting}
+                                                >
+                                                    <SurveyCard
+                                                        item={{
+                                                            ...item,
+                                                            question: displayQuestion
+                                                        }}
+                                                        style="style-5-feedback"
+                                                        showDetails={false}
+                                                        isReporting={isReporting}
                                                     isSelected={reportedIds.includes(item.id)}
                                                     onToggleSelect={() => toggleReportId(item.id)}
                                                     disableDialog={true}
+                                                    isInvalid={record.status === "Invalid"}
                                                 />
+                                                </div>
                                             </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                                        );
+                                    })}
 
-                        {/* Approval Comment Section for Pending */}
-                        {record.status === "Pending" && !isReporting && (
-                            <div className="mt-8 space-y-4">
-                                {!showCommentInput ? (
-                                    <div className="space-y-3">
-                                        <p className="text-[11px] text-zinc-500 font-medium leading-relaxed">
-                                            Add a comment for any specific feedback or observations (optional).
-                                        </p>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="h-8 px-0 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 hover:bg-transparent transition-colors group flex items-center gap-2"
-                                            onClick={() => setShowCommentInput(true)}
-                                        >
-                                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700 transition-colors">
-                                                <MessageSquareText className="h-3.5 w-3.5 opacity-70 group-hover:opacity-100" />
-                                            </div>
-                                            <span className="text-xs font-bold uppercase tracking-tight">Add a comment</span>
-                                        </Button>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                                        <div className="flex items-center justify-between">
+                                    {/* Approval Comment Section for Pending */}
+                                    {record.status === "Pending" && !isReporting && (
+                                        <div className="mt-8 space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                                            {!showCommentInput ? (
+                                                <div className="space-y-3">
+                                                    <p className="text-[11px] text-zinc-500 font-medium leading-relaxed">
+                                                        Add a comment for any specific feedback or observations (optional).
+                                                    </p>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-8 px-0 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 hover:bg-transparent transition-colors group flex items-center gap-2"
+                                                        onClick={() => setShowCommentInput(true)}
+                                                    >
+                                                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700 transition-colors">
+                                                            <MessageSquareText className="h-3.5 w-3.5 opacity-70 group-hover:opacity-100" />
+                                                        </div>
+                                                        <span className="text-xs font-bold uppercase tracking-tight">Add a comment</span>
+                                                    </Button>
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-2 text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+                                                            Comment <span className="font-medium opacity-70">(Optional)</span>
+                                                        </div>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="h-6 px-2 text-[10px] font-bold text-zinc-400 hover:text-red-500 transition-colors"
+                                                            onClick={() => {
+                                                                setShowCommentInput(false)
+                                                                setComment("")
+                                                            }}
+                                                        >
+                                                            Cancel
+                                                        </Button>
+                                                    </div>
+                                                    <Textarea
+                                                        placeholder="Type your comment here..."
+                                                        className="min-h-[100px] w-full bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-lg text-sm resize-none focus-visible:ring-1 focus-visible:ring-zinc-200 dark:focus-visible:ring-zinc-800 p-3 placeholder:text-zinc-400"
+                                                        value={comment}
+                                                        onChange={(e) => setComment(e.target.value)}
+                                                        autoFocus
+                                                    />
+                                                    <div className="h-px bg-zinc-100 dark:bg-zinc-800 w-full" />
+                                                    <p className="text-[10px] text-zinc-400 font-medium italic">
+                                                        This comment will be permanently attached to the verified record.
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Display Comment for Verified */}
+                                    {record.status === "Verified" && (record.verified?.comment || record.approvalComment) && (
+                                        <div className="mt-8 space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
                                             <div className="flex items-center gap-2 text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
-                                                Comment <span className="font-medium opacity-70">(Optional)</span>
+                                                Comment
                                             </div>
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="h-6 px-2 text-[10px] font-bold text-zinc-400 hover:text-red-500 transition-colors"
-                                                onClick={() => {
-                                                    setShowCommentInput(false)
-                                                    setComment("")
-                                                }}
-                                            >
-                                                Cancel
-                                            </Button>
+                                            <div className="text-sm text-zinc-900 dark:text-zinc-50 leading-relaxed">
+                                                {record.verified?.comment || record.approvalComment}
+                                            </div>
+                                            <div className="flex items-center gap-2 pt-1">
+                                                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
+                                                    {record.verified?.verifier}
+                                                </span>
+                                                <span className="text-zinc-300 dark:text-zinc-700">•</span>
+                                                <span className="text-[10px] text-zinc-400 font-medium uppercase">
+                                                    {record.verified?.date ? format(record.verified.date, "dd MMM yyyy") : ""}
+                                                </span>
+                                            </div>
+                                            <div className="h-px bg-zinc-100 dark:bg-zinc-800 w-full" />
                                         </div>
-                                        <Textarea
-                                            placeholder="Type your comment here..."
-                                            className="min-h-[100px] w-full bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-lg text-sm resize-none focus-visible:ring-1 focus-visible:ring-zinc-200 dark:focus-visible:ring-zinc-800 p-3 placeholder:text-zinc-400"
-                                            value={comment}
-                                            onChange={(e) => setComment(e.target.value)}
-                                            autoFocus
-                                        />
-                                        <div className="h-px bg-zinc-100 dark:bg-zinc-800 w-full" />
-                                        <p className="text-[10px] text-zinc-400 font-medium italic">
-                                            This comment will be permanently attached to the verified record.
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {/* Display Comment for Verified */}
-                        {record.status === "Verified" && (record.verified?.comment || record.approvalComment) && (
-                            <div className="mt-8 space-y-3">
-                                <div className="flex items-center gap-2 text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
-                                    Comment
-                                </div>
-                                <div className="text-sm text-zinc-900 dark:text-zinc-50 leading-relaxed">
-                                    {record.verified?.comment || record.approvalComment}
-                                </div>
-                                <div className="flex items-center gap-2 pt-1">
-                                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
-                                        {record.verified?.verifier}
-                                    </span>
-                                    <span className="text-zinc-300 dark:text-zinc-700">•</span>
-                                    <span className="text-[10px] text-zinc-400 font-medium uppercase">
-                                        {record.verified?.date ? format(record.verified.date, "dd MMM yyyy") : ""}
-                                    </span>
-                                </div>
-                                <div className="h-px bg-zinc-100 dark:bg-zinc-800 w-full" />
-                            </div>
-                        )}
+                                    )}
+                                </>
+                            )}
+                        </div>
                     </div>
                 </ScrollArea>
 
@@ -795,7 +846,7 @@ export function EngagementDetailSheet({
                             <div className="flex items-center gap-3">
                                 <Checkbox 
                                     id="select-all-footer" 
-                                    checked={reportedIds.length === surveyData.length}
+                                    checked={reportedIds.length === activeSurveyData.length}
                                     onCheckedChange={toggleSelectAll}
                                     className="h-4 w-4 border-amber-400 data-[state=checked]:bg-amber-600 data-[state=checked]:border-amber-600 rounded"
                                 />
@@ -814,31 +865,31 @@ export function EngagementDetailSheet({
 
                     <div className="p-4 flex items-center justify-between gap-4">
                         {/* Left: Navigation */}
-                    <div className="flex items-center gap-3">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-9 w-9 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
-                            onClick={onPrevious}
-                            disabled={isFirst}
-                        >
-                            <ChevronLeft className="h-5 w-5" />
-                        </Button>
-                        <span className="text-[11px] font-bold text-zinc-500 tabular-nums">
-                            {currentIndex + 1} / {totalCount}
-                        </span>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-9 w-9 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
-                            onClick={onNext}
-                            disabled={isLast}
-                        >
-                            <ChevronRight className="h-5 w-5" />
-                        </Button>
-                    </div>
+                        <div className="flex items-center gap-3">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-9 w-9 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+                                onClick={onPrevious}
+                                disabled={isFirst || isDataLoading}
+                            >
+                                <ChevronLeft className="h-5 w-5" />
+                            </Button>
+                            <span className="text-[11px] font-bold text-zinc-500 tabular-nums">
+                                {currentIndex + 1} / {totalCount}
+                            </span>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-9 w-9 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+                                onClick={onNext}
+                                disabled={isLast || isDataLoading}
+                            >
+                                <ChevronRight className="h-5 w-5" />
+                            </Button>
+                        </div>
 
-                                {/* Right: Actions */}
+                                    {/* Right: Actions */}
                                 {record.status !== "Verified" && record.status !== "Invalid" && (
                                     <div className="flex items-center gap-2">
                                         {isReporting ? (
@@ -867,9 +918,14 @@ export function EngagementDetailSheet({
                                             <Button
                                                 className="h-9 px-5 text-xs font-bold shadow-md transition-all active:scale-[0.98] bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900"
                                                 onClick={handleApprove}
+                                                disabled={isApproving}
                                             >
-                                                <CheckCircle2 className="mr-2 h-3.5 w-3.5" />
-                                                <span>Approve</span>
+                                                {isApproving ? (
+                                                    <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                                                ) : (
+                                                    <CheckCircle2 className="mr-2 h-3.5 w-3.5" />
+                                                )}
+                                                <span>{isApproving ? "Approving..." : "Approve"}</span>
                                             </Button>
                                         )}
 

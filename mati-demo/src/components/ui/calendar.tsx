@@ -57,7 +57,8 @@ function Calendar({
     setHours(newHours)
     setMinutes(newMinutes)
     setAmpm(newAmpm)
-    onTimeChange?.(`${newHours}:${newMinutes} ${newAmpm}`)
+    const formattedMinutes = newMinutes.padStart(2, "0")
+    onTimeChange?.(`${newHours}:${formattedMinutes} ${newAmpm}`)
   }
 
   return (
@@ -209,7 +210,7 @@ function Calendar({
         <div className="flex items-center justify-center gap-2 p-3 border-t bg-background">
           <Select value={hours} onValueChange={(v) => handleTimeUpdate(v, minutes, ampm)}>
             <SelectTrigger className="w-[64px] h-8 text-xs">
-              <SelectValue placeholder="12" />
+              <SelectValue>{hours.padStart(2, "0")}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               {Array.from({ length: 12 }, (_, i) => (i + 1).toString()).map((h) => (
@@ -222,7 +223,7 @@ function Calendar({
           <span className="text-zinc-400">:</span>
           <Select value={minutes} onValueChange={(v) => handleTimeUpdate(hours, v, ampm)}>
             <SelectTrigger className="w-[64px] h-8 text-xs">
-              <SelectValue placeholder="00" />
+              <SelectValue>{minutes.padStart(2, "0")}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               {Array.from({ length: 60 }, (_, i) => i.toString()).map((m) => (

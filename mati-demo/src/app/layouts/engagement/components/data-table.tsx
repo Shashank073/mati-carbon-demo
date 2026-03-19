@@ -28,6 +28,7 @@ import {
 import { DataTablePagination } from "./data-table-pagination"
 import { DataTableToolbar } from "./data-table-toolbar"
 import { cn } from "@/lib/utils"
+import { Loader2 } from "lucide-react"
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -41,6 +42,7 @@ interface DataTableProps<TData, TValue> {
         invalid: number
     }
     selectedId?: string
+    isLoading?: boolean
 }
 
 export function EngagementTable<TData, TValue>({
@@ -51,6 +53,7 @@ export function EngagementTable<TData, TValue>({
     setActiveTab,
     counts,
     selectedId,
+    isLoading = false,
 }: DataTableProps<TData, TValue>) {
     const [rowSelection, setRowSelection] = React.useState({})
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
@@ -91,7 +94,7 @@ export function EngagementTable<TData, TValue>({
     })
 
     return (
-        <div className="flex flex-col h-full gap-4 w-full">
+        <div className="flex flex-col h-full gap-4 w-full relative">
             <div className="shrink-0">
                 <DataTableToolbar
                     table={table}
@@ -99,9 +102,10 @@ export function EngagementTable<TData, TValue>({
                     setActiveTab={setActiveTab}
                     counts={counts}
                     activeColumns={activeColumnIds}
+                    isLoading={isLoading}
                 />
             </div>
-            <div className="rounded-md border flex-1 min-h-0 flex flex-col overflow-auto scrollbar-minimal">
+            <div className="rounded-md border flex-1 min-h-0 flex flex-col overflow-auto scrollbar-minimal relative">
                 <Table className="relative w-max min-w-full border-collapse">
                     <TableHeader className="sticky top-0 z-10 bg-background shadow-sm">
                         {table.getHeaderGroups().map((headerGroup) => (
@@ -126,7 +130,19 @@ export function EngagementTable<TData, TValue>({
                         ))}
                     </TableHeader>
                     <TableBody>
-                        {table.getRowModel().rows?.length ? (
+                        {isLoading ? (
+                            <TableRow className="hover:bg-transparent border-none">
+                                <TableCell
+                                    colSpan={columns.length}
+                                    className="p-0"
+                                >
+                                    <div className="flex flex-col items-center justify-center h-[400px] w-full gap-3 animate-in fade-in duration-500">
+                                        <Loader2 className="h-8 w-8 text-zinc-300 animate-spin" />
+                                        <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em]">Loading Records...</p>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ) : table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => {
                                 const isSelected = selectedId === (row.original as any).id
                                 return (
@@ -134,7 +150,7 @@ export function EngagementTable<TData, TValue>({
                                         key={row.id}
                                         data-state={isSelected ? "selected" : undefined}
                                         className={cn(
-                                            "cursor-pointer transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
+                                            "cursor-pointer transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted animate-in fade-in slide-in-from-bottom-1 duration-500",
                                             isSelected ? "bg-muted/50" : ""
                                         )}
                                         onClick={() => onRowClick?.(row.original)}
@@ -162,9 +178,6 @@ export function EngagementTable<TData, TValue>({
                         )}
                     </TableBody>
                 </Table>
-            </div>
-            <div className="shrink-0 py-2">
-                <DataTablePagination table={table} selectedId={selectedId} />
             </div>
         </div>
     )

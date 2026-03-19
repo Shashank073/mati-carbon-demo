@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ArrowLeft, MapPin, Calendar, DollarSign, Check, X, Star, Image as ImageIcon, Video, FileText, Download, Play, Phone, Mail, Copy, Ruler, Package, AlertCircle } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, DollarSign, Check, X, Star, Image as ImageIcon, Video, FileText, Download, Play, Phone, Mail, Copy, Ruler, Package, AlertCircle, Clock, Smile, ListOrdered, Mic, QrCode, Layers, Pause, Info } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,16 +30,23 @@ export type VariantType =
     | "phone"
     | "email"
     | "area"
-    | "quantity";
+    | "quantity"
+    | "time"
+    | "emoji"
+    | "rank"
+    | "audio"
+    | "qrcode"
+    | "repeater";
 
 export interface SurveyItem {
     id: string;
     question: string;
     type: VariantType;
-    answer: string | number | boolean | string[] | { name: string; size: string };
+    answer: string | number | boolean | string[] | { name: string; size: string } | { label: string; rank: number }[] | { id: string; fields: SurveyItem[] }[];
     meta?: string;
     label: string;
     description: string;
+    required?: boolean;
 }
 
 // --- Dummy Data ---
@@ -51,6 +58,7 @@ export const surveyData: SurveyItem[] = [
         answer: "The real-time data accuracy is excellent for our needs.",
         label: "Text Input",
         description: "Best for displaying concise, single-line text data like names, titles, or short comments.",
+        required: false,
     },
     {
         id: "2",
@@ -126,6 +134,7 @@ export const surveyData: SurveyItem[] = [
         answer: 4, // out of 5
         label: "Rating Scale",
         description: "Perfect for visualizing satisfaction scores, product ratings, or quality levels.",
+        required: false,
     },
     {
         id: "11",
@@ -167,6 +176,133 @@ export const surveyData: SurveyItem[] = [
         answer: "agro.support@example.com",
         label: "Email Address",
         description: "Standard layout for displaying email addresses.",
+    },
+    {
+        id: "16",
+        question: "Primary Contact Number:",
+        type: "phone",
+        answer: "+91 98765 43210",
+        label: "Mobile Number",
+        description: "MobileNumMAX10: Standard layout for displaying contact phone numbers.",
+    },
+    {
+        id: "17",
+        question: "Number of storage units available:",
+        type: "quantity",
+        answer: 12,
+        meta: "Units",
+        label: "Whole Number",
+        description: "WholeNum: Best for displaying non-negative integers.",
+    },
+    {
+        id: "18",
+        question: "Average soil moisture content:",
+        type: "area",
+        answer: 24.85,
+        meta: "%",
+        label: "Decimal",
+        description: "Decimal: Used for displaying values with floating point precision.",
+    },
+    {
+        id: "19",
+        question: "Total number of livestock:",
+        type: "quantity",
+        answer: 8,
+        label: "Natural Number",
+        description: "NaturalNum: Used for simple counting of items.",
+    },
+    {
+        id: "20",
+        question: "Preferred contact method:",
+        type: "badge",
+        answer: ["WhatsApp"],
+        label: "Radio Selection",
+        description: "Radio: Displays the single selected choice as a badge.",
+    },
+    {
+        id: "21",
+        question: "Equipment available for rent:",
+        type: "badge",
+        answer: ["Tractor", "Seeder", "Harvester"],
+        label: "Checkbox Selection",
+        description: "Checkbox: Displays multiple selected options as badges.",
+    },
+    {
+        id: "22",
+        question: "Current crop season:",
+        type: "badge",
+        answer: ["Kharif"],
+        label: "Dropdown Selection",
+        description: "Selected Dropdown: Displays the option selected from a dropdown menu.",
+    },
+    {
+        id: "23",
+        question: "Preferred time for field visit:",
+        type: "time",
+        answer: "10:30 AM",
+        label: "Time Selection",
+        description: "Time: Selected time shown in AM/PM format.",
+    },
+    {
+        id: "24",
+        question: "Overall satisfaction with the process:",
+        type: "emoji",
+        answer: "😊",
+        label: "Emoji Feedback",
+        description: "Emoji: Selected emoji feedback.",
+    },
+    {
+        id: "25",
+        question: "Rank the following priorities (1-3):",
+        type: "rank",
+        answer: [
+            { label: "Water Management", rank: 1 },
+            { label: "Soil Health", rank: 2 },
+            { label: "Pest Control", rank: 3 }
+        ],
+        label: "Ranking",
+        description: "Rank: Surveyor ranks the options in order of priority.",
+    },
+    {
+        id: "26",
+        question: "Voice note from the surveyor:",
+        type: "audio",
+        answer: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
+        label: "Audio Recording",
+        description: "Audio: Custom player to listen to the recorded audio.",
+    },
+    {
+        id: "27",
+        question: "Scan Farmer ID (QR Code):",
+        type: "qrcode",
+        answer: "FYKDBC-2024",
+        label: "QR Code Scan",
+        description: "QRCode: Scanned ID from the farmer's documentation.",
+    },
+    {
+        id: "28",
+        question: "Details of individual plots:",
+        type: "repeater",
+        answer: [
+            {
+                id: "P-001",
+                fields: [
+                    { id: "p1-1", question: "Crop Type", type: "text", answer: "Wheat", label: "", description: "" },
+                    { id: "p1-2", question: "Area", type: "area", answer: 1.2, meta: "Acres", label: "", description: "" },
+                    { id: "p1-3", question: "Plot Photo", type: "image", answer: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=300&auto=format&fit=crop", label: "", description: "" }
+                ]
+            },
+            {
+                id: "P-002",
+                fields: [
+                    { id: "p2-1", question: "Crop Type", type: "text", answer: "Mustard", label: "", description: "" },
+                    { id: "p2-2", question: "Area", type: "area", answer: 0.8, meta: "Acres", label: "", description: "" },
+                    { id: "p2-3", question: "Plot Health Rating", type: "rating", answer: 4, label: "", description: "" }
+                ]
+            }
+        ],
+        label: "Repeater Form",
+        description: "Repeater: Multiple sub-forms linked to a single question.",
     }
 ];
 
@@ -255,6 +391,125 @@ const VideoHighlightsPreview = ({ src }: { src: string }) => {
 
 
 
+// --- Audio Player Component ---
+const AudioPlayer = ({ src, style, isReporting, isSelected, onToggleSelect, id }: { src: string, style: string, isReporting?: boolean, isSelected?: boolean, onToggleSelect?: (id: string) => void, id: string }) => {
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [duration, setDuration] = useState(0);
+    const [currentTime, setCurrentTime] = useState(0);
+    const audioRef = React.useRef<HTMLAudioElement>(null);
+
+    const formatTime = (time: number) => {
+        const minutes = Math.floor(time / 60);
+        const seconds = Math.floor(time % 60);
+        return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+    };
+
+    const togglePlay = () => {
+        if (audioRef.current) {
+            if (isPlaying) {
+                audioRef.current.pause();
+            } else {
+                audioRef.current.play();
+            }
+        }
+    };
+
+    const handleTimeUpdate = () => {
+        if (audioRef.current) {
+            setCurrentTime(audioRef.current.currentTime);
+        }
+    };
+
+    const handleLoadedMetadata = () => {
+        if (audioRef.current) {
+            setDuration(audioRef.current.duration);
+        }
+    };
+
+    const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (audioRef.current && duration > 0) {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const percentage = Math.max(0, Math.min(1, x / rect.width));
+            audioRef.current.currentTime = percentage * duration;
+            setCurrentTime(percentage * duration);
+        }
+    };
+
+    const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+    const fileName = src.split('/').pop()?.split('?')[0] || "audio_note.mp3";
+
+    return (
+        <div className="group relative w-full">
+            <audio 
+                ref={audioRef} 
+                src={src} 
+                onTimeUpdate={handleTimeUpdate}
+                onLoadedMetadata={handleLoadedMetadata}
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
+                onEnded={() => setIsPlaying(false)} 
+                preload="auto"
+            />
+            
+            <div className="flex items-center p-3 border border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors pr-10">
+                {/* Play/Pause Button */}
+                <Button
+                    variant="secondary"
+                    size="icon"
+                    className="h-10 w-10 rounded-lg flex-shrink-0 bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 flex items-center justify-center mr-3 transition-all active:scale-95 shadow-md group/btn"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        togglePlay();
+                    }}
+                >
+                    {isPlaying ? (
+                        <Pause className="h-4 w-4 text-white fill-white dark:text-zinc-900 dark:fill-zinc-900" />
+                    ) : (
+                        <div className="relative h-4 w-4 flex items-center justify-center">
+                            <Mic className="h-4 w-4 absolute transition-all duration-300 group-hover/btn:opacity-0 group-hover/btn:scale-50" />
+                            <Play className="h-4 w-4 absolute opacity-0 scale-50 transition-all duration-300 group-hover/btn:opacity-100 group-hover/btn:scale-100 fill-current ml-0.5" />
+                        </div>
+                    )}
+                </Button>
+
+                {/* Info & Progress */}
+                <div className="flex-1 min-w-0 space-y-1.5">
+                    <div className="flex items-center justify-between gap-2">
+                        <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{fileName}</p>
+                        <span className="text-[10px] font-bold text-zinc-400 tabular-nums uppercase whitespace-nowrap">
+                            {formatTime(currentTime)} / {formatTime(duration)}
+                        </span>
+                    </div>
+                    
+                    {/* Progress Bar */}
+                    <div 
+                        className="h-1.5 w-full bg-zinc-200 dark:bg-zinc-800 rounded-full cursor-pointer group/progress relative overflow-hidden"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleProgressClick(e);
+                        }}
+                    >
+                        <div 
+                            className="h-full bg-zinc-900 dark:bg-zinc-100 transition-none" 
+                            style={{ width: `${progress}%` }} 
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {/* Download Button - Matches Image/Video/File style */}
+            <div className="absolute top-[50%] -translate-y-[50%] right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-zinc-200 dark:hover:bg-zinc-700" onClick={(e) => e.stopPropagation()}>
+                    <a href={src} download title="Download Audio">
+                        <Download className="h-4 w-4 text-zinc-500" />
+                    </a>
+                </Button>
+            </div>
+        </div>
+    );
+};
+
 // --- Survey Card Component ---
 export const SurveyCard = ({
     item,
@@ -263,7 +518,8 @@ export const SurveyCard = ({
     isReporting = false,
     isSelected = false,
     onToggleSelect,
-    disableDialog = false
+    disableDialog = false,
+    isInvalid = false
 }: {
     item: SurveyItem;
     style: string;
@@ -272,6 +528,7 @@ export const SurveyCard = ({
     isSelected?: boolean;
     onToggleSelect?: (id: string) => void;
     disableDialog?: boolean;
+    isInvalid?: boolean;
 }) => {
     // Dynamic Styles based on selection
     const cardStyles = cn(
@@ -294,12 +551,31 @@ export const SurveyCard = ({
         style === "style-1" && "text-lg text-zinc-800 dark:text-zinc-100",
         style === "style-2" && "text-sm text-zinc-900 dark:text-zinc-50 font-semibold mb-3",
         style === "style-3" && "text-base font-medium text-zinc-900 dark:text-zinc-100 mb-1",
-        style === "style-5" && "text-[13px] font-normal text-zinc-500 dark:text-zinc-400 leading-tight",
-        style === "style-5-feedback" && "text-[13px] font-normal text-zinc-500 dark:text-zinc-400 leading-tight"
+        style === "style-5" && "text-[14px] font-normal text-zinc-500 dark:text-zinc-400 leading-tight",
+        style === "style-5-feedback" && "text-[14px] font-normal text-zinc-500 dark:text-zinc-400 leading-tight"
     );
 
     const renderContent = () => {
         const isStyle5 = style === "style-5" || style === "style-5-feedback";
+
+        // Handle empty states for all types
+        const isEmpty = !item.answer || 
+            (Array.isArray(item.answer) && item.answer.length === 0) ||
+            (typeof item.answer === 'object' && Object.keys(item.answer).length === 0);
+
+        if (isEmpty) {
+            return (
+                <div className={cn(
+                    "inline-flex items-center gap-1.5 px-2 py-1 rounded bg-zinc-50/50 dark:bg-zinc-900/30 border border-dashed border-zinc-200 dark:border-zinc-800 transition-all duration-300",
+                    isStyle5 ? "mt-0.5" : "mt-1"
+                )}>
+                    <AlertCircle className="w-3 h-3 text-zinc-300 dark:text-zinc-600" />
+                    <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
+                        Not available
+                    </span>
+                </div>
+            );
+        }
 
         switch (item.type) {
             case "text":
@@ -761,6 +1037,96 @@ export const SurveyCard = ({
                     </div>
                 );
 
+            case "time":
+                return (
+                    <div className={cn(
+                        "flex items-center gap-2 text-zinc-900 dark:text-zinc-100 font-semibold text-base",
+                        !isStyle5 && "text-lg"
+                    )}>
+                        {!isStyle5 && <Clock className="w-4 h-4 text-zinc-500" />}
+                        {item.answer as string}
+                    </div>
+                );
+
+            case "emoji":
+                return (
+                    <div className="flex items-center justify-center w-12 h-12 bg-zinc-100 dark:bg-zinc-800 rounded-xl text-2xl">
+                        {item.answer as string}
+                    </div>
+                );
+
+            case "rank":
+                return (
+                    <div className="space-y-2 w-full">
+                        {(item.answer as { label: string; rank: number }[]).sort((a, b) => a.rank - b.rank).map((rankItem, idx) => (
+                            <div key={idx} className="flex items-center gap-3 p-2 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-lg">
+                                <div className="w-6 h-6 flex items-center justify-center bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-[10px] font-bold rounded-md">
+                                    {rankItem.rank}
+                                </div>
+                                <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{rankItem.label}</span>
+                            </div>
+                        ))}
+                    </div>
+                );
+
+            case "audio":
+                return <AudioPlayer 
+                    src={item.answer as string} 
+                    style={style} 
+                    isReporting={isReporting} 
+                    isSelected={isSelected} 
+                    onToggleSelect={onToggleSelect} 
+                    id={item.id} 
+                />;
+
+            case "qrcode":
+                return (
+                    <div className="flex items-center gap-2 px-3 py-2 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-lg w-fit">
+                        <QrCode className="w-4 h-4 text-zinc-500" />
+                        <span className="text-sm font-mono font-bold tracking-wider text-zinc-900 dark:text-zinc-100">{item.answer as string}</span>
+                    </div>
+                );
+
+            case "repeater":
+                const entries = item.answer as { id: string; fields: SurveyItem[] }[];
+                return (
+                    <div className="space-y-6 w-full">
+                        <div className="flex items-center gap-2 mb-1">
+                            <div className="bg-zinc-100 dark:bg-zinc-800 p-1.5 rounded-md">
+                                <Layers className="w-3.5 h-3.5 text-zinc-500" />
+                            </div>
+                            <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">{entries.length} Entries Recorded</span>
+                        </div>
+                        <div className="space-y-4">
+                            {entries.map((entry, idx) => (
+                                <div key={entry.id} className="relative pl-4 border-l-2 border-zinc-100 dark:border-zinc-800 py-1">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center gap-2">
+                                            <span className="flex items-center justify-center w-5 h-5 rounded bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-[10px] font-bold">
+                                                {idx + 1}
+                                            </span>
+                                            <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-tight">Entry Details</span>
+                                        </div>
+                                        <Badge variant="outline" className="text-[9px] font-bold bg-white dark:bg-zinc-950 px-1.5 h-5">ID: {entry.id}</Badge>
+                                    </div>
+                                    <div className="grid grid-cols-1 gap-4">
+                                        {entry.fields.map((field) => (
+                                            <div key={field.id} className="group/repeater-field">
+                                                <SurveyCard 
+                                                    item={field}
+                                                    style="style-5"
+                                                    showDetails={false}
+                                                    disableDialog={false}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                );
+
             default:
                 // Text, long-text, phone, email, etc.
                 if (isStyle5) {
@@ -797,7 +1163,7 @@ export const SurveyCard = ({
             <div className="w-full">
                 <div className={cn(
                     "flex items-center gap-2",
-                    (style === "style-5" || style === "style-5-feedback") ? "mb-0.5" : "mb-3"
+                    (style === "style-5" || style === "style-5-feedback") ? "mb-1" : "mb-3"
                 )}>
                     {/* Only show ID if NOT Style 3 or Style 5. For Style 5 Feedback, hide it when reporting to match Style 5 alignment */}
                     {(style !== "style-3" && style !== "style-5" && !(style === "style-5-feedback" && isReporting)) && (
@@ -1171,14 +1537,16 @@ export const BulkSubmissionCard = ({
                                         />
                                     </div>
                                 )}
-                                <div className="flex-1 min-w-0 flex flex-col gap-1">
-                                    <span className="text-[13px] text-zinc-500 font-normal pr-2" title={item.question}>
-                                        {item.question}
-                                    </span>
-                                    <div className="min-h-[24px] flex items-center">
-                                        {renderCompactValue(item)}
-                                    </div>
-                                </div>
+                                <div className={cn(
+                    "flex-1 min-w-0 flex flex-col gap-2"
+                )}>
+                    <span className="text-[14px] text-zinc-500 font-normal pr-2" title={item.question}>
+                        {item.question}
+                    </span>
+                    <div className="min-h-[24px] flex items-center">
+                        {renderCompactValue(item)}
+                    </div>
+                </div>
                             </div>
                         </div>
                     );
