@@ -192,6 +192,21 @@ export function DataTableToolbar<TData>({
                                         typeof column.accessorFn !== "undefined" && column.getCanHide()
                                 )
                                 .map((column) => {
+                                    // Try to get the title from the header function if it's a DataTableColumnHeader
+                                    // or use the id/accessorKey as a fallback
+                                    let title = column.id
+                                    
+                                    if (typeof column.columnDef.header === 'function') {
+                                        // This is a bit of a hack to extract the title from the DataTableColumnHeader component
+                                        // since we can't easily execute the header function here without the context
+                                        const headerElement = column.columnDef.header({ column, table: table as any, header: {} as any })
+                                        if (headerElement && typeof headerElement === 'object' && 'props' in headerElement) {
+                                            title = (headerElement.props as any).title || title
+                                        }
+                                    } else if (typeof column.columnDef.header === 'string') {
+                                        title = column.columnDef.header
+                                    }
+
                                     return (
                                         <DropdownMenuCheckboxItem
                                             key={column.id}
@@ -200,7 +215,7 @@ export function DataTableToolbar<TData>({
                                             onCheckedChange={(value) => column.toggleVisibility(!!value)}
                                             onSelect={(e) => e.preventDefault()}
                                         >
-                                            {column.id.replace(/([A-Z])/g, ' $1').trim()}
+                                            {title.replace(/([A-Z])/g, ' $1').trim()}
                                         </DropdownMenuCheckboxItem>
                                     )
                                 })}

@@ -65,6 +65,7 @@ export default function DeploymentPage() {
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
+    libraries: ["drawing", "geometry"] as any,
   });
 
   const [data, setData] = useState<FarmerDeployment>(initialData);
