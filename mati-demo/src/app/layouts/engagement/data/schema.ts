@@ -10,6 +10,9 @@ export interface EngagementRecord {
     };
     engagementType: string;
     village: string;
+    block?: string;
+    state?: string;
+    country?: string;
     azs: number;
     azName?: string;
     surveyor: {

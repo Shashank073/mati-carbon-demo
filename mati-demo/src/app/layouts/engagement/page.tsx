@@ -4,7 +4,7 @@ import * as React from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { NavBarType4 } from "@/components/nav-bars/NavBarType4"
 import { Button } from "@/components/ui/button"
-import { MessageSquare } from "lucide-react"
+import { MessageSquare, Info } from "lucide-react"
 import { engagementData } from "./data/mock-data"
 import { columns as defaultColumns, allColumns } from "./components/columns"
 import { EngagementTable } from "./components/data-table"
@@ -12,6 +12,12 @@ import { EngagementDetailSheet } from "./components/engagement-detail-sheet"
 import { EngagementRecord } from "./data/schema"
 import { cn } from "@/lib/utils"
 import { surveyData } from "@/app/components/survey/SurveyComponents"
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 export default function EngagementPage() {
     const [selectedRecord, setSelectedRecord] = React.useState<EngagementRecord | null>(null)
@@ -100,9 +106,25 @@ export default function EngagementPage() {
             <div className="flex flex-col h-full gap-4">
                 <div className="shrink-0">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <div>
+                        <div className="flex items-baseline gap-2">
                             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Engagement</h1>
-                            <p className="text-muted-foreground text-xs sm:text-sm">Manage ongoing farmer interactions and feedback.</p>
+                            <TooltipProvider>
+                                <Tooltip delayDuration={300}>
+                                    <TooltipTrigger asChild>
+                                        <button className="inline-flex items-center justify-center rounded-full w-5 h-5 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 transition-colors translate-y-[1px]">
+                                            <Info className="w-4 h-4" />
+                                            <span className="sr-only">About Engagement</span>
+                                        </button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="right" className="max-w-[280px] p-3 text-xs leading-relaxed">
+                                        <p className="font-medium mb-1">Engagement Management</p>
+                                        <p className="text-zinc-500 dark:text-zinc-400">
+                                            Track and manage ongoing farmer interactions, feedback, and survey responses. 
+                                            Review verification status, monitor pending tasks, and address records requiring correction to ensure high-quality data collection.
+                                        </p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
                         </div>
                     </div>
                 </div>

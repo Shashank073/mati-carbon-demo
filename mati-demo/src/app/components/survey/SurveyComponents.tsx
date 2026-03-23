@@ -529,6 +529,7 @@ export const SurveyCard = ({
     onToggleSelect?: (id: string) => void;
     disableDialog?: boolean;
     isInvalid?: boolean;
+    onMapClick?: (item: SurveyItem) => void;
 }) => {
     // Dynamic Styles based on selection
     const cardStyles = cn(
@@ -901,7 +902,7 @@ export const SurveyCard = ({
                 return (
                     <HoverCard openDelay={200}>
                         <HoverCardTrigger asChild>
-                            <div className="flex items-start gap-3 p-3 border border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-help">
+                            <div className="flex items-start gap-3 p-3 border border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer group">
                                 <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-md text-blue-600 dark:text-blue-400">
                                     <MapPin className="w-5 h-5" />
                                 </div>
@@ -911,20 +912,31 @@ export const SurveyCard = ({
                                 </div>
                             </div>
                         </HoverCardTrigger>
-                        <HoverCardContent className="w-80 p-0 overflow-hidden border-none shadow-2xl z-[300]" side="left" align="start" sideOffset={10}>
-                            <div className="relative h-40 bg-zinc-100">
-                                <img
-                                    src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=1000&auto=format&fit=crop"
-                                    alt="Map Preview"
-                                    className="w-full h-full object-cover"
+                        <HoverCardContent 
+                            className="w-80 p-0 overflow-hidden border-none shadow-2xl z-[300] cursor-pointer" 
+                            side="left" 
+                            align="start" 
+                            sideOffset={10}
+                            onClick={() => onMapClick?.(item)}
+                        >
+                            <div className="relative h-48 bg-zinc-100 dark:bg-zinc-900">
+                                <iframe
+                                    width="100%"
+                                    height="100%"
+                                    frameBorder="0"
+                                    style={{ border: 0 }}
+                                    src={`https://www.google.com/maps/embed/v1/view?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&center=${item.meta?.replace(/[^\d.,-]/g, '')}&zoom=18&maptype=satellite`}
+                                    allowFullScreen
                                 />
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <span className="bg-black/50 text-white px-2 py-1 rounded text-xs">Map View</span>
+                                <div className="absolute inset-0 bg-transparent" />
+                                <div className="absolute inset-0 border-2 border-white/20 pointer-events-none" />
+                                <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/60 backdrop-blur-md rounded text-[10px] text-white font-bold uppercase tracking-widest pointer-events-none">
+                                    Preview
                                 </div>
                             </div>
-                            <div className="p-3 bg-white dark:bg-zinc-950">
-                                <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{item.answer as string}</p>
-                                <p className="text-xs text-zinc-500 mt-1">{item.meta || "GEO COORD"}</p>
+                            <div className="p-3 bg-white dark:bg-zinc-950 border-t border-zinc-100 dark:border-zinc-800">
+                                <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{item.answer as string}</p>
+                                <p className="text-[10px] text-zinc-500 font-medium mt-1 uppercase tracking-tight">{item.meta || "GEO COORD"}</p>
                             </div>
                         </HoverCardContent>
                     </HoverCard>

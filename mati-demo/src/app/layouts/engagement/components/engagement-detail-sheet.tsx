@@ -44,7 +44,7 @@ const LIBRARIES: ("drawing" | "geometry")[] = ["drawing", "geometry"];
 const DEFAULT_CENTER = { lat: 20.5, lng: 78.9 };
 const DEFAULT_ZOOM = 5;
 
-function MapPreviewContent({ selectedFarmer, onIdle }: { selectedFarmer: Farmer | null, onIdle?: () => void }) {
+function MapPreviewContent({ selectedFarmer, onIdle, center, zoom, specificMarker, onReset }: { selectedFarmer: Farmer | null, onIdle?: () => void, center?: google.maps.LatLngLiteral | null, zoom?: number, specificMarker?: google.maps.LatLngLiteral | null, onReset?: () => void }) {
     const mapRef = React.useRef<google.maps.Map | null>(null);
 
     const onLoad = React.useCallback((map: google.maps.Map) => {
@@ -57,17 +57,22 @@ function MapPreviewContent({ selectedFarmer, onIdle }: { selectedFarmer: Farmer 
     }, []);
 
     React.useEffect(() => {
-        if (selectedFarmer && mapRef.current) {
-            mapRef.current.panTo(selectedFarmer.location);
-            mapRef.current.setZoom(17);
+        if (mapRef.current) {
+            if (center) {
+                mapRef.current.panTo(center);
+                mapRef.current.setZoom(zoom || 17);
+            } else if (selectedFarmer) {
+                mapRef.current.panTo(selectedFarmer.location);
+                mapRef.current.setZoom(17);
+            }
         }
-    }, [selectedFarmer]);
+    }, [selectedFarmer, center, zoom]);
 
     return (
         <GoogleMap
             mapContainerStyle={{ width: "100%", height: "100%" }}
-            center={selectedFarmer?.location || DEFAULT_CENTER}
-            zoom={selectedFarmer ? 17 : DEFAULT_ZOOM}
+            center={center || selectedFarmer?.location || DEFAULT_CENTER}
+            zoom={zoom || (selectedFarmer ? 17 : DEFAULT_ZOOM)}
             onLoad={onLoad}
             onIdle={onIdle}
             onUnmount={onUnmount}
@@ -79,6 +84,12 @@ function MapPreviewContent({ selectedFarmer, onIdle }: { selectedFarmer: Farmer 
                 zoomControl: true,
             }}
         >
+            {specificMarker && (
+                <Marker
+                    position={specificMarker}
+                    animation={google.maps.Animation.BOUNCE}
+                />
+            )}
             {selectedFarmer && (
                 <>
                     {selectedFarmer.plots.map(plot => (
@@ -201,6 +212,10 @@ export function EngagementDetailSheet({
     const [rotation, setRotation] = React.useState(0)
     const [imageMode, setImageMode] = React.useState<"fill" | "fit" | "stretch" | "center">("fit")
     const [isDataLoading, setIsDataLoading] = React.useState(false)
+    const [mapCenter, setMapCenter] = React.useState<google.maps.LatLngLiteral | null>(null)
+    const [mapZoom, setMapZoom] = React.useState<number>(17)
+    const [isShowingSpecificLocation, setIsShowingSpecificLocation] = React.useState(false)
+    const [specificMarker, setSpecificMarker] = React.useState<google.maps.LatLngLiteral | null>(null)
     
     // Use custom survey data if provided, otherwise fallback to default surveyData
     const activeSurveyData = customSurveyData || surveyData;
@@ -242,6 +257,10 @@ export function EngagementDetailSheet({
         setRotation(0);
         setImageMode("fit");
         setIsMapReady(false); // Reset map ready state
+        setMapCenter(null); // Reset map center
+        setSpecificMarker(null); // Reset specific marker
+        setMapZoom(17); // Reset map zoom
+        setIsShowingSpecificLocation(false); // Reset specific location state
         
         if (open) {
             setMapVisible(true);
@@ -294,9 +313,38 @@ export function EngagementDetailSheet({
     }
 
     const handleItemClick = (item: SurveyItem) => {
-        if (["image", "video", "file", "map"].includes(item.type)) {
+        if (item.type === "map") {
+            // Extract coordinates from meta (e.g., "12.7107° N, 77.6971° E")
+            if (item.meta) {
+                const parts = item.meta.split(',');
+                if (parts.length === 2) {
+                    const latPart = parts[0].trim();
+                    const lngPart = parts[1].trim();
+                    
+                    const lat = parseFloat(latPart.replace(/[^\d.-]/g, '')) * (latPart.includes('S') ? -1 : 1);
+                    const lng = parseFloat(lngPart.replace(/[^\d.-]/g, '')) * (lngPart.includes('W') ? -1 : 1);
+                    
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                        const newCenter = { lat, lng };
+                        setMapCenter(newCenter);
+                        setSpecificMarker(newCenter);
+                        setMapZoom(19);
+                        setIsShowingSpecificLocation(true);
+                    }
+                }
+            }
+            return;
+        }
+        if (["image", "video", "file"].includes(item.type)) {
             setPreviewItem(item)
         }
+    }
+
+    const resetMapToFarmer = () => {
+        setMapCenter(null);
+        setSpecificMarker(null);
+        setMapZoom(17);
+        setIsShowingSpecificLocation(false);
     }
 
     const handleCloseAll = () => {
@@ -379,7 +427,7 @@ export function EngagementDetailSheet({
                                 <Button 
                                     variant="ghost" 
                                     size="icon" 
-                                    className="h-9 w-9 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-full"
+                                    className="h-9 w-9 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-full" 
                                     onClick={() => setRotation(prev => (prev + 90) % 360)}
                                     title="Rotate 90°"
                                 >
@@ -596,20 +644,42 @@ export function EngagementDetailSheet({
 
                             <div className="w-full h-full relative overflow-hidden">
                                 {isLoaded ? (
-                                    <MapPreviewContent selectedFarmer={farmerData} onIdle={onMapIdle} />
+                                    <MapPreviewContent 
+                                        selectedFarmer={farmerData} 
+                                        onIdle={onMapIdle} 
+                                        center={mapCenter}
+                                        zoom={mapZoom}
+                                        specificMarker={specificMarker}
+                                        onReset={resetMapToFarmer}
+                                    />
                                 ) : (
                                     <div className="flex h-full items-center justify-center text-zinc-500">
                                         Loading Map...
                                     </div>
                                 )}
-                                <div className="absolute top-6 left-6 z-20 pointer-events-none">
-                                    <div className="flex items-center gap-2 pointer-events-auto">
-                                        <div className="px-3 py-1.5 bg-white/95 dark:bg-zinc-950/95 shadow-xl border border-zinc-200 dark:border-zinc-800 rounded-lg text-[14px] font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-50 whitespace-nowrap backdrop-blur-md">
-                                            {farmerData.calArea}
+                                <div className="absolute top-6 left-6 z-20 pointer-events-none w-[calc(100%-48px)]">
+                                    <div className="flex items-center justify-between w-full">
+                                        <div className="flex items-center gap-2 pointer-events-auto">
+                                            <div className="px-3 h-[36px] flex items-center bg-white/95 dark:bg-zinc-950/95 shadow-xl border border-zinc-200 dark:border-zinc-800 rounded-lg text-[14px] font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-50 whitespace-nowrap backdrop-blur-md">
+                                                {isShowingSpecificLocation ? `${record.village}, ${record.block || "Block A"}, ${record.state || "Karnataka"}, ${record.country || "India"}` : farmerData.calArea}
+                                            </div>
+                                            {!isShowingSpecificLocation && (
+                                                <div className="px-3 h-[36px] flex items-center bg-white/95 dark:bg-zinc-950/95 shadow-xl border border-zinc-200 dark:border-zinc-800 rounded-lg text-[14px] font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-50 whitespace-nowrap backdrop-blur-md">
+                                                    {farmerData.plots.length} Plots
+                                                </div>
+                                            )}
                                         </div>
-                                        <div className="px-3 py-1.5 bg-white/95 dark:bg-zinc-950/95 shadow-xl border border-zinc-200 dark:border-zinc-800 rounded-lg text-[14px] font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-50 whitespace-nowrap backdrop-blur-md">
-                                            {farmerData.plots.length} Plots
-                                        </div>
+                                        
+                                        {isShowingSpecificLocation && (
+                                            <Button 
+                                                variant="outline"
+                                                onClick={resetMapToFarmer}
+                                                className="pointer-events-auto bg-white/95 dark:bg-zinc-950/95 hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-900 dark:text-zinc-50 shadow-xl border border-zinc-200 dark:border-zinc-800 h-[36px] px-4 text-xs font-bold uppercase tracking-widest rounded-lg transition-all active:scale-95 flex items-center gap-2"
+                                            >
+                                                <RotateCcw className="h-4 w-4 text-zinc-500" />
+                                                Reset View
+                                            </Button>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -619,7 +689,7 @@ export function EngagementDetailSheet({
                 <div className="shrink-0 border-b border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 z-30">
                     <div className="p-5">
                         <div className="flex items-start justify-between">
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
                                 <Avatar className="h-12 w-12 border border-zinc-100 dark:border-zinc-800 shadow-sm">
                                     <AvatarImage src={record.farmer.avatar} />
                                     <AvatarFallback className="bg-zinc-100 text-zinc-600 font-bold">{record.farmer.name.substring(0, 2).toUpperCase()}</AvatarFallback>
@@ -629,10 +699,10 @@ export function EngagementDetailSheet({
                                         {record.farmer.name}
                                     </SheetTitle>
                                     <SheetDescription asChild>
-                                        <div className="flex items-center gap-2 mt-1.5">
-                                            <span className="flex items-center gap-1 text-xs text-zinc-500 font-medium">
-                                                <MapPin className="h-3 w-3" />
-                                                {record.village}
+                                        <div className="flex items-center gap-1.5 mt-1 text-xs text-zinc-500 font-medium">
+                                            <MapPin className="h-3 w-3 shrink-0" />
+                                            <span className="truncate">
+                                                {record.village}, {record.block || "Block A"}, {record.state || "Karnataka"}, {record.country || "India"}
                                             </span>
                                         </div>
                                     </SheetDescription>
@@ -732,9 +802,9 @@ export function EngagementDetailSheet({
                                                 <div 
                                                     className="cursor-pointer"
                                                     onClick={(e) => {
-                                                        // If the click came from the attachment preview trigger, open the pop-up
+                                                        // If the click came from the attachment preview trigger or map item, handle it
                                                         const target = e.target as HTMLElement;
-                                                        if (target.closest('.attachment-preview-trigger')) {
+                                                        if (target.closest('.attachment-preview-trigger') || item.type === 'map') {
                                                             handleItemClick(item);
                                                         }
                                                     }}
@@ -751,6 +821,7 @@ export function EngagementDetailSheet({
                                                     onToggleSelect={() => toggleReportId(item.id)}
                                                     disableDialog={true}
                                                     isInvalid={record.status === "Invalid"}
+                                                    onMapClick={handleItemClick}
                                                 />
                                                 </div>
                                             </div>

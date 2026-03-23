@@ -24,6 +24,11 @@ export const engagementData: EngagementRecord[] = Array.from({ length: 60 }, (_,
     const azCode = (i % 9) + 1;
     const azName = cropNames[(azCode - 1) % cropNames.length];
 
+    const village = villages[i % villages.length];
+    const block = "Block " + String.fromCharCode(65 + (i % 5));
+    const state = "Karnataka";
+    const country = "India";
+
     return {
         id: 2481 + i,
         submittedOn,
@@ -34,7 +39,10 @@ export const engagementData: EngagementRecord[] = Array.from({ length: 60 }, (_,
             phoneNumber: `+91 98765 ${43210 + i}`
         },
         engagementType: engagementTypes[i % engagementTypes.length],
-        village: villages[i % villages.length],
+        village,
+        block,
+        state,
+        country,
         azs: azCode,
         azName: azName,
         surveyor: {
