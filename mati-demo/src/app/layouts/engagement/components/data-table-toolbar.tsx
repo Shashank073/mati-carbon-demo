@@ -143,41 +143,51 @@ export function DataTableToolbar<TData>({
             </div>
 
             <div className="flex items-center gap-2 justify-end shrink-0">
-                {isFiltered && (
-                    <div className="flex items-center gap-1.5 px-2.5 h-10 rounded-md bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-sm transition-all shrink-0">
-                        <button
+                <div className={cn(
+                    "flex items-center h-10 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm transition-all overflow-hidden",
+                    isFiltered ? "pl-3 pr-1 gap-2 bg-zinc-100/50 dark:bg-zinc-900/50" : ""
+                )}>
+                    {isFiltered ? (
+                        <>
+                            <button
+                                onClick={() => setFilterSidebarOpen(true)}
+                                className="flex items-center gap-2 h-full hover:opacity-70 transition-opacity pr-1"
+                            >
+                                <Filter className="h-4 w-4 text-zinc-900 dark:text-zinc-50" />
+                                <span className="text-sm font-medium text-zinc-900 dark:text-zinc-50 whitespace-nowrap">
+                                    {filterCount} {filterCount === 1 ? 'filter' : 'filters'}
+                                </span>
+                            </button>
+                            <Separator orientation="vertical" className="h-4 bg-zinc-200 dark:border-zinc-800" />
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    table.resetColumnFilters();
+                                }}
+                                className="h-8 w-8 p-0 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 rounded-sm transition-colors shrink-0"
+                                title="Clear all filters"
+                            >
+                                <X className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+                            </Button>
+                        </>
+                    ) : (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-10 w-10 rounded-none hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors shrink-0 text-zinc-900 dark:text-zinc-50"
                             onClick={() => setFilterSidebarOpen(true)}
-                            className="text-xs font-semibold text-zinc-900 dark:text-zinc-50 hover:opacity-70 transition-opacity"
+                            title="Filters"
                         >
-                            {filterCount} {filterCount === 1 ? 'filter' : 'filters'}
-                        </button>
-                        <Separator orientation="vertical" className="h-4 bg-zinc-300 dark:bg-zinc-600" />
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                table.resetColumnFilters();
-                            }}
-                            className="p-0.5 hover:bg-zinc-300/50 dark:hover:bg-zinc-600/50 rounded-sm transition-colors"
-                            title="Clear all filters"
-                        >
-                            <X className="h-3.5 w-3.5 text-zinc-500 dark:text-zinc-400" />
-                        </button>
-                    </div>
-                )}
-
-                <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-10 w-10 shrink-0"
-                    onClick={() => setFilterSidebarOpen(true)}
-                    title="Filters"
-                >
-                    <Filter className="h-4 w-4" />
-                </Button>
+                            <Filter className="h-4 w-4" />
+                        </Button>
+                    )}
+                </div>
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="icon" className="h-10 w-10 relative overflow-visible shrink-0" title="Columns">
+                        <Button variant="outline" size="icon" className="h-10 w-10 relative overflow-visible shrink-0 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-50" title="Columns">
                             <Eye className="h-4 w-4" />
                         </Button>
                     </DropdownMenuTrigger>

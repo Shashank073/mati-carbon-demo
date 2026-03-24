@@ -12,6 +12,7 @@ import { EngagementDetailSheet } from "./components/engagement-detail-sheet"
 import { EngagementRecord } from "./data/schema"
 import { cn } from "@/lib/utils"
 import { surveyData } from "@/app/components/survey/SurveyComponents"
+import { format } from "date-fns"
 import {
     Tooltip,
     TooltipContent,
@@ -69,12 +70,19 @@ export default function EngagementPage() {
     const pendingCount = engagementData.filter(item => item.status === "Pending").length
     const invalidCount = engagementData.filter(item => item.status === "Invalid").length
 
+    const selectedIdNum = selectedRecord ? selectedRecord.id : 0;
+
     // Filter survey data to only show questions 1-16 (hide 17-28)
     const filteredSurveyData = React.useMemo(() => {
-        const baseData = surveyData.filter(item => {
+        let baseData = surveyData.filter(item => {
             const idNum = parseInt(item.id);
             return idNum >= 1 && idNum <= 16;
         });
+
+        // For presentation: hide location question (ID: 7) for every 3rd farmer
+        if (selectedRecord && selectedIdNum % 3 === 0) {
+            baseData = baseData.filter(item => item.id !== "7");
+        }
 
         // If the selected farmer has status "Invalid" and is "Farmer E", return all questions with empty answers
         if (selectedRecord?.status === "Invalid" && selectedRecord?.farmer.name === "Farmer E") {
@@ -85,7 +93,11 @@ export default function EngagementPage() {
         }
 
         return baseData;
-    }, [selectedRecord?.id]);
+    }, [selectedRecord?.id, selectedIdNum]);
+
+    const hasLocationQuestion = React.useMemo(() => {
+        return filteredSurveyData.some(item => item.id === "7");
+    }, [filteredSurveyData]);
 
     // Dynamic columns
     const activeColumns = React.useMemo(() => {
@@ -103,7 +115,7 @@ export default function EngagementPage() {
 
     return (
         <NavBarType4 activeItem="Engagement">
-            <div className="flex flex-col h-full gap-4">
+            <div className="flex flex-col h-full gap-6">
                 <div className="shrink-0">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div className="flex items-baseline gap-2">
@@ -158,7 +170,33 @@ export default function EngagementPage() {
                     currentIndex={currentIndex}
                     totalCount={filteredData.length}
                     surveyData={filteredSurveyData}
+                    hasLocationQuestion={hasLocationQuestion}
                 />
+
+                {/* Footer Section */}
+                <div className="shrink-0 py-3 px-1 border-t border-zinc-100 dark:border-zinc-800 mt-auto">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-[10px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                        <div className="flex items-center gap-4">
+                            <span>Version 1.2.4-stable</span>
+                            <span className="hidden sm:inline opacity-30">|</span>
+                            <div className="flex items-center gap-1.5">
+                                <span>All rights reserved by Mati Carbon Pvt</span>
+                                <button className="text-zinc-900 dark:text-zinc-300 hover:underline underline-offset-2 font-bold">TnC</button>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-1.5">
+                                <span className="opacity-50">Session ID:</span>
+                                <span className="font-mono text-zinc-600 dark:text-zinc-400">MC-8824-X92</span>
+                            </div>
+                            <span className="hidden sm:inline opacity-30">|</span>
+                            <div className="flex items-center gap-1.5">
+                                <span className="opacity-50">Last Refreshed:</span>
+                                <span className="text-zinc-600 dark:text-zinc-400">{format(new Date(), "dd MMM yyyy, hh:mm aa")}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </NavBarType4>
     )

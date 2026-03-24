@@ -25,10 +25,15 @@ import { Calendar, XCircle } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, MessageSquareText, AlertCircle, CheckCircle2, X, Check, Image as ImageIcon, Play, FileText, MapPin, Download, Info, MessageSquareWarning, Trash2, ZoomIn, ZoomOut, RotateCw, Maximize2, Minimize2, Scaling, AlignCenter, SlidersHorizontal, RotateCcw, Loader2, ChevronDown } from "lucide-react"
+import { ChevronLeft, ChevronRight, MessageSquareText, AlertCircle, CheckCircle2, X, Check, Image as ImageIcon, Play, FileText, MapPin, Download, Info, MessageSquareWarning, Trash2, ZoomIn, ZoomOut, RotateCw, Maximize2, Minimize2, Scaling, AlignCenter, SlidersHorizontal, RotateCcw, Loader2, ChevronDown, User, Phone, Eye, EyeOff } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
+import {
+    HoverCard,
+    HoverCardContent,
+    HoverCardTrigger,
+} from "@/components/ui/hover-card"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -44,29 +49,65 @@ const LIBRARIES: ("drawing" | "geometry")[] = ["drawing", "geometry"];
 const DEFAULT_CENTER = { lat: 20.5, lng: 78.9 };
 const DEFAULT_ZOOM = 5;
 
-function MapPreviewContent({ selectedFarmer, onIdle, center, zoom, specificMarker, onReset }: { selectedFarmer: Farmer | null, onIdle?: () => void, center?: google.maps.LatLngLiteral | null, zoom?: number, specificMarker?: google.maps.LatLngLiteral | null, onReset?: () => void }) {
-    const mapRef = React.useRef<google.maps.Map | null>(null);
+function MapPreviewContent({ selectedFarmer, onIdle, center, zoom, specificMarker, onReset, onInteraction, resetCount, questionLocation, setIsMapInteracted, mapRef, isProgrammaticChange, hasLocationQuestion }: { selectedFarmer: Farmer | null, onIdle?: () => void, center?: google.maps.LatLngLiteral | null, zoom?: number, specificMarker?: google.maps.LatLngLiteral | null, onReset?: () => void, onInteraction?: () => void, resetCount: number, questionLocation?: google.maps.LatLngLiteral | null, setIsMapInteracted: (val: boolean) => void, mapRef: React.MutableRefObject<google.maps.Map | null>, isProgrammaticChange: React.MutableRefObject<boolean>, hasLocationQuestion: boolean }) {
+    const fitBounds = React.useCallback(() => {
+        if (!mapRef.current || !selectedFarmer || selectedFarmer.plots.length === 0) return;
+
+        isProgrammaticChange.current = true;
+        const bounds = new google.maps.LatLngBounds();
+        selectedFarmer.plots.forEach(plot => {
+            bounds.extend(plot.location);
+            if (plot.path) {
+                plot.path.forEach(point => bounds.extend(point));
+            }
+        });
+
+        // Also include the question location in the initial view bounds if it exists
+        if (questionLocation && hasLocationQuestion) {
+            bounds.extend(questionLocation);
+        }
+
+        mapRef.current.fitBounds(bounds);
+        
+        // Add some padding so markers aren't right at the edge
+        const listener = google.maps.event.addListener(mapRef.current, "idle", () => {
+            if (mapRef.current) {
+                // If the zoom is too high after fitBounds (e.g. only one plot), cap it
+                if (mapRef.current.getZoom()! > 18) mapRef.current.setZoom(18);
+            }
+            // Use a small delay before allowing interaction detection again
+            setTimeout(() => {
+                isProgrammaticChange.current = false;
+            }, 100);
+            google.maps.event.removeListener(listener);
+        });
+    }, [selectedFarmer, questionLocation, mapRef, isProgrammaticChange, hasLocationQuestion]);
 
     const onLoad = React.useCallback((map: google.maps.Map) => {
         mapRef.current = map;
         map.setMapTypeId("satellite");
-    }, []);
+        if (!center) {
+            fitBounds();
+        }
+    }, [center, fitBounds, mapRef]);
 
     const onUnmount = React.useCallback(() => {
         mapRef.current = null;
-    }, []);
+    }, [mapRef]);
 
     React.useEffect(() => {
         if (mapRef.current) {
+            isProgrammaticChange.current = true;
             if (center) {
                 mapRef.current.panTo(center);
                 mapRef.current.setZoom(zoom || 17);
+                // Reset flag after a short delay since panTo/setZoom don't have callbacks
+                setTimeout(() => { isProgrammaticChange.current = false; }, 500);
             } else if (selectedFarmer) {
-                mapRef.current.panTo(selectedFarmer.location);
-                mapRef.current.setZoom(17);
+                fitBounds();
             }
         }
-    }, [selectedFarmer, center, zoom]);
+    }, [selectedFarmer, center, zoom, fitBounds, resetCount, mapRef, isProgrammaticChange]);
 
     return (
         <GoogleMap
@@ -76,6 +117,18 @@ function MapPreviewContent({ selectedFarmer, onIdle, center, zoom, specificMarke
             onLoad={onLoad}
             onIdle={onIdle}
             onUnmount={onUnmount}
+            onDragStart={() => {
+                if (!isProgrammaticChange.current) {
+                    setIsMapInteracted(true);
+                    onInteraction?.();
+                }
+            }}
+            onZoomChanged={() => {
+                if (mapRef.current && !isProgrammaticChange.current) {
+                    setIsMapInteracted(true);
+                    onInteraction?.();
+                }
+            }}
             mapTypeId="satellite"
             options={{
                 mapTypeControl: false,
@@ -84,15 +137,25 @@ function MapPreviewContent({ selectedFarmer, onIdle, center, zoom, specificMarke
                 zoomControl: true,
             }}
         >
-            {specificMarker && (
+            {questionLocation && hasLocationQuestion && (
                 <Marker
-                    position={specificMarker}
-                    animation={google.maps.Animation.BOUNCE}
+                    position={questionLocation}
+                    animation={specificMarker ? google.maps.Animation.BOUNCE : undefined}
+                    icon={{
+                        url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10" fill="#2563eb" stroke="white" stroke-width="2" />
+                                <text x="12" y="15.5" fill="white" font-size="10" font-family="Arial" font-weight="bold" text-anchor="middle">7</text>
+                            </svg>
+                        `)}`,
+                        scaledSize: new google.maps.Size(24, 24),
+                        anchor: new google.maps.Point(12, 12)
+                    }}
                 />
             )}
             {selectedFarmer && (
                 <>
-                    {selectedFarmer.plots.map(plot => (
+                    {selectedFarmer.plots.map((plot, index) => (
                         <React.Fragment key={plot.id}>
                             {plot.path && plot.path.length > 0 && (
                                 <Polygon
@@ -109,6 +172,16 @@ function MapPreviewContent({ selectedFarmer, onIdle, center, zoom, specificMarke
                             <Marker
                                 position={plot.location}
                                 clickable={false}
+                                icon={{
+                                    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                            <circle cx="12" cy="12" r="10" fill="#dc2626" stroke="white" stroke-width="2" />
+                                            <text x="12" y="15.5" fill="white" font-size="10" font-family="Arial" font-weight="bold" text-anchor="middle">${index + 1}</text>
+                                        </svg>
+                                    `)}`,
+                                    scaledSize: new google.maps.Size(24, 24),
+                                    anchor: new google.maps.Point(12, 12)
+                                }}
                             />
                         </React.Fragment>
                     ))}
@@ -129,6 +202,7 @@ interface EngagementDetailSheetProps {
     currentIndex: number
     totalCount: number
     surveyData?: SurveyItem[]
+    hasLocationQuestion?: boolean
 }
 
 function ImagePreview({ item, zoom, rotation, imageMode }: { item: SurveyItem, zoom: number, rotation: number, imageMode: "fill" | "fit" | "stretch" | "center" }) {
@@ -200,7 +274,8 @@ export function EngagementDetailSheet({
     isLast,
     currentIndex,
     totalCount,
-    surveyData: customSurveyData
+    surveyData: customSurveyData,
+    hasLocationQuestion = true
 }: EngagementDetailSheetProps) {
     const [comment, setComment] = React.useState("")
     const [isApproving, setIsApproving] = React.useState(false)
@@ -212,10 +287,29 @@ export function EngagementDetailSheet({
     const [rotation, setRotation] = React.useState(0)
     const [imageMode, setImageMode] = React.useState<"fill" | "fit" | "stretch" | "center">("fit")
     const [isDataLoading, setIsDataLoading] = React.useState(false)
+    const [isSurveyorPhoneVisible, setIsSurveyorPhoneVisible] = React.useState(false)
     const [mapCenter, setMapCenter] = React.useState<google.maps.LatLngLiteral | null>(null)
     const [mapZoom, setMapZoom] = React.useState<number>(17)
     const [isShowingSpecificLocation, setIsShowingSpecificLocation] = React.useState(false)
+    const [isMapInteracted, setIsMapInteracted] = React.useState(false)
+    const [resetCount, setResetCount] = React.useState(0)
     const [specificMarker, setSpecificMarker] = React.useState<google.maps.LatLngLiteral | null>(null)
+    const mapRef = React.useRef<google.maps.Map | null>(null);
+    const isProgrammaticChange = React.useRef(false);
+
+    // Find the farmer in MOCK_FARMERS to get plot data
+    const farmerData = MOCK_FARMERS.find(f => f.name === record?.farmer.name) || MOCK_FARMERS[0];
+
+    // Calculate a persistent question location for this farmer
+    const questionLocation = React.useMemo(() => {
+        if (farmerData && farmerData.plots.length > 0) {
+            return {
+                lat: farmerData.plots[0].location.lat + 0.0005,
+                lng: farmerData.plots[0].location.lng + 0.0005
+            };
+        }
+        return null;
+    }, [farmerData?.id]);
     
     // Use custom survey data if provided, otherwise fallback to default surveyData
     const activeSurveyData = customSurveyData || surveyData;
@@ -226,6 +320,87 @@ export function EngagementDetailSheet({
     const [isSubmittingReport, setIsSubmittingReport] = React.useState(false)
     const [reportSuccess, setReportSuccess] = React.useState(false)
     const [isReportCommentMinimized, setIsReportCommentMinimized] = React.useState(false)
+    const [hasScrolledToBottom, setHasScrolledToBottom] = React.useState(false)
+    const [scrollProgress, setScrollProgress] = React.useState(0)
+    const [isApproveLoaded, setIsApproveLoaded] = React.useState(false)
+    const scrollAreaRef = React.useRef<HTMLDivElement>(null)
+    const [infoSwitchIndex, setInfoSwitchIndex] = React.useState(0)
+    const [isInfoHovered, setIsInfoHovered] = React.useState(false)
+
+    // Switch info every 5 seconds
+    React.useEffect(() => {
+        if (isInfoHovered) return;
+
+        const timer = setInterval(() => {
+            setInfoSwitchIndex(prev => (prev + 1) % 2);
+        }, 5000);
+
+        return () => clearInterval(timer);
+    }, [isInfoHovered]);
+
+    // Reset switch index when record changes
+    React.useEffect(() => {
+        setInfoSwitchIndex(0);
+    }, [record?.id]);
+
+    // Track scroll progress for Approve button
+    React.useEffect(() => {
+        // Wait for a bit longer to ensure the DOM and images are ready
+        const initTimer = setTimeout(() => {
+            const scrollArea = scrollAreaRef.current
+            if (!scrollArea) return
+
+            // Find the viewport element. Radix ScrollArea uses a specific data attribute.
+            const viewport = scrollArea.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement;
+                             
+            if (!viewport) return
+
+            const handleScroll = () => {
+                const { scrollTop, scrollHeight, clientHeight } = viewport;
+                const totalScrollable = scrollHeight - clientHeight;
+                
+                // If content is not scrollable (fits in view), it's effectively "at the bottom"
+                if (totalScrollable <= 0) {
+                    setScrollProgress(100)
+                    setHasScrolledToBottom(true)
+                    setIsApproveLoaded(true)
+                    return
+                }
+
+                const progress = (scrollTop / totalScrollable) * 100
+                setScrollProgress(progress)
+
+                // If we've reached within 20px of the bottom, consider it "scrolled to bottom"
+                if (scrollTop + clientHeight >= scrollHeight - 20) {
+                    setHasScrolledToBottom(true)
+                    setIsApproveLoaded(true)
+                }
+            }
+
+            viewport.addEventListener('scroll', handleScroll)
+            // Initial check
+            handleScroll();
+
+            // Store for cleanup
+            (viewport as any)._cleanup = () => viewport.removeEventListener('scroll', handleScroll);
+        }, 1200);
+
+        return () => {
+            clearTimeout(initTimer);
+            const scrollArea = scrollAreaRef.current;
+            if (scrollArea) {
+                const viewport = scrollArea.querySelector('[data-radix-scroll-area-viewport]') as any;
+                if (viewport && viewport._cleanup) viewport._cleanup();
+            }
+        }
+    }, [farmerData, activeSurveyData, open])
+
+    // Reset scroll state when a new farmer is selected
+    React.useEffect(() => {
+        setHasScrolledToBottom(false)
+        setScrollProgress(0)
+        setIsApproveLoaded(false)
+    }, [record?.id]) // Reset when record ID changes
 
     // Determine if we are previewing something else (image, video, file)
     const activePreview = previewItem && previewItem.type !== "map" ? previewItem : null;
@@ -261,6 +436,7 @@ export function EngagementDetailSheet({
         setSpecificMarker(null); // Reset specific marker
         setMapZoom(17); // Reset map zoom
         setIsShowingSpecificLocation(false); // Reset specific location state
+        setIsMapInteracted(false); // Reset map interaction state
         
         if (open) {
             setMapVisible(true);
@@ -276,9 +452,6 @@ export function EngagementDetailSheet({
     }, [record?.id, open])
 
     if (!record) return null
-
-    // Find the farmer in MOCK_FARMERS to get plot data
-    const farmerData = MOCK_FARMERS.find(f => f.name === record.farmer.name) || MOCK_FARMERS[0];
 
     const toggleReportId = (id: string) => {
         setReportedIds(prev =>
@@ -314,24 +487,16 @@ export function EngagementDetailSheet({
 
     const handleItemClick = (item: SurveyItem) => {
         if (item.type === "map") {
-            // Extract coordinates from meta (e.g., "12.7107° N, 77.6971° E")
-            if (item.meta) {
-                const parts = item.meta.split(',');
-                if (parts.length === 2) {
-                    const latPart = parts[0].trim();
-                    const lngPart = parts[1].trim();
-                    
-                    const lat = parseFloat(latPart.replace(/[^\d.-]/g, '')) * (latPart.includes('S') ? -1 : 1);
-                    const lng = parseFloat(lngPart.replace(/[^\d.-]/g, '')) * (lngPart.includes('W') ? -1 : 1);
-                    
-                    if (!isNaN(lat) && !isNaN(lng)) {
-                        const newCenter = { lat, lng };
-                        setMapCenter(newCenter);
-                        setSpecificMarker(newCenter);
-                        setMapZoom(19);
-                        setIsShowingSpecificLocation(true);
-                    }
+            if (questionLocation) {
+                // Set programmatic flag before changing map state
+                if (mapRef.current) {
+                    isProgrammaticChange.current = true;
                 }
+                setMapCenter(questionLocation);
+                setSpecificMarker(questionLocation);
+                setMapZoom(19);
+                setIsShowingSpecificLocation(true);
+                setIsMapInteracted(false); // Ensure interaction is false when clicking question
             }
             return;
         }
@@ -341,10 +506,15 @@ export function EngagementDetailSheet({
     }
 
     const resetMapToFarmer = () => {
+        if (mapRef.current) {
+            isProgrammaticChange.current = true;
+        }
         setMapCenter(null);
         setSpecificMarker(null);
         setMapZoom(17);
         setIsShowingSpecificLocation(false);
+        setIsMapInteracted(false);
+        setResetCount(prev => prev + 1);
     }
 
     const handleCloseAll = () => {
@@ -609,7 +779,8 @@ export function EngagementDetailSheet({
                 }
             }}>
                 <SheetContent 
-                    className="w-full sm:max-w-[500px] p-0 flex flex-col gap-0 border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-2xl overflow-visible z-[200] transition-all duration-500 ease-in-out"
+                    onOpenAutoFocus={(e) => e.preventDefault()}
+                    className="w-full sm:max-w-[500px] p-0 flex flex-col gap-0 border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-2xl overflow-visible z-[200] transition-all duration-500 ease-in-out focus-visible:outline-none"
                     onPointerDownOutside={(e) => {
                         const target = e.target as HTMLElement;
                         if (target.closest('.map-preview-module')) {
@@ -651,6 +822,13 @@ export function EngagementDetailSheet({
                                         zoom={mapZoom}
                                         specificMarker={specificMarker}
                                         onReset={resetMapToFarmer}
+                                        onInteraction={() => setIsMapInteracted(true)}
+                                        resetCount={resetCount}
+                                        questionLocation={questionLocation}
+                                        setIsMapInteracted={setIsMapInteracted}
+                                        mapRef={mapRef}
+                                        isProgrammaticChange={isProgrammaticChange}
+                                        hasLocationQuestion={hasLocationQuestion}
                                     />
                                 ) : (
                                     <div className="flex h-full items-center justify-center text-zinc-500">
@@ -659,18 +837,15 @@ export function EngagementDetailSheet({
                                 )}
                                 <div className="absolute top-6 left-6 z-20 pointer-events-none w-[calc(100%-48px)]">
                                     <div className="flex items-center justify-between w-full">
-                                        <div className="flex items-center gap-2 pointer-events-auto">
-                                            <div className="px-3 h-[36px] flex items-center bg-white/95 dark:bg-zinc-950/95 shadow-xl border border-zinc-200 dark:border-zinc-800 rounded-lg text-[14px] font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-50 whitespace-nowrap backdrop-blur-md">
-                                                {isShowingSpecificLocation ? `${record.village}, ${record.block || "Block A"}, ${record.state || "Karnataka"}, ${record.country || "India"}` : farmerData.calArea}
-                                            </div>
-                                            {!isShowingSpecificLocation && (
-                                                <div className="px-3 h-[36px] flex items-center bg-white/95 dark:bg-zinc-950/95 shadow-xl border border-zinc-200 dark:border-zinc-800 rounded-lg text-[14px] font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-50 whitespace-nowrap backdrop-blur-md">
-                                                    {farmerData.plots.length} Plots
+                                        <div className="flex items-center gap-2 pointer-events-auto text-zinc-900 dark:text-zinc-50">
+                                            {isShowingSpecificLocation && (
+                                                <div className="px-3 h-[36px] flex items-center bg-white/95 dark:bg-zinc-950/95 shadow-xl border border-zinc-200 dark:border-zinc-800 rounded-lg text-[14px] font-bold uppercase tracking-wider whitespace-nowrap backdrop-blur-md">
+                                                    {record.village}, {record.block || "Block A"}, {record.state || "Karnataka"}, {record.country || "India"}
                                                 </div>
                                             )}
                                         </div>
                                         
-                                        {isShowingSpecificLocation && (
+                                        {(isShowingSpecificLocation || isMapInteracted) && (
                                             <Button 
                                                 variant="outline"
                                                 onClick={resetMapToFarmer}
@@ -679,6 +854,22 @@ export function EngagementDetailSheet({
                                                 <RotateCcw className="h-4 w-4 text-zinc-500" />
                                                 Reset View
                                             </Button>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Map Legend */}
+                                <div className="absolute bottom-6 left-6 z-20 pointer-events-none">
+                                    <div className="flex flex-col gap-2 pointer-events-auto bg-white/95 dark:bg-zinc-950/95 shadow-xl border border-zinc-200 dark:border-zinc-800 rounded-lg p-2.5 backdrop-blur-md">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-3 h-3 rounded-full bg-[#dc2626] border-2 border-white shadow-sm" />
+                                            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">Deployed Plot</span>
+                                        </div>
+                                        {hasLocationQuestion && (
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-3 h-3 rounded-full bg-[#2563eb] border-2 border-white shadow-sm animate-pulse" />
+                                                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">Survey Location</span>
+                                            </div>
                                         )}
                                     </div>
                                 </div>
@@ -712,7 +903,7 @@ export function EngagementDetailSheet({
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-8 w-8 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all active:scale-95 -mr-1"
+                                    className="h-8 w-8 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all active:scale-95 -mr-1 focus-visible:ring-0 focus-visible:ring-offset-0"
                                     onClick={handleCloseAll}
                                 >
                                     <X className="h-4 w-4" />
@@ -735,16 +926,88 @@ export function EngagementDetailSheet({
                     {/* Fixed Engagement Details Bar */}
                     <div className="bg-white dark:bg-zinc-950 border-t border-zinc-100 dark:border-zinc-800 px-6 py-2.5 flex items-center justify-between text-[11px] font-bold uppercase tracking-wider">
                         <div className="flex items-center gap-3">
-                            <span className="text-zinc-900 dark:text-zinc-50">{record.engagementType}</span>
+                            <span className="text-zinc-900 dark:text-zinc-50 leading-none">{record.engagementType}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-zinc-400 font-medium">
-                            <span>AZ-{record.azs}</span>
-                            {record.azName && (
-                                <>
+                        
+                        {/* Info Switcher Container */}
+                        <div 
+                            className="h-[16px] overflow-hidden relative min-w-[200px]"
+                            onMouseEnter={() => setIsInfoHovered(true)}
+                            onMouseLeave={() => setIsInfoHovered(false)}
+                        >
+                            <div 
+                                className="transition-transform duration-700 ease-in-out absolute top-0 right-0 w-full grid grid-rows-[16px_16px]"
+                                style={{ transform: `translateY(-${infoSwitchIndex * 16}px)` }}
+                            >
+                                {/* First Info: AZ Code and AZ Name */}
+                                <div className="h-[16px] flex items-center justify-end gap-2 leading-none">
+                                    <span>AZ-{record.azs}</span>
                                     <span className="text-zinc-200 dark:text-zinc-800">•</span>
-                                    <span className="text-zinc-500 dark:text-zinc-400">{record.azName}</span>
-                                </>
-                            )}
+                                    <span className="text-zinc-500 dark:text-zinc-400 truncate max-w-[120px]">{record.azName || "Cotton Cluster"}</span>
+                                </div>
+
+                                {/* Second Info: Surveyor and Verifier */}
+                                <div className="h-[16px] flex items-center justify-end gap-2 leading-none">
+                                    <HoverCard openDelay={100} closeDelay={100}>
+                                        <HoverCardTrigger asChild>
+                                            <span className="text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 cursor-help transition-colors">
+                                                {record.surveyor.name}
+                                            </span>
+                                        </HoverCardTrigger>
+                                        <HoverCardContent align="start" side="bottom" className="w-80 z-[300] p-4">
+                                            <div className="space-y-2 text-left">
+                                                <h4 className="text-sm font-semibold leading-none">{record.surveyor.name}</h4>
+                                                <div className="flex items-center gap-2 pt-1">
+                                                    <Phone className="h-3 w-3 opacity-70 shrink-0" />
+                                                    <div className="flex items-center gap-2 group">
+                                                        <span className="text-sm font-medium font-mono">
+                                                            {isSurveyorPhoneVisible 
+                                                                ? record.surveyor.phoneNumber 
+                                                                : record.surveyor.phoneNumber?.replace(/.(?=.{4})/g, "*")}
+                                                        </span>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-6 w-6 transition-opacity opacity-100"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation()
+                                                                setIsSurveyorPhoneVisible(!isSurveyorPhoneVisible)
+                                                            }}
+                                                        >
+                                                            {isSurveyorPhoneVisible ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </HoverCardContent>
+                                    </HoverCard>
+
+                                    {record.status === "Verified" && record.verified && (
+                                        <>
+                                            <span className="text-zinc-200 dark:text-zinc-800">•</span>
+                                            <HoverCard openDelay={100} closeDelay={100}>
+                                                <HoverCardTrigger asChild>
+                                                    <span className="text-emerald-600 dark:text-emerald-400 hover:opacity-70 cursor-help transition-opacity">
+                                                        {record.verified.verifier}
+                                                    </span>
+                                                </HoverCardTrigger>
+                                                <HoverCardContent align="start" side="bottom" className="w-80 z-[300] p-4">
+                                                    <div className="space-y-2 text-left">
+                                                        <h4 className="text-sm font-semibold leading-none text-zinc-900 dark:text-zinc-50">{record.verified.verifier}</h4>
+                                                        <div className="flex items-center gap-2 pt-1">
+                                                            <div className="flex items-center gap-1.5 leading-none text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                                                                <span>Verified on</span>
+                                                                <span className="text-zinc-300 dark:text-zinc-700 font-normal">-</span>
+                                                                <span>{format(record.verified.date, "dd MMM yyyy")}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </HoverCardContent>
+                                            </HoverCard>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -777,7 +1040,7 @@ export function EngagementDetailSheet({
                 </div>
 
                 {/* Content section - Style 5 (Feedback based) */}
-                <ScrollArea className="flex-1 relative">
+                <ScrollArea ref={scrollAreaRef} className="flex-1 relative">
                     <div className="p-6">
                         <div className="space-y-1">
                             {isDataLoading ? (
@@ -812,7 +1075,11 @@ export function EngagementDetailSheet({
                                                     <SurveyCard
                                                         item={{
                                                             ...item,
-                                                            question: displayQuestion
+                                                            question: displayQuestion,
+                                                            answer: item.type === "map" ? record.village : item.answer,
+                                                            meta: item.type === "map" && questionLocation ? 
+                                                                `${questionLocation.lat.toFixed(4)}° N, ${questionLocation.lng.toFixed(4)}° E` : 
+                                                                item.meta
                                                         }}
                                                         style="style-5-feedback"
                                                         showDetails={false}
@@ -909,8 +1176,18 @@ export function EngagementDetailSheet({
                     </div>
                 </ScrollArea>
 
+                {/* Scroll Progress Bar (Minimal) */}
+                {record.status === "Pending" && !isReporting && (
+                    <div className="h-1 w-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden shrink-0">
+                        <div 
+                            className="h-full bg-zinc-900 dark:bg-zinc-50 transition-all duration-200 ease-out"
+                            style={{ width: `${scrollProgress}%` }}
+                        />
+                    </div>
+                )}
+
                 {/* Footer section */}
-                <div className="border-t border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 z-20 flex flex-col">
+                <div className="border-t border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 z-20 flex flex-col relative">
                     {/* Report Selection Bar - Only visible during reporting */}
                     {isReporting && (
                         <div className="bg-amber-50/50 dark:bg-[#1a1608]/50 border-b border-amber-100/50 dark:border-amber-900/20 px-6 py-2 flex items-center justify-between animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -986,18 +1263,38 @@ export function EngagementDetailSheet({
                                         
                                         {/* Only show Approve button for Pending records and when not in reporting mode */}
                                         {record.status === "Pending" && !isReporting && (
-                                            <Button
-                                                className="h-9 px-5 text-xs font-bold shadow-md transition-all active:scale-[0.98] bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900"
-                                                onClick={handleApprove}
-                                                disabled={isApproving}
-                                            >
-                                                {isApproving ? (
-                                                    <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                                                ) : (
-                                                    <CheckCircle2 className="mr-2 h-3.5 w-3.5" />
-                                                )}
-                                                <span>{isApproving ? "Approving..." : "Approve"}</span>
-                                            </Button>
+                                            <div className="flex flex-col items-end gap-1.5">
+                                                <Button
+                                                    className={cn(
+                                                        "h-9 px-5 text-xs font-bold shadow-md transition-all active:scale-[0.98] relative overflow-hidden",
+                                                        isApproveLoaded 
+                                                            ? "bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900" 
+                                                            : "bg-zinc-100 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500 cursor-not-allowed shadow-none"
+                                                    )}
+                                                    onClick={handleApprove}
+                                                    disabled={isApproving || !isApproveLoaded}
+                                                >
+                                                    {/* Background Loading Fill */}
+                                                    {!isApproveLoaded && (
+                                                        <div 
+                                                            className="absolute inset-y-0 left-0 bg-zinc-200 dark:bg-zinc-700 transition-all duration-200 ease-out z-0"
+                                                            style={{ width: `${scrollProgress}%` }}
+                                                        />
+                                                    )}
+                                                    
+                                                    <div className="relative z-10 flex items-center">
+                                                        {isApproving ? (
+                                                            <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                                                        ) : (
+                                                            <CheckCircle2 className={cn(
+                                                                "mr-2 h-3.5 w-3.5 transition-colors",
+                                                                isApproveLoaded ? "text-white dark:text-zinc-900" : "text-zinc-300 dark:text-zinc-600"
+                                                            )} />
+                                                        )}
+                                                        <span>{isApproving ? "Approving..." : "Approve"}</span>
+                                                    </div>
+                                                </Button>
+                                            </div>
                                         )}
 
                                         {/* Show Report Selected button when in reporting mode */}

@@ -105,7 +105,7 @@ export const surveyData: SurveyItem[] = [
         question: "Confirm the location of the field:",
         type: "map",
         answer: "Anekal, Karnataka",
-        meta: "12.7107° N, 77.6971° E",
+        meta: "20.5025° N, 78.9035° E",
         label: "Geolocation",
         description: "Designed to display geospatial coordinates or location names with an interactive map preview.",
     },
@@ -925,7 +925,7 @@ export const SurveyCard = ({
                                     height="100%"
                                     frameBorder="0"
                                     style={{ border: 0 }}
-                                    src={`https://www.google.com/maps/embed/v1/view?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&center=${item.meta?.replace(/[^\d.,-]/g, '')}&zoom=18&maptype=satellite`}
+                                    src={`https://www.google.com/maps/embed/v1/view?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&center=${item.meta?.replace(/[^\d.,-]/g, '') || '20.5025,78.9035'}&zoom=18&maptype=satellite`}
                                     allowFullScreen
                                 />
                                 <div className="absolute inset-0 bg-transparent" />
