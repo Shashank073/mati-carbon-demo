@@ -94,7 +94,7 @@ export function EngagementTable<TData, TValue>({
     })
 
     return (
-        <div className="flex flex-col h-full gap-4 w-full relative">
+        <div className="flex flex-col h-full gap-0 w-full relative overflow-hidden">
             <div className="shrink-0">
                 <DataTableToolbar
                     table={table}
@@ -115,7 +115,7 @@ export function EngagementTable<TData, TValue>({
                                         <TableHead
                                             key={header.id}
                                             colSpan={header.colSpan}
-                                            className="whitespace-nowrap h-11 px-4 text-left align-middle font-medium text-muted-foreground bg-background"
+                                            className="whitespace-nowrap h-12 px-4 text-left align-middle bg-muted/50 border-b border-zinc-200 dark:border-zinc-800"
                                         >
                                             {header.isPlaceholder
                                                 ? null

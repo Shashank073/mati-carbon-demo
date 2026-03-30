@@ -54,7 +54,7 @@ const FarmerHoverCard = ({ farmer }: { farmer: EngagementRecord["farmer"] }) => 
                         <AvatarFallback>{farmer.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col leading-tight">
-                        <span className="font-semibold text-sm">{farmer.name}</span>
+                        <span className="text-sm">{farmer.name}</span>
                         <span className="text-[10px] font-mono text-muted-foreground">
                             {farmer.phoneNumber?.replace(/.(?=.{4})/g, "*")}
                         </span>
@@ -85,7 +85,7 @@ const SurveyorHoverCard = ({ surveyor }: { surveyor: EngagementRecord["surveyor"
         <HoverCard openDelay={100} closeDelay={100}>
             <HoverCardTrigger asChild>
                 <div className="flex flex-col leading-tight cursor-help group">
-                    <span className="font-semibold text-sm">{surveyor.name}</span>
+                    <span className="text-sm">{surveyor.name}</span>
                     <span className="text-[10px] font-mono text-muted-foreground">
                         {surveyor.phoneNumber?.replace(/.(?=.{4})/g, "*")}
                     </span>
@@ -170,7 +170,7 @@ export const columns: ColumnDef<EngagementRecord>[] = [
         cell: ({ row }) => {
             const verified = row.original.verified
             if (!verified) return <span className="text-muted-foreground">-</span>
-            return <div className="text-sm font-medium">{verified.verifier}</div>
+            return <div className="text-sm">{verified.verifier}</div>
         },
     },
     {
@@ -275,7 +275,7 @@ export const allColumns: ColumnDef<EngagementRecord>[] = [
         cell: ({ row }) => {
             const verified = row.original.verified
             if (!verified) return <span className="text-muted-foreground">-</span>
-            return <div className="text-sm font-medium">{verified.verifier}</div>
+            return <div className="text-sm">{verified.verifier}</div>
         },
     },
     {

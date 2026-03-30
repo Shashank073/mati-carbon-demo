@@ -114,33 +114,12 @@ export default function EngagementPage() {
     }, [activeTab])
 
     return (
-        <NavBarType4 activeItem="Engagement">
-            <div className="flex flex-col h-full gap-6">
-                <div className="shrink-0">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <div className="flex items-baseline gap-2">
-                            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Engagement</h1>
-                            <TooltipProvider>
-                                <Tooltip delayDuration={300}>
-                                    <TooltipTrigger asChild>
-                                        <button className="inline-flex items-center justify-center rounded-full w-5 h-5 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 transition-colors translate-y-[1px]">
-                                            <Info className="w-4 h-4" />
-                                            <span className="sr-only">About Engagement</span>
-                                        </button>
-                                    </TooltipTrigger>
-                                    <TooltipContent side="right" className="max-w-[280px] p-3 text-xs leading-relaxed">
-                                        <p className="font-medium mb-1">Engagement Management</p>
-                                        <p className="text-zinc-500 dark:text-zinc-400">
-                                            Track and manage ongoing farmer interactions, feedback, and survey responses. 
-                                            Review verification status, monitor pending tasks, and address records requiring correction to ensure high-quality data collection.
-                                        </p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
-                        </div>
-                    </div>
-                </div>
-
+        <NavBarType4 
+            pageTitle="Engagement" 
+            activeItemUrl="#engagement"
+            pageDescription="Track and manage ongoing farmer interactions, feedback, and survey responses. Review verification status, monitor pending tasks, and address records requiring correction to ensure high-quality data collection."
+        >
+            <div className="flex flex-col h-[calc(100vh-64px)] p-6 overflow-hidden">
                 <div className="bg-white dark:bg-zinc-950 flex-1 min-h-0 flex flex-col">
                     <EngagementTable
                         key={activeTab} // Re-mount table when tab changes for fresh state
@@ -174,7 +153,7 @@ export default function EngagementPage() {
                 />
 
                 {/* Footer Section */}
-                <div className="shrink-0 py-3 px-1 border-t border-zinc-100 dark:border-zinc-800 mt-auto">
+                <div className="shrink-0 py-3 px-1 border-t border-zinc-100 dark:border-zinc-800 mt-4">
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-[10px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
                         <div className="flex items-center gap-4">
                             <span>Version 1.2.4-stable</span>

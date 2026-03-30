@@ -444,7 +444,7 @@ export function FilterSidebar({ open, onOpenChange, onApply, initialFilters, act
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
-            <SheetContent className="w-full sm:max-w-[380px] p-0 flex flex-col gap-0 border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-xl">
+            <SheetContent className="w-full sm:max-w-[380px] p-0 flex flex-col gap-0 border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-xl z-[300]">
                 <SheetHeader className="p-4 border-b border-zinc-100 dark:border-zinc-800">
                     <SheetTitle className="text-base font-medium text-zinc-900 dark:text-zinc-50">
                         Filters

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ArrowLeft, MapPin, Calendar, DollarSign, Check, X, Star, Image as ImageIcon, Video, FileText, Download, Play, Phone, Mail, Copy, Ruler, Package, AlertCircle, Clock, Smile, ListOrdered, Mic, QrCode, Layers, Pause, Info } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, DollarSign, Check, X, Star, Image as ImageIcon, Video, FileText, Download, Play, Phone, Mail, Copy, Ruler, Package, AlertCircle, Clock, Smile, ListOrdered, Mic, QrCode, Layers, Pause, Info, ChevronDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -36,13 +36,31 @@ export type VariantType =
     | "rank"
     | "audio"
     | "qrcode"
-    | "repeater";
+    | "repeater"
+    | "tree";
+
+export interface TreeResponse {
+    id: string;
+    label: string;
+    value?: any;
+    type?: VariantType;
+    meta?: string;
+    children?: TreeResponse[];
+}
 
 export interface SurveyItem {
     id: string;
     question: string;
     type: VariantType;
-    answer: string | number | boolean | string[] | { name: string; size: string } | { label: string; rank: number }[] | { id: string; fields: SurveyItem[] }[];
+    answer: 
+        | string 
+        | number 
+        | boolean 
+        | string[] 
+        | { name: string; size: string } 
+        | { label: string; rank: number }[] 
+        | { id: string; fields: SurveyItem[] }[]
+        | TreeResponse[];
     meta?: string;
     label: string;
     description: string;
@@ -281,28 +299,51 @@ export const surveyData: SurveyItem[] = [
     },
     {
         id: "28",
-        question: "Details of individual plots:",
-        type: "repeater",
+        question: "Hierarchical Survey Structure (4 Levels):",
+        type: "tree",
         answer: [
             {
-                id: "P-001",
-                fields: [
-                    { id: "p1-1", question: "Crop Type", type: "text", answer: "Wheat", label: "", description: "" },
-                    { id: "p1-2", question: "Area", type: "area", answer: 1.2, meta: "Acres", label: "", description: "" },
-                    { id: "p1-3", question: "Plot Photo", type: "image", answer: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=300&auto=format&fit=crop", label: "", description: "" }
-                ]
-            },
-            {
-                id: "P-002",
-                fields: [
-                    { id: "p2-1", question: "Crop Type", type: "text", answer: "Mustard", label: "", description: "" },
-                    { id: "p2-2", question: "Area", type: "area", answer: 0.8, meta: "Acres", label: "", description: "" },
-                    { id: "p2-3", question: "Plot Health Rating", type: "rating", answer: 4, label: "", description: "" }
+                id: "root-1",
+                label: "Identifier: Record Group A",
+                children: [
+                    { id: "q1-l1", label: "Question Label (Text)", value: "Response Content", type: "text" },
+                    { id: "q2-l1", label: "Question Label (Date)", value: "2024-03-25", type: "date" },
+                    {
+                        id: "q3-l1",
+                        label: "Expandable Question (Level 2)",
+                        value: "Initial Response Content",
+                        type: "text",
+                        children: [
+                            { id: "q1-l2", label: "Question Label (Quantity)", value: 150, type: "quantity" },
+                            { id: "q2-l2", label: "Question Label (Image)", value: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=300&auto=format&fit=crop", type: "image" },
+                            {
+                                id: "q3-l2",
+                                label: "Expandable Question (Level 3)",
+                                value: "2024-03-26",
+                                type: "date",
+                                children: [
+                                    { id: "q1-l3", label: "Question Label (Boolean)", value: true, type: "boolean" },
+                                    { id: "q2-l3", label: "Question Label (Rating)", value: 5, type: "rating" },
+                                    {
+                                        id: "q3-l3",
+                                        label: "Expandable Question (Level 4)",
+                                        value: 75,
+                                        type: "quantity",
+                                        children: [
+                                            { id: "q1-l4", label: "Question Label (Currency)", value: 5000, type: "currency" },
+                                            { id: "q2-l4", label: "Question Label (Video)", value: "https://www.w3schools.com/html/mov_bbb.mp4", type: "video" },
+                                            { id: "q3-l4", label: "Question Label (Badge)", value: ["Option A", "Option B"], type: "badge" }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
                 ]
             }
         ],
-        label: "Repeater Form",
-        description: "Repeater: Multiple sub-forms linked to a single question.",
+        label: "Tree Structure",
+        description: "Tree: 4-level hierarchical response structure following a generic formula for identifiers, questions, and multi-type responses.",
     }
 ];
 
@@ -349,6 +390,164 @@ const ExpandableText = ({ text, style }: { text: string; style: string }) => {
             </p>
         </div>
     );
+};
+
+// --- Value Only Renderer for Tree/Repeater ---
+const renderValueOnly = (item: SurveyItem, style: string) => {
+    const isStyle5 = style === "style-5" || style === "style-5-feedback";
+    const isEmpty = !item.answer || 
+        (Array.isArray(item.answer) && item.answer.length === 0) ||
+        (typeof item.answer === 'object' && Object.keys(item.answer).length === 0);
+
+    if (isEmpty) {
+        return (
+            <div className={cn(
+                "inline-flex items-center gap-1.5 px-2 py-1 rounded bg-zinc-50/50 dark:bg-zinc-900/30 border border-dashed border-zinc-200 dark:border-zinc-800 transition-all duration-300",
+                isStyle5 ? "mt-0.5" : "mt-1"
+            )}>
+                <AlertCircle className="w-3 h-3 text-zinc-300 dark:text-zinc-600" />
+                <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
+                    Not available
+                </span>
+            </div>
+        );
+    }
+
+    switch (item.type) {
+        case "text":
+            return (
+                <CopyableText text={item.answer as string}>
+                    <p className={cn(
+                        "text-zinc-500 dark:text-zinc-400 leading-relaxed",
+                        style === "style-5" ? "text-base font-semibold text-zinc-900 dark:text-zinc-100 leading-snug" : "text-sm",
+                        style === "style-5-feedback" && "text-base font-semibold text-zinc-900 dark:text-zinc-100 leading-snug"
+                    )}>{item.answer as string}</p>
+                </CopyableText>
+            );
+        case "date":
+            return (
+                <div className={cn(
+                    "flex items-center gap-2 text-zinc-700 dark:text-zinc-300",
+                    isStyle5 && "text-zinc-900 dark:text-zinc-100 font-semibold text-base"
+                )}>
+                    {isStyle5
+                        ? new Date(item.answer as string).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+                        : new Date(item.answer as string).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+                    }
+                </div>
+            );
+        case "quantity":
+        case "area":
+        case "currency":
+            return (
+                <div className={cn(
+                    "flex items-center gap-2 text-lg font-semibold text-zinc-900 dark:text-zinc-100",
+                    isStyle5 && "text-base"
+                )}>
+                    {item.answer as number} {item.meta && <span className="text-xs font-normal text-zinc-500 uppercase">{item.meta}</span>}
+                </div>
+            );
+        case "boolean":
+            return (
+                <div className={cn(
+                    "inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wide",
+                    item.answer
+                        ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                        : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                )}>
+                    {item.answer ? "Yes" : "No"}
+                </div>
+            );
+        case "rating":
+            return (
+                <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                            key={star}
+                            className={cn(
+                                "w-4 h-4",
+                                star <= (item.answer as number) ? "fill-amber-400 text-amber-400" : "text-zinc-300 dark:text-zinc-700"
+                            )}
+                        />
+                    ))}
+                </div>
+            );
+        case "badge":
+            return (
+                <div className="flex flex-wrap gap-1.5">
+                    {(item.answer as string[]).map((badge, idx) => (
+                        <Badge key={idx} variant="outline" className="text-xs border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300">
+                            {badge}
+                        </Badge>
+                    ))}
+                </div>
+            );
+        case "image":
+            const imgFileName = (item.answer as string).split('/').pop()?.split('?')[0] || "image.jpg";
+            return (
+                <div className="mt-1 w-full max-w-md">
+                    <div className="flex items-center p-3 border border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer pr-10 attachment-preview-trigger">
+                        <div className="w-10 h-10 rounded overflow-hidden flex-shrink-0 border border-zinc-200 dark:border-zinc-700 bg-zinc-200 mr-3">
+                            <img src={item.answer as string} alt="Thumbnail" className="w-full h-full object-cover" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{imgFileName}</p>
+                            <p className="text-xs text-zinc-500">2.4 MB</p>
+                        </div>
+                    </div>
+                </div>
+            );
+        case "video":
+            const vidFileName = (item.answer as string).split('/').pop()?.split('?')[0] || "video.mp4";
+            return (
+                <div className="mt-1 w-full max-w-md">
+                    <div className="flex items-center p-3 border border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer pr-10 attachment-preview-trigger">
+                        <div className="w-10 h-10 rounded overflow-hidden flex-shrink-0 border border-zinc-200 dark:border-zinc-700 bg-zinc-200 mr-3">
+                            <Play className="w-4 h-4 text-white fill-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{vidFileName}</p>
+                            <p className="text-xs text-zinc-500">12.8 MB</p>
+                        </div>
+                    </div>
+                </div>
+            );
+        case "phone":
+            return (
+                <CopyableText text={item.answer as string}>
+                    <span className={cn(
+                        "font-medium text-zinc-900 dark:text-zinc-100",
+                        isStyle5 && "font-semibold text-base"
+                    )}>{item.answer as string}</span>
+                </CopyableText>
+            );
+        case "email":
+            return (
+                <CopyableText text={item.answer as string}>
+                    <span className={cn(
+                        "font-medium text-zinc-900 dark:text-zinc-100",
+                        isStyle5 && "font-semibold text-base"
+                    )}>{item.answer as string}</span>
+                </CopyableText>
+            );
+        case "time":
+            return (
+                <div className={cn(
+                    "flex items-center gap-2 text-zinc-900 dark:text-zinc-100 font-semibold text-base",
+                    !isStyle5 && "text-lg"
+                )}>
+                    {item.answer as string}
+                </div>
+            );
+        case "emoji":
+            return (
+                <div className="flex items-center justify-center w-12 h-12 bg-zinc-100 dark:bg-zinc-800 rounded-xl text-2xl">
+                    {item.answer as string}
+                </div>
+            );
+        default:
+            return <p className="font-semibold text-zinc-900 dark:text-zinc-100 text-base leading-snug">{item.answer?.toString()}</p>;
+    }
 };
 
 
@@ -1135,6 +1334,81 @@ export const SurveyCard = ({
                                     </div>
                                 </div>
                             ))}
+                        </div>
+                    </div>
+                );
+
+            case "tree":
+                const treeData = item.answer as TreeResponse[];
+                const TreeNode = ({ node, level = 0 }: { node: TreeResponse, level?: number }) => {
+                    const [isExpanded, setIsExpanded] = React.useState(level < 1);
+                    const hasChildren = node.children && node.children.length > 0;
+                    const hasValue = node.value !== undefined;
+                    
+                    return (
+                        <div key={node.id} className={cn(
+                            "relative",
+                            level > 0 && "ml-2.5 pl-4 border-l border-zinc-100 dark:border-zinc-800"
+                        )}>
+                            <div 
+                                className={cn(
+                                    "flex flex-col py-2 group select-none transition-all duration-200",
+                                    hasChildren && "cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900/50 -ml-2 pl-2 rounded-lg"
+                                )}
+                                onClick={() => hasChildren && setIsExpanded(!isExpanded)}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <div className="w-5 flex-shrink-0 flex items-center justify-center">
+                                        {hasChildren ? (
+                                            <div className={cn(
+                                                "w-5 h-5 flex items-center justify-center rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-500 transition-transform duration-200",
+                                                isExpanded ? "rotate-0" : "-rotate-90"
+                                            )}>
+                                                <ChevronDown className="w-3.5 h-3.5" />
+                                            </div>
+                                        ) : (
+                                            <div className={cn(
+                                                "w-1.5 h-1.5 rounded-full shrink-0 transition-all",
+                                                level === 0 && "bg-zinc-900 dark:bg-zinc-100 w-2 h-2",
+                                                level > 0 && "bg-zinc-300 dark:bg-zinc-700"
+                                            )} />
+                                        )}
+                                    </div>
+                                    <span className={cn(
+                                        "text-[14px] tracking-tight leading-tight",
+                                        level === 0 ? "font-bold text-zinc-900 dark:text-zinc-50" : "font-normal text-zinc-500 dark:text-zinc-400"
+                                    )}>
+                                        {node.label}
+                                    </span>
+                                </div>
+
+                                {hasValue && (
+                                    <div className="mt-1 pl-[28px]">
+                                        {renderValueOnly({
+                                            id: node.id,
+                                            question: "",
+                                            type: node.type || "text",
+                                            answer: node.value,
+                                            meta: node.meta,
+                                            label: "",
+                                            description: ""
+                                        }, "style-5")}
+                                    </div>
+                                )}
+                            </div>
+                            {hasChildren && isExpanded && (
+                                <div className="mt-0 animate-in fade-in slide-in-from-top-1 duration-200">
+                                    {node.children!.map(child => <TreeNode key={child.id} node={child} level={level + 1} />)}
+                                </div>
+                            )}
+                        </div>
+                    );
+                };
+
+                return (
+                    <div className="w-full mt-2">
+                        <div className="space-y-0 bg-transparent py-0 px-0">
+                            {treeData.map(rootNode => <TreeNode key={rootNode.id} node={rootNode} />)}
                         </div>
                     </div>
                 );

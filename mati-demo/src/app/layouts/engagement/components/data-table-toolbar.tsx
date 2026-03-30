@@ -110,31 +110,31 @@ export function DataTableToolbar<TData>({
     }
 
     return (
-        <div className="flex flex-row items-center justify-between gap-4 w-full">
+        <div className="flex flex-row items-center justify-between gap-4 w-full mb-[16px]">
             <div className="flex items-center min-w-0 flex-1 gap-4">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
-                    <TabsList className="h-9 w-max justify-start bg-muted p-1">
+                    <TabsList className="h-10 w-max justify-start bg-muted p-1">
                         <TabsTrigger
                             value="All"
-                            className="text-xs px-3 h-7 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
+                            className="text-xs px-3 h-8 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
                         >
                             All <span className="ml-2 opacity-50 font-normal">{counts.verified + counts.pending + counts.invalid}</span>
                         </TabsTrigger>
                         <TabsTrigger
                             value="Verified"
-                            className="text-xs px-3 h-7 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
+                            className="text-xs px-3 h-8 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
                         >
                             Verified <span className="ml-2 opacity-50 font-normal">{counts.verified}</span>
                         </TabsTrigger>
                         <TabsTrigger
                             value="Pending"
-                            className="text-xs px-3 h-7 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
+                            className="text-xs px-3 h-8 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
                         >
                             Pending <span className="ml-2 opacity-50 font-normal">{counts.pending}</span>
                         </TabsTrigger>
                         <TabsTrigger
                             value="Invalid"
-                            className="text-xs px-3 h-7 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
+                            className="text-xs px-3 h-8 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
                         >
                             Need Correction <span className="ml-2 opacity-50 font-normal">{counts.invalid}</span>
                         </TabsTrigger>

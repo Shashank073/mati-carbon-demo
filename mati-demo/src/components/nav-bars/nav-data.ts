@@ -21,7 +21,14 @@ import {
     ClipboardList,
     Users,
     Leaf,
-    Calendar
+    Calendar,
+    Info,
+    Truck,
+    TestTube,
+    ArrowLeftRight,
+    ShieldPlus,
+    CalendarCheck,
+    LayoutPanelLeft
 } from "lucide-react"
 
 export type UserRole = "Verifier" | "Admin" | "HQ Verifier" | "HQ Admin";
@@ -31,6 +38,7 @@ export interface NavItem {
     url: string
     icon?: any
     isActive?: boolean
+    badge?: string
     items?: {
         title: string
         url: string
@@ -71,134 +79,205 @@ export const data = {
     navMain: [
         {
             title: "Dashboard",
-            url: "#",
-            icon: LayoutDashboard,
-            isActive: true, // Default active for Verifier
-            roles: ["Verifier", "HQ Verifier"] as UserRole[],
-            items: [
-                { title: "Overview", url: "#" },
-                { title: "Analytics", url: "#" },
-            ],
+            url: "#dashboard",
+            icon: LayoutPanelLeft,
+            roles: ["Verifier"] as UserRole[],
         },
         {
-            title: "Farm App",
-            url: "#",
+            title: "Farm app",
+            url: "#farm-app",
             icon: Tractor,
-            isActive: true,
-            roles: ["Verifier", "HQ Verifier"] as UserRole[],
+            roles: ["Verifier"] as UserRole[],
             items: [
-                { title: "Qualification", url: "#" },
-                { title: "Deployment", url: "#" },
-                { title: "Engagement", url: "#" },
-                { title: "Conversation", url: "#" },
+                { title: "Qualification", url: "#qualification" },
+                { title: "Deployment", url: "#deployment" },
+                { title: "Engagement", url: "#engagement" },
+                { title: "Conversation", url: "#conversation" },
             ],
         },
         {
-            title: "Warehouse App",
-            url: "#",
-            icon: Warehouse,
-            roles: ["Verifier", "HQ Verifier"] as UserRole[],
+            title: "Warehouse app",
+            url: "#warehouse",
+            icon: Truck,
+            roles: ["Verifier"] as UserRole[],
             items: [
-                { title: "Overview", url: "#" },
-                { title: "Dispatched", url: "#" },
-                { title: "Delivered", url: "#" },
-                { title: "Dispatch QCs", url: "#" },
-                { title: "Source QCs", url: "#" },
+                { title: "Overview", url: "#warehouse-overview" },
+                { title: "Dispatched", url: "#warehouse-dispatched" },
+                { title: "Delivered", url: "#warehouse-delivered" },
+                { title: "Dispatch QCs", url: "#warehouse-dispatch-qcs" },
+                { title: "Source QCs", url: "#warehouse-source-qcs" },
             ],
         },
         {
-            title: "LAB App",
-            url: "#",
-            icon: FlaskConical,
-            roles: ["Verifier", "HQ Verifier"] as UserRole[],
+            title: "LAB app",
+            url: "#lab",
+            icon: TestTube,
+            roles: ["Verifier"] as UserRole[],
             items: [
-                { title: "Overview", url: "#" },
-                { title: "Samples", url: "#" },
-                { title: "Shipments", url: "#" },
-                { title: "Costs", url: "#" },
+                { title: "Overview", url: "#lab-overview" },
+                { title: "Samples", url: "#lab-samples" },
+                { title: "Shipments", url: "#lab-shipments" },
+                { title: "Carts", url: "#lab-carts" },
             ],
         },
         {
             title: "Supply & Demand",
-            url: "#",
-            icon: TrendingUp,
-            roles: ["Verifier", "HQ Verifier"] as UserRole[],
+            url: "#supply",
+            icon: ArrowLeftRight,
+            roles: ["Verifier"] as UserRole[],
             items: [
-                { title: "Requests", url: "#" },
-                { title: "History", url: "#" },
+                { title: "Requests", url: "#supply-requests" },
+                { title: "History", url: "#supply-history" },
             ],
         },
         {
             title: "HSE",
-            url: "#",
-            icon: Activity,
-            roles: ["Verifier", "HQ Verifier"] as UserRole[],
+            url: "#hse",
+            icon: ShieldPlus,
+            badge: "16",
+            roles: ["Verifier"] as UserRole[],
         },
         {
             title: "Quality System",
-            url: "#",
+            url: "#quality",
             icon: ClipboardCheck,
-            roles: ["Verifier", "HQ Verifier"] as UserRole[],
-        },
-        {
-            title: "Reports",
-            url: "#",
-            icon: ClipboardList,
-            roles: ["HQ Verifier"] as UserRole[],
+            badge: "23",
+            roles: ["Verifier"] as UserRole[],
         }
     ],
     admin: [
         {
             title: "Dashboard",
-            url: "#",
-            icon: LayoutDashboard,
+            url: "#admin-dashboard",
+            icon: LayoutPanelLeft,
             roles: ["Admin"] as UserRole[],
             items: [
-                { title: "Overview", url: "#" },
-                { title: "Track Logistics", url: "#" },
-                { title: "Day End Report", url: "#" }
+                { title: "Overview", url: "#admin-overview" },
+                { title: "Track Logistics", url: "#admin-logistics" },
+                { title: "Day End Report", url: "#admin-report" }
             ]
         },
         {
             title: "Planning",
-            url: "#",
-            icon: Calendar,
+            url: "#planning",
+            icon: CalendarCheck,
             roles: ["Admin"] as UserRole[],
             items: [
-                { title: "Create Plan", url: "#" },
-                { title: "Saved Plans", url: "#" },
-                { title: "Completed plans", url: "#" }
+                { title: "Create Plan", url: "#planning-create" },
+                { title: "Saved Plans", url: "#planning-saved" },
+                { title: "Completed plans", url: "#planning-completed" }
             ]
-        },
+        }
+    ],
+    hqVerifier: [
         {
             title: "Dashboard",
-            url: "#",
-            icon: LayoutDashboard,
-            roles: ["HQ Admin"] as UserRole[],
+            url: "#hq-v-dashboard",
+            icon: LayoutPanelLeft,
+            roles: ["HQ Verifier"] as UserRole[],
+        },
+        {
+            title: "Farm app",
+            url: "#hq-v-farm",
+            icon: Tractor,
+            roles: ["HQ Verifier"] as UserRole[],
             items: [
-                { title: "Overview", url: "#" },
-                { title: "Analytics", url: "#" },
+                { title: "Qualification", url: "#hq-v-qualification" },
+                { title: "Deployment", url: "#hq-v-deployment" },
+                { title: "Engagement", url: "#hq-v-engagement" },
+                { title: "Conversation", url: "#hq-v-conversation" },
+            ],
+        },
+        {
+            title: "Warehouse app",
+            url: "#hq-v-warehouse",
+            icon: Truck,
+            roles: ["HQ Verifier"] as UserRole[],
+            items: [
+                { title: "Overview", url: "#hq-v-w-overview" },
+                { title: "Dispatched", url: "#hq-v-w-dispatched" },
+                { title: "Delivered", url: "#hq-v-w-delivered" },
+                { title: "Dispatch QCs", url: "#hq-v-w-dispatch-qcs" },
+                { title: "Source QCs", url: "#hq-v-w-source-qcs" },
+            ],
+        },
+        {
+            title: "LAB app",
+            url: "#hq-v-lab",
+            icon: TestTube,
+            roles: ["HQ Verifier"] as UserRole[],
+            items: [
+                { title: "Overview", url: "#hq-v-l-overview" },
+                { title: "Samples", url: "#hq-v-l-samples" },
+                { title: "Shipments", url: "#hq-v-l-shipments" },
+                { title: "Carts", url: "#hq-v-l-carts" },
+            ],
+        },
+        {
+            title: "Supply & Demand",
+            url: "#hq-v-supply",
+            icon: ArrowLeftRight,
+            roles: ["HQ Verifier"] as UserRole[],
+            items: [
+                { title: "Requests", url: "#hq-v-s-requests" },
+                { title: "History", url: "#hq-v-s-history" },
+            ],
+        },
+        {
+            title: "HSE",
+            url: "#hq-v-hse",
+            icon: ShieldPlus,
+            badge: "16",
+            roles: ["HQ Verifier"] as UserRole[],
+        },
+        {
+            title: "Quality System",
+            url: "#hq-v-quality",
+            icon: ClipboardCheck,
+            badge: "23",
+            roles: ["HQ Verifier"] as UserRole[],
+        }
+    ],
+    hqAdmin: [
+        {
+            title: "Dashboard",
+            url: "#hq-a-dashboard",
+            icon: LayoutPanelLeft,
+            roles: ["HQ Admin"] as UserRole[],
+        },
+        {
+            title: "Farmers",
+            url: "#hq-a-farmers",
+            icon: Users,
+            roles: ["HQ Admin"] as UserRole[],
+        }
+    ],
+    others: [
+        {
+            title: "Manage",
+            url: "#manage",
+            icon: FileText,
+            items: [
+                { title: "Surveys", url: "#manage-surveys" },
+                { title: "Entities", url: "#manage-entities" },
+                { title: "Verified", url: "#manage-verified" },
+                { title: "Franchises", url: "#manage-franchises" }
             ]
         },
         {
-            title: "User Management",
-            url: "#",
-            icon: User,
-            roles: ["HQ Admin"] as UserRole[],
-            items: [
-                { title: "Users", url: "#" },
-                { title: "Roles", url: "#" },
-            ]
+            title: "Help",
+            url: "#help",
+            icon: HelpCircle,
         },
         {
-            title: "Global Settings",
-            url: "#",
+            title: "About us",
+            url: "#about",
+            icon: Info,
+        },
+        {
+            title: "Settings",
+            url: "#settings",
             icon: Settings,
-            roles: ["HQ Admin"] as UserRole[],
-            items: [
-                { title: "General", url: "#" },
-                { title: "Security", url: "#" },
-            ]
         }
     ]
 }

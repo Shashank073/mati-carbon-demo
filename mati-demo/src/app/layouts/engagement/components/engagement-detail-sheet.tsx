@@ -1322,7 +1322,7 @@ export function EngagementDetailSheet({
                 if (!val) setPreviewItem(null);
             }}>
                 <DialogPortal>
-                    <DialogContent className="max-w-[1200px] w-[95vw] h-[800px] max-h-[90vh] p-0 overflow-hidden bg-white dark:bg-zinc-950 border-none shadow-2xl z-[10001] flex items-center justify-center rounded-2xl [&>button]:hidden">
+                    <DialogContent className="max-w-[1200px] w-[95vw] h-[800px] max-h-[90vh] p-0 overflow-hidden bg-white dark:bg-zinc-950 border-none shadow-2xl z-[500] flex items-center justify-center rounded-2xl [&>button]:hidden">
                         <DialogTitle className="sr-only">Attachment Preview</DialogTitle>
                         <DialogDescription className="sr-only">Basic view of the survey attachment</DialogDescription>
                         
@@ -1335,7 +1335,7 @@ export function EngagementDetailSheet({
 
             {/* New Report Comment Pop-up */}
             <Dialog open={isReportingFinalStep} onOpenChange={setIsReportingFinalStep}>
-                <DialogContent className="max-w-[480px] p-0 overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-lg z-[10002] rounded-xl [&>button]:hidden">
+                <DialogContent className="max-w-[480px] p-0 overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-lg z-[550] rounded-xl [&>button]:hidden">
                     <DialogTitle className="sr-only">Finalize Report</DialogTitle>
                     <DialogDescription className="sr-only">Add additional comments before submitting the report</DialogDescription>
                     

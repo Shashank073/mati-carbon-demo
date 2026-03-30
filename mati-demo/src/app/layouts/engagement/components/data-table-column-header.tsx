@@ -1,5 +1,5 @@
 import { Column } from "@tanstack/react-table"
-import { ArrowDown, ArrowUp, ChevronsUpDown, EyeOff } from "lucide-react"
+import { ArrowDown, ArrowUp, ChevronDown, ChevronsUpDown, EyeOff } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -23,7 +23,7 @@ export function DataTableColumnHeader<TData, TValue>({
     className,
 }: DataTableColumnHeaderProps<TData, TValue>) {
     if (!column.getCanSort()) {
-        return <div className={cn(className)}>{title}</div>
+        return <div className={cn("text-sm font-semibold text-zinc-900 dark:text-zinc-100 px-1", className)}>{title}</div>
     }
 
     return (
@@ -33,15 +33,19 @@ export function DataTableColumnHeader<TData, TValue>({
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="-ml-3 h-8 data-[state=open]:bg-accent group/header"
+                        className="-ml-3 h-8 data-[state=open]:bg-accent group/header hover:bg-transparent data-[state=open]:hover:bg-accent"
                     >
-                        <span>{title}</span>
+                        <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 group-hover/header:text-zinc-900 transition-colors">{title}</span>
                         {column.getIsSorted() === "desc" ? (
-                            <ArrowDown className="ml-2 h-4 w-4" />
+                            <ArrowDown className="ml-2 h-3.5 w-3.5 text-zinc-900" />
                         ) : column.getIsSorted() === "asc" ? (
-                            <ArrowUp className="ml-2 h-4 w-4" />
+                            <ArrowUp className="ml-2 h-3.5 w-3.5 text-zinc-900" />
                         ) : (
-                            <ChevronsUpDown className="ml-2 h-4 w-4 opacity-0 group-hover/header:opacity-100 transition-opacity" />
+                            <ChevronDown className={cn(
+                                "ml-1 h-3.5 w-3.5 transition-all",
+                                "opacity-0 group-hover/header:opacity-100 group-data-[state=open]/header:opacity-100",
+                                "group-data-[state=open]/header:rotate-180 text-zinc-400 group-data-[state=open]/header:text-zinc-900"
+                            )} />
                         )}
                     </Button>
                 </DropdownMenuTrigger>
