@@ -45,101 +45,114 @@ export function DataTableToolbar<TData>({
 
     const handleApplyFilters = (filters: FilterValue) => {
         // Map the custom FilterValue structure to TanStack Table column filters
+        const safeSetFilter = (columnId: string, value: any) => {
+            // Use getAllColumns to avoid the error thrown by getColumn when a column is missing
+            const column = table.getAllColumns().find(col => col.id === columnId);
+            if (column) {
+                column.setFilterValue(value);
+            }
+        };
+
         if (filters.submittedOn?.from || filters.submittedOn?.to) {
-            table.getColumn("submittedOn")?.setFilterValue([filters.submittedOn.from, filters.submittedOn.to])
+            safeSetFilter("submittedOn", [filters.submittedOn.from, filters.submittedOn.to]);
         } else {
-            table.getColumn("submittedOn")?.setFilterValue(undefined)
+            safeSetFilter("submittedOn", undefined);
         }
 
         if (filters.farmers.length > 0) {
-            table.getColumn("farmer")?.setFilterValue(filters.farmers)
+            safeSetFilter("farmer", filters.farmers);
         } else {
-            table.getColumn("farmer")?.setFilterValue(undefined)
+            safeSetFilter("farmer", undefined);
         }
 
         if (filters.engagementTypes.length > 0) {
-            table.getColumn("engagementType")?.setFilterValue(filters.engagementTypes)
+            safeSetFilter("engagementType", filters.engagementTypes);
         } else {
-            table.getColumn("engagementType")?.setFilterValue(undefined)
+            safeSetFilter("engagementType", undefined);
+        }
+
+        if (filters.bases.length > 0) {
+            safeSetFilter("base", filters.bases);
+        } else {
+            safeSetFilter("base", undefined);
         }
 
         if (filters.villages.length > 0) {
-            table.getColumn("village")?.setFilterValue(filters.villages)
+            safeSetFilter("village", filters.villages);
         } else {
-            table.getColumn("village")?.setFilterValue(undefined)
+            safeSetFilter("village", undefined);
         }
 
         if (filters.azs.length > 0) {
-            table.getColumn("azs")?.setFilterValue(filters.azs)
+            safeSetFilter("azs", filters.azs);
         } else {
-            table.getColumn("azs")?.setFilterValue(undefined)
+            safeSetFilter("azs", undefined);
         }
 
         if (filters.surveyors.length > 0) {
-            table.getColumn("surveyor")?.setFilterValue(filters.surveyors)
+            safeSetFilter("surveyor", filters.surveyors);
         } else {
-            table.getColumn("surveyor")?.setFilterValue(undefined)
+            safeSetFilter("surveyor", undefined);
         }
 
         if (filters.statuses.length > 0) {
-            const statusColumn = table.getAllColumns().find(col => col.id === "status")
-            if (statusColumn) {
-                statusColumn.setFilterValue(filters.statuses)
-            }
+            safeSetFilter("status", filters.statuses);
         } else {
-            table.getAllColumns().find(col => col.id === "status")?.setFilterValue(undefined)
+            safeSetFilter("status", undefined);
         }
 
         if (filters.verifiedBy.length > 0) {
-            table.getColumn("verifiedBy")?.setFilterValue(filters.verifiedBy)
+            safeSetFilter("verifiedBy", filters.verifiedBy);
         } else {
-            table.getColumn("verifiedBy")?.setFilterValue(undefined)
+            safeSetFilter("verifiedBy", undefined);
         }
 
         if (filters.matiDeployed?.min !== undefined || filters.matiDeployed?.max !== undefined) {
-            table.getColumn("matiDeployed")?.setFilterValue([filters.matiDeployed.min, filters.matiDeployed.max])
+            safeSetFilter("matiDeployed", [filters.matiDeployed.min, filters.matiDeployed.max]);
         } else {
-            table.getColumn("matiDeployed")?.setFilterValue(undefined)
+            safeSetFilter("matiDeployed", undefined);
         }
 
         if (filters.verifiedOn?.from || filters.verifiedOn?.to) {
-            table.getColumn("verifiedOn")?.setFilterValue([filters.verifiedOn.from, filters.verifiedOn.to])
+            safeSetFilter("verifiedOn", [filters.verifiedOn.from, filters.verifiedOn.to]);
         } else {
-            table.getColumn("verifiedOn")?.setFilterValue(undefined)
+            safeSetFilter("verifiedOn", undefined);
         }
     }
 
     return (
-        <div className="flex flex-row items-center justify-between gap-4 w-full mb-[16px]">
-            <div className="flex items-center min-w-0 flex-1 gap-4">
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
-                    <TabsList className="h-10 w-max justify-start bg-muted p-1">
-                        <TabsTrigger
-                            value="All"
-                            className="text-xs px-3 h-8 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
-                        >
-                            All <span className="ml-2 opacity-50 font-normal">{counts.verified + counts.pending + counts.invalid}</span>
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="Verified"
-                            className="text-xs px-3 h-8 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
-                        >
-                            Verified <span className="ml-2 opacity-50 font-normal">{counts.verified}</span>
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="Pending"
-                            className="text-xs px-3 h-8 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
-                        >
-                            Pending <span className="ml-2 opacity-50 font-normal">{counts.pending}</span>
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="Invalid"
-                            className="text-xs px-3 h-8 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
-                        >
-                            Need Correction <span className="ml-2 opacity-50 font-normal">{counts.invalid}</span>
-                        </TabsTrigger>
-                    </TabsList>
-                </Tabs>
+        <div className="flex flex-row items-center justify-between gap-4 w-full mb-[16px] min-w-0 overflow-hidden">
+            <div className="flex items-center min-w-0 flex-1 gap-4 overflow-hidden">
+                <div className="flex-1 min-w-0 overflow-x-auto scrollbar-none">
+                    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto shrink-0">
+                        <TabsList className="h-10 w-max justify-start bg-muted p-1">
+                            <TabsTrigger
+                                value="All"
+                                className="text-xs px-3 h-8 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
+                            >
+                                All <span className="ml-2 opacity-50 font-normal">{counts.verified + counts.pending + counts.invalid}</span>
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="Verified"
+                                className="text-xs px-3 h-8 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
+                            >
+                                Verified <span className="ml-2 opacity-50 font-normal">{counts.verified}</span>
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="Pending"
+                                className="text-xs px-3 h-8 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
+                            >
+                                Pending <span className="ml-2 opacity-50 font-normal">{counts.pending}</span>
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="Invalid"
+                                className="text-xs px-3 h-8 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
+                            >
+                                Need Correction <span className="ml-2 opacity-50 font-normal">{counts.invalid}</span>
+                            </TabsTrigger>
+                        </TabsList>
+                    </Tabs>
+                </div>
             </div>
 
             <div className="flex items-center gap-2 justify-end shrink-0">

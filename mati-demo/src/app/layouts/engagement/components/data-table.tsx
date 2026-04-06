@@ -94,8 +94,8 @@ export function EngagementTable<TData, TValue>({
     })
 
     return (
-        <div className="flex flex-col h-full gap-0 w-full relative overflow-hidden">
-            <div className="shrink-0">
+        <div className="flex flex-col h-full gap-0 w-full relative overflow-hidden min-w-0">
+            <div className="shrink-0 min-w-0 w-full overflow-hidden">
                 <DataTableToolbar
                     table={table}
                     activeTab={activeTab}
@@ -105,79 +105,94 @@ export function EngagementTable<TData, TValue>({
                     isLoading={isLoading}
                 />
             </div>
-            <div className="rounded-md border flex-1 min-h-0 flex flex-col overflow-auto scrollbar-minimal relative">
-                <Table className="relative w-max min-w-full border-collapse">
-                    <TableHeader className="sticky top-0 z-10 bg-background shadow-sm">
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className="hover:bg-transparent border-b">
-                                {headerGroup.headers.map((header) => {
-                                    return (
-                                        <TableHead
-                                            key={header.id}
-                                            colSpan={header.colSpan}
-                                            className="whitespace-nowrap h-12 px-4 text-left align-middle bg-muted/50 border-b border-zinc-200 dark:border-zinc-800"
-                                        >
-                                            {header.isPlaceholder
-                                                ? null
-                                                : flexRender(
-                                                    header.column.columnDef.header,
-                                                    header.getContext()
-                                                )}
-                                        </TableHead>
-                                    )
-                                })}
-                            </TableRow>
-                        ))}
-                    </TableHeader>
-                    <TableBody>
-                        {isLoading ? (
-                            <TableRow className="hover:bg-transparent border-none">
-                                <TableCell
-                                    colSpan={columns.length}
-                                    className="p-0"
-                                >
-                                    <div className="flex flex-col items-center justify-center h-[400px] w-full gap-3 animate-in fade-in duration-500">
-                                        <Loader2 className="h-8 w-8 text-zinc-300 animate-spin" />
-                                        <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em]">Loading Records...</p>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        ) : table.getRowModel().rows?.length ? (
-                            table.getRowModel().rows.map((row) => {
-                                const isSelected = selectedId === (row.original as any).id
-                                return (
-                                    <TableRow
-                                        key={row.id}
-                                        data-state={isSelected ? "selected" : undefined}
-                                        className={cn(
-                                            "cursor-pointer transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted animate-in fade-in slide-in-from-bottom-1 duration-500",
-                                            isSelected ? "bg-muted/50" : ""
-                                        )}
-                                        onClick={() => onRowClick?.(row.original)}
+            <div className="rounded-md border flex-1 min-h-0 flex flex-col overflow-hidden relative min-w-0 w-full">
+                <div className="flex-1 overflow-auto scrollbar-minimal w-full relative">
+                    <Table className="relative w-full border-collapse">
+                        <TableHeader className="sticky top-0 z-30 bg-background shadow-sm">
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <TableRow key={headerGroup.id} className="hover:bg-transparent border-b">
+                                    {headerGroup.headers.map((header) => {
+                                        return (
+                                            <TableHead
+                                                key={header.id}
+                                                colSpan={header.colSpan}
+                                                style={{ 
+                                                    minWidth: header.column.columnDef.size,
+                                                }}
+                                                className="whitespace-nowrap h-12 px-4 text-left align-middle bg-muted/50 border-b border-zinc-200 dark:border-zinc-800 sticky top-0 z-30"
+                                            >
+                                                {header.isPlaceholder
+                                                    ? null
+                                                    : flexRender(
+                                                        header.column.columnDef.header,
+                                                        header.getContext()
+                                                    )}
+                                            </TableHead>
+                                        )
+                                    })}
+                                </TableRow>
+                            ))}
+                        </TableHeader>
+                        <TableBody>
+                            {isLoading ? (
+                                <TableRow className="hover:bg-transparent border-none">
+                                    <TableCell
+                                        colSpan={columns.length}
+                                        className="p-0"
                                     >
-                                        {row.getVisibleCells().map((cell) => (
-                                            <TableCell key={cell.id} className="whitespace-nowrap p-4 align-middle">
-                                                {flexRender(
-                                                    cell.column.columnDef.cell,
-                                                    cell.getContext()
-                                                )}
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
-                                )
-                            })
-                        ) : (
-                            <TableRow>
-                                <TableCell
-                                    colSpan={columns.length}
-                                    className="h-24 text-center"
-                                >
-                                    No results.
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
+                                        <div className="flex flex-col items-center justify-center h-[400px] w-full gap-3 animate-in fade-in duration-500 relative">
+                                            <div className="sticky left-0 right-0 flex flex-col items-center justify-center w-[calc(100vw-var(--sidebar-width)-3rem)] min-w-0">
+                                                <Loader2 className="h-8 w-8 text-zinc-300 animate-spin" />
+                                                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em]">Loading Records...</p>
+                                            </div>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ) : table.getRowModel().rows?.length ? (
+                                table.getRowModel().rows.map((row) => {
+                                    const isSelected = selectedId === (row.original as any).id
+                                    return (
+                                        <TableRow
+                                            key={row.id}
+                                            data-state={isSelected ? "selected" : undefined}
+                                            className={cn(
+                                                "cursor-pointer transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted animate-in fade-in slide-in-from-bottom-1 duration-500",
+                                                isSelected ? "bg-muted/50" : ""
+                                            )}
+                                            onClick={() => onRowClick?.(row.original)}
+                                        >
+                                            {row.getVisibleCells().map((cell) => {
+                                                return (
+                                                    <TableCell 
+                                                        key={cell.id} 
+                                                        style={{ 
+                                                            minWidth: cell.column.columnDef.size,
+                                                        }}
+                                                        className="whitespace-nowrap p-4 align-middle"
+                                                    >
+                                                        {flexRender(
+                                                            cell.column.columnDef.cell,
+                                                            cell.getContext()
+                                                        )}
+                                                    </TableCell>
+                                                )
+                                            })}
+                                        </TableRow>
+                                    )
+                                })
+                            ) : (
+                                <TableRow>
+                                    <TableCell
+                                        colSpan={columns.length}
+                                        className="h-24 text-center"
+                                    >
+                                        No results.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
             </div>
         </div>
     )

@@ -119,23 +119,25 @@ export default function EngagementPage() {
             activeItemUrl="#engagement"
             pageDescription="Track and manage ongoing farmer interactions, feedback, and survey responses. Review verification status, monitor pending tasks, and address records requiring correction to ensure high-quality data collection."
         >
-            <div className="flex flex-col h-[calc(100vh-64px)] p-6 overflow-hidden">
-                <div className="bg-white dark:bg-zinc-950 flex-1 min-h-0 flex flex-col">
-                    <EngagementTable
-                        key={activeTab} // Re-mount table when tab changes for fresh state
-                        data={filteredData}
-                        columns={activeColumns}
-                        onRowClick={handleRecordClick}
-                        activeTab={activeTab}
-                        setActiveTab={handleTabChange}
-                        counts={{
-                            verified: verifiedCount,
-                            pending: pendingCount,
-                            invalid: invalidCount,
-                        }}
-                        selectedId={selectedRecord?.id}
-                        isLoading={isLoading}
-                    />
+            <div className="flex flex-col h-[calc(100vh-64px)] p-6 overflow-hidden min-w-0 w-full">
+                <div className="bg-white dark:bg-zinc-950 flex-1 min-h-0 flex flex-col min-w-0 overflow-hidden w-full">
+                    <div className="flex-1 min-h-0 w-full overflow-hidden flex flex-col">
+                        <EngagementTable
+                            key={activeTab} // Re-mount table when tab changes for fresh state
+                            data={filteredData}
+                            columns={activeColumns}
+                            onRowClick={handleRecordClick}
+                            activeTab={activeTab}
+                            setActiveTab={handleTabChange}
+                            counts={{
+                                verified: verifiedCount,
+                                pending: pendingCount,
+                                invalid: invalidCount,
+                            }}
+                            selectedId={selectedRecord?.id}
+                            isLoading={isLoading}
+                        />
+                    </div>
                 </div>
 
                 <EngagementDetailSheet

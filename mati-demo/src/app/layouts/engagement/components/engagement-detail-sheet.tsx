@@ -17,7 +17,7 @@ import {
     DialogPortal,
     DialogOverlay,
 } from "@/components/ui/dialog"
-import { EngagementRecord } from "../data/schema"
+import { EngagementRecord, VerificationComment } from "../data/schema"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -25,7 +25,7 @@ import { Calendar, XCircle } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, MessageSquareText, AlertCircle, CheckCircle2, X, Check, Image as ImageIcon, Play, FileText, MapPin, Download, Info, MessageSquareWarning, Trash2, ZoomIn, ZoomOut, RotateCw, Maximize2, Minimize2, Scaling, AlignCenter, SlidersHorizontal, RotateCcw, Loader2, ChevronDown, User, Phone, Eye, EyeOff } from "lucide-react"
+import { ChevronLeft, ChevronRight, MessageSquareText, AlertCircle, CheckCircle2, X, Check, Image as ImageIcon, Play, FileText, MapPin, Download, Info, MessageSquareWarning, Trash2, ZoomIn, ZoomOut, RotateCw, Maximize2, Minimize2, Scaling, AlignCenter, SlidersHorizontal, RotateCcw, Loader2, ChevronDown, User, Phone, Eye, EyeOff, Plus } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
@@ -278,6 +278,8 @@ export function EngagementDetailSheet({
     hasLocationQuestion = true
 }: EngagementDetailSheetProps) {
     const [comment, setComment] = React.useState("")
+    const [isSavingComment, setIsSavingComment] = React.useState(false)
+    const [localComments, setLocalComments] = React.useState<VerificationComment[]>([])
     const [isApproving, setIsApproving] = React.useState(false)
     const [showCommentInput, setShowCommentInput] = React.useState(false)
     const [isReporting, setIsReporting] = React.useState(false)
@@ -423,6 +425,8 @@ export function EngagementDetailSheet({
     // Reset state when record changes
     React.useEffect(() => {
         setComment("")
+        setIsSavingComment(false)
+        setLocalComments(record?.verificationComments || [])
         setIsApproving(false)
         setShowCommentInput(false)
         setIsReporting(false)
@@ -467,6 +471,24 @@ export function EngagementDetailSheet({
         } else {
             setReportedIds(activeSurveyData.map(item => item.id))
         }
+    }
+
+    const handleSaveComment = () => {
+        if (!comment.trim()) return
+        setIsSavingComment(true)
+        // Simulate API call
+        setTimeout(() => {
+            const newComment: VerificationComment = {
+                id: `local-${Date.now()}`,
+                verifier: "Current User", // In a real app, this would be the logged-in user
+                date: new Date(),
+                text: comment
+            }
+            setLocalComments(prev => [...prev, newComment])
+            setComment("")
+            setShowCommentInput(false)
+            setIsSavingComment(false)
+        }, 600)
     }
 
     const handleApprove = () => {
@@ -924,30 +946,30 @@ export function EngagementDetailSheet({
                     </div>
 
                     {/* Fixed Engagement Details Bar */}
-                    <div className="bg-white dark:bg-zinc-950 border-t border-zinc-100 dark:border-zinc-800 px-6 py-2.5 flex items-center justify-between text-[11px] font-bold uppercase tracking-wider">
+                    <div className="bg-white dark:bg-zinc-950 border-t border-zinc-100 dark:border-zinc-800 px-6 py-2.5 flex items-center justify-between text-[10px] font-bold uppercase tracking-wider">
                         <div className="flex items-center gap-3">
                             <span className="text-zinc-900 dark:text-zinc-50 leading-none">{record.engagementType}</span>
                         </div>
                         
                         {/* Info Switcher Container */}
                         <div 
-                            className="h-[16px] overflow-hidden relative min-w-[200px]"
+                            className="h-[14px] overflow-hidden relative min-w-[200px]"
                             onMouseEnter={() => setIsInfoHovered(true)}
                             onMouseLeave={() => setIsInfoHovered(false)}
                         >
                             <div 
-                                className="transition-transform duration-700 ease-in-out absolute top-0 right-0 w-full grid grid-rows-[16px_16px]"
-                                style={{ transform: `translateY(-${infoSwitchIndex * 16}px)` }}
+                                className="transition-transform duration-700 ease-in-out absolute top-0 right-0 w-full grid grid-rows-[14px_14px]"
+                                style={{ transform: `translateY(-${infoSwitchIndex * 14}px)` }}
                             >
                                 {/* First Info: AZ Code and AZ Name */}
-                                <div className="h-[16px] flex items-center justify-end gap-2 leading-none">
+                                <div className="h-[14px] flex items-center justify-end gap-2 leading-none">
                                     <span>AZ-{record.azs}</span>
                                     <span className="text-zinc-200 dark:text-zinc-800">•</span>
                                     <span className="text-zinc-500 dark:text-zinc-400 truncate max-w-[120px]">{record.azName || "Cotton Cluster"}</span>
                                 </div>
 
                                 {/* Second Info: Surveyor and Verifier */}
-                                <div className="h-[16px] flex items-center justify-end gap-2 leading-none">
+                                <div className="h-[14px] flex items-center justify-end gap-2 leading-none">
                                     <HoverCard openDelay={100} closeDelay={100}>
                                         <HoverCardTrigger asChild>
                                             <span className="text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 cursor-help transition-colors">
@@ -1097,77 +1119,116 @@ export function EngagementDetailSheet({
 
                                     {/* Approval Comment Section for Pending */}
                                     {record.status === "Pending" && !isReporting && (
-                                        <div className="mt-8 space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                            {!showCommentInput ? (
-                                                <div className="space-y-3">
-                                                    <p className="text-[11px] text-zinc-500 font-medium leading-relaxed">
-                                                        Add a comment for any specific feedback or observations (optional).
-                                                    </p>
+                                        <div className="border-b border-zinc-100 dark:border-zinc-800 pt-2 pb-3">
+                                            <div className="space-y-0.5 mb-3">
+                                                <div className="text-[12px] font-bold text-zinc-400 uppercase tracking-widest">
+                                                    Add Comment <span className="text-[10px] font-medium lowercase opacity-70">(optional)</span>
+                                                </div>
+                                                <div className="text-[12px] font-normal text-zinc-500 dark:text-zinc-400 leading-tight">
+                                                    Share any additional observations or feedback regarding this survey.
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <Textarea
+                                                    rows={showCommentInput || comment.trim() ? 4 : 1}
+                                                    placeholder="Type your comment here . . ."
+                                                    className={cn(
+                                                        "w-full box-border bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-md resize-none focus-visible:ring-1 focus-visible:ring-zinc-200 dark:focus-visible:ring-zinc-800 px-3 py-2 placeholder:text-zinc-400 transition-[min-height] duration-300 ease-in-out md:text-sm !min-h-0",
+                                                        showCommentInput || comment.trim()
+                                                            ? "min-h-[100px] text-base"
+                                                            : "h-10 min-h-0 max-h-10 text-sm leading-tight"
+                                                    )}
+                                                    value={comment}
+                                                    onChange={(e) => setComment(e.target.value)}
+                                                    onFocus={() => setShowCommentInput(true)}
+                                                    onBlur={() => {
+                                                        if (!comment.trim()) setShowCommentInput(false);
+                                                    }}
+                                                />
+                                                <div className={cn(
+                                                    "flex items-center gap-2 overflow-hidden transition-[height,opacity,margin-top] duration-300 ease-in-out",
+                                                    comment.trim() ? "mt-2 h-7 opacity-100" : "mt-0 h-0 opacity-0 pointer-events-none"
+                                                )}>
+                                                    <Button 
+                                                        size="sm"
+                                                        className="h-6 px-3 text-[10px] font-bold uppercase tracking-wider bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 rounded-md shadow-sm transition-all duration-200"
+                                                        onClick={handleSaveComment}
+                                                        disabled={isSavingComment || !comment.trim()}
+                                                    >
+                                                        {isSavingComment ? (
+                                                            <Loader2 className="h-3 w-3 animate-spin mr-1.5" />
+                                                        ) : null}
+                                                        Save
+                                                    </Button>
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"
-                                                        className="h-8 px-0 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 hover:bg-transparent transition-colors group flex items-center gap-2"
-                                                        onClick={() => setShowCommentInput(true)}
+                                                        className="h-6 px-2 text-[10px] font-bold text-zinc-400 hover:text-zinc-900 transition-colors"
+                                                        onClick={() => {
+                                                            setComment("")
+                                                            setShowCommentInput(false)
+                                                        }}
                                                     >
-                                                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700 transition-colors">
-                                                            <MessageSquareText className="h-3.5 w-3.5 opacity-70 group-hover:opacity-100" />
-                                                        </div>
-                                                        <span className="text-xs font-bold uppercase tracking-tight">Add a comment</span>
+                                                        Cancel
                                                     </Button>
                                                 </div>
-                                            ) : (
-                                                <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                                                    <div className="flex items-center justify-between">
-                                                        <div className="flex items-center gap-2 text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
-                                                            Comment <span className="font-medium opacity-70">(Optional)</span>
-                                                        </div>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="h-6 px-2 text-[10px] font-bold text-zinc-400 hover:text-red-500 transition-colors"
-                                                            onClick={() => {
-                                                                setShowCommentInput(false)
-                                                                setComment("")
-                                                            }}
-                                                        >
-                                                            Cancel
-                                                        </Button>
-                                                    </div>
-                                                    <Textarea
-                                                        placeholder="Type your comment here..."
-                                                        className="min-h-[100px] w-full bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-lg text-sm resize-none focus-visible:ring-1 focus-visible:ring-zinc-200 dark:focus-visible:ring-zinc-800 p-3 placeholder:text-zinc-400"
-                                                        value={comment}
-                                                        onChange={(e) => setComment(e.target.value)}
-                                                        autoFocus
-                                                    />
-                                                    <div className="h-px bg-zinc-100 dark:bg-zinc-800 w-full" />
-                                                    <p className="text-[10px] text-zinc-400 font-medium italic">
-                                                        This comment will be permanently attached to the verified record.
-                                                    </p>
-                                                </div>
-                                            )}
+                                            </div>
                                         </div>
                                     )}
 
-                                    {/* Display Comment for Verified */}
-                                    {record.status === "Verified" && (record.verified?.comment || record.approvalComment) && (
-                                        <div className="mt-8 space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                            <div className="flex items-center gap-2 text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+                                    {/* Verification Comments List */}
+                                    {localComments.length > 0 && (
+                                        <div className="py-2 border-b border-zinc-100 dark:border-zinc-800">
+                                            <div className="flex items-center gap-2 text-[12px] font-bold text-zinc-400 uppercase tracking-widest mb-2">
+                                                {localComments.length > 1 ? 'Comments' : 'Comment'}
+                                            </div>
+                                            <div className="space-y-3">
+                                                {localComments.map((c, idx) => (
+                                                    <div key={c.id} className="relative pl-4 animate-in fade-in slide-in-from-left-2 duration-500" style={{ animationDelay: `${idx * 100}ms` }}>
+                                                        {/* Left accent line */}
+                                                        <div className="absolute left-0 top-1 bottom-1 w-0.5 bg-zinc-200 dark:bg-zinc-800 rounded-full" />
+                                                        
+                                                        <div className="text-[14px] text-zinc-700 dark:text-zinc-300 leading-relaxed italic">
+                                                            "{c.text}"
+                                                        </div>
+                                                        <div className="flex items-center gap-2 pt-1">
+                                                            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
+                                                                {c.verifier}
+                                                            </span>
+                                                            <span className="text-zinc-300 dark:text-zinc-700">•</span>
+                                                            <span className="text-[10px] text-zinc-400 font-medium uppercase">
+                                                                {format(c.date, "dd MMM yyyy")}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Display Comment for Verified (Legacy Support) */}
+                                    {record.status === "Verified" && (record.verified?.comment || record.approvalComment) && localComments.length === 0 && (
+                                        <div className="py-2 border-b border-zinc-100 dark:border-zinc-800">
+                                            <div className="flex items-center gap-2 text-[12px] font-bold text-zinc-400 uppercase tracking-widest mb-2">
                                                 Comment
                                             </div>
-                                            <div className="text-sm text-zinc-900 dark:text-zinc-50 leading-relaxed">
-                                                {record.verified?.comment || record.approvalComment}
+                                            <div className="space-y-3">
+                                                <div className="relative pl-4 animate-in fade-in slide-in-from-left-2 duration-500">
+                                                    <div className="absolute left-0 top-1 bottom-1 w-0.5 bg-zinc-200 dark:bg-zinc-800 rounded-full" />
+                                                    <div className="text-[14px] text-zinc-700 dark:text-zinc-300 leading-relaxed italic">
+                                                        "{record.verified?.comment || record.approvalComment}"
+                                                    </div>
+                                                    <div className="flex items-center gap-2 pt-1">
+                                                        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
+                                                            {record.verified?.verifier}
+                                                        </span>
+                                                        <span className="text-zinc-300 dark:text-zinc-700">•</span>
+                                                        <span className="text-[10px] text-zinc-400 font-medium uppercase">
+                                                            {record.verified?.date ? format(record.verified.date, "dd MMM yyyy") : ""}
+                                                        </span>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div className="flex items-center gap-2 pt-1">
-                                                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
-                                                    {record.verified?.verifier}
-                                                </span>
-                                                <span className="text-zinc-300 dark:text-zinc-700">•</span>
-                                                <span className="text-[10px] text-zinc-400 font-medium uppercase">
-                                                    {record.verified?.date ? format(record.verified.date, "dd MMM yyyy") : ""}
-                                                </span>
-                                            </div>
-                                            <div className="h-px bg-zinc-100 dark:bg-zinc-800 w-full" />
                                         </div>
                                     )}
                                 </>

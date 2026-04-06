@@ -1,4 +1,11 @@
 
+export interface VerificationComment {
+    id: string;
+    verifier: string;
+    date: Date;
+    text: string;
+}
+
 export interface EngagementRecord {
     id: number;
     submittedOn: Date;
@@ -10,6 +17,7 @@ export interface EngagementRecord {
     };
     engagementType: string;
     village: string;
+    base?: string;
     block?: string;
     state?: string;
     country?: string;
@@ -30,5 +38,6 @@ export interface EngagementRecord {
     // Keeping some old fields for compatibility with the detail drawer if needed
     comments: string;
     approvalComment?: string;
+    verificationComments?: VerificationComment[];
     score: number;
 }

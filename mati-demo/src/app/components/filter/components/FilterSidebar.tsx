@@ -39,6 +39,7 @@ export interface FilterValue {
     farmers: string[];
     engagementTypes: string[];
     villages: string[];
+    bases: string[];
     azs: string[];
     surveyors: string[];
     statuses: string[];
@@ -65,6 +66,13 @@ const VILLAGES = [
     "Village A",
     "Village B",
     "Village C",
+];
+
+const BASE_OPTIONS = [
+    "Base A",
+    "Base B",
+    "Base C",
+    "Base D",
 ];
 
 const STATUS_OPTIONS = [
@@ -113,6 +121,7 @@ const DEFAULT_FILTERS: FilterValue = {
     farmers: [],
     engagementTypes: [],
     villages: [],
+    bases: [],
     azs: [],
     surveyors: [],
     statuses: [],
@@ -276,7 +285,7 @@ export function FilterSidebar({ open, onOpenChange, onApply, initialFilters, act
     // Filter out options based on active columns
     const visibleFields = React.useMemo(() => {
         const fields: (keyof FilterValue)[] = [
-            'submittedOn', 'farmers', 'engagementTypes', 'villages', 
+            'submittedOn', 'farmers', 'engagementTypes', 'bases', 'villages', 
             'azs', 'surveyors', 'statuses', 'matiDeployed', 'verifiedBy', 'verifiedOn'
         ];
         
@@ -286,6 +295,7 @@ export function FilterSidebar({ open, onOpenChange, onApply, initialFilters, act
             if (field === 'farmers') return activeColumns.includes('farmer');
             if (field === 'engagementTypes') return activeColumns.includes('engagementType');
             if (field === 'villages') return activeColumns.includes('village');
+            if (field === 'bases') return activeColumns.includes('base');
             if (field === 'surveyors') return activeColumns.includes('surveyor');
             if (field === 'statuses') return activeColumns.includes('status');
             if (field === 'matiDeployed') return activeColumns.includes('matiDeployed');
@@ -469,6 +479,16 @@ export function FilterSidebar({ open, onOpenChange, onApply, initialFilters, act
                             label="Engagement type" 
                             field="engagementTypes" 
                             options={ENGAGEMENT_TYPES} 
+                            currentFilters={filters}
+                            onFilterChange={handleFilterChange}
+                            onReset={handleResetField}
+                        />
+                    )}
+                    {visibleFields.includes('bases') && (
+                        <FilterMultiSelect 
+                            label="Base" 
+                            field="bases" 
+                            options={BASE_OPTIONS} 
                             currentFilters={filters}
                             onFilterChange={handleFilterChange}
                             onReset={handleResetField}

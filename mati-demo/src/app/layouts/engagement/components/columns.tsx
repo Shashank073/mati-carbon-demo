@@ -108,6 +108,7 @@ const SurveyorHoverCard = ({ surveyor }: { surveyor: EngagementRecord["surveyor"
 export const columns: ColumnDef<EngagementRecord>[] = [
     {
         accessorKey: "submittedOn",
+        size: 120,
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Submitted on" />
         ),
@@ -119,6 +120,7 @@ export const columns: ColumnDef<EngagementRecord>[] = [
     {
         id: "farmer",
         accessorFn: (row) => row.farmer.name,
+        size: 200,
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Farmer" />
         ),
@@ -126,13 +128,23 @@ export const columns: ColumnDef<EngagementRecord>[] = [
     },
     {
         accessorKey: "engagementType",
+        size: 180,
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Engagement type" />
         ),
         cell: ({ row }) => <div className="text-sm">{row.getValue("engagementType")}</div>,
     },
     {
+        accessorKey: "base",
+        size: 120,
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Base" />
+        ),
+        cell: ({ row }) => <div className="text-sm">{row.getValue("base") || "-"}</div>,
+    },
+    {
         accessorKey: "village",
+        size: 140,
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Village" />
         ),
@@ -140,6 +152,7 @@ export const columns: ColumnDef<EngagementRecord>[] = [
     },
     {
         accessorKey: "azs",
+        size: 100,
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="AZ code" />
         ),
@@ -147,6 +160,7 @@ export const columns: ColumnDef<EngagementRecord>[] = [
     },
     {
         accessorKey: "azName",
+        size: 140,
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="AZ name" />
         ),
@@ -156,6 +170,7 @@ export const columns: ColumnDef<EngagementRecord>[] = [
         accessorKey: "surveyor",
         id: "surveyor",
         accessorFn: (row) => row.surveyor.name,
+        size: 180,
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Surveyor" />
         ),
@@ -164,6 +179,7 @@ export const columns: ColumnDef<EngagementRecord>[] = [
     {
         id: "verifiedBy",
         accessorFn: (row) => row.verified?.verifier,
+        size: 140,
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Verified By" />
         ),
@@ -176,6 +192,7 @@ export const columns: ColumnDef<EngagementRecord>[] = [
     {
         id: "verifiedOn",
         accessorFn: (row) => row.verified?.date,
+        size: 140,
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Verified On" />
         ),
@@ -191,6 +208,7 @@ export const columns: ColumnDef<EngagementRecord>[] = [
 export const allColumns: ColumnDef<EngagementRecord>[] = [
     {
         accessorKey: "submittedOn",
+        size: 120,
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Submitted on" />
         ),
@@ -202,6 +220,7 @@ export const allColumns: ColumnDef<EngagementRecord>[] = [
     {
         id: "farmer",
         accessorFn: (row) => row.farmer.name,
+        size: 200,
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Farmer" />
         ),
@@ -209,13 +228,23 @@ export const allColumns: ColumnDef<EngagementRecord>[] = [
     },
     {
         accessorKey: "engagementType",
+        size: 180,
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Engagement type" />
         ),
         cell: ({ row }) => <div className="text-sm">{row.getValue("engagementType")}</div>,
     },
     {
+        accessorKey: "base",
+        size: 120,
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Base" />
+        ),
+        cell: ({ row }) => <div className="text-sm">{row.getValue("base") || "-"}</div>,
+    },
+    {
         accessorKey: "village",
+        size: 140,
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Village" />
         ),
@@ -223,6 +252,7 @@ export const allColumns: ColumnDef<EngagementRecord>[] = [
     },
     {
         accessorKey: "azs",
+        size: 100,
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="AZ code" />
         ),
@@ -230,6 +260,7 @@ export const allColumns: ColumnDef<EngagementRecord>[] = [
     },
     {
         accessorKey: "azName",
+        size: 140,
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="AZ name" />
         ),
@@ -239,6 +270,7 @@ export const allColumns: ColumnDef<EngagementRecord>[] = [
         accessorKey: "surveyor",
         id: "surveyor",
         accessorFn: (row) => row.surveyor.name,
+        size: 180,
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Surveyor" />
         ),
@@ -246,6 +278,7 @@ export const allColumns: ColumnDef<EngagementRecord>[] = [
     },
     {
         accessorKey: "status",
+        size: 150,
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Status" />
         ),
@@ -269,6 +302,7 @@ export const allColumns: ColumnDef<EngagementRecord>[] = [
     {
         id: "verifiedBy",
         accessorFn: (row) => row.verified?.verifier,
+        size: 140,
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Verified By" />
         ),
@@ -281,6 +315,7 @@ export const allColumns: ColumnDef<EngagementRecord>[] = [
     {
         id: "verifiedOn",
         accessorFn: (row) => row.verified?.date,
+        size: 140,
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Verified On" />
         ),

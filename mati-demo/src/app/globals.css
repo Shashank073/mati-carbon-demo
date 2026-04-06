@@ -104,8 +104,8 @@
   }
 
   .scrollbar-minimal::-webkit-scrollbar {
-    width: 5px;
-    height: 5px;
+    width: 4px;
+    height: 4px;
   }
 
   .scrollbar-minimal::-webkit-scrollbar-track {
@@ -113,12 +113,12 @@
   }
 
   .scrollbar-minimal::-webkit-scrollbar-thumb {
-    background: hsl(var(--muted-foreground) / 0.2);
+    background: hsl(var(--muted-foreground) / 0.3);
     border-radius: 10px;
   }
 
   .scrollbar-minimal::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted-foreground) / 0.4);
+    background: hsl(var(--muted-foreground) / 0.5);
   }
 }
 

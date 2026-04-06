@@ -122,19 +122,19 @@ function NavBarType4Content({ children, pageTitle, initialActiveItemUrl, pageDes
                 setIsFranchiseOpen={setIsFranchiseOpen}
             />
             <SidebarInset>
-                <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-4">
-                    <div className="flex items-center gap-2">
-                        <SidebarTrigger className="-ml-1" />
-                        <Separator orientation="vertical" className="mr-2 h-4" />
-                        <Breadcrumb>
-                            <BreadcrumbList>
-                                <BreadcrumbItem className="flex items-center gap-2">
-                                    <BreadcrumbPage className="text-lg font-semibold text-zinc-900">{pageTitle}</BreadcrumbPage>
+                <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-4 min-w-0 w-full overflow-hidden">
+                    <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
+                        <SidebarTrigger className="-ml-1 shrink-0" />
+                        <Separator orientation="vertical" className="mr-2 h-4 shrink-0" />
+                        <Breadcrumb className="min-w-0 flex-1 overflow-hidden">
+                            <BreadcrumbList className="flex-nowrap overflow-hidden">
+                                <BreadcrumbItem className="flex items-center gap-2 min-w-0 overflow-hidden">
+                                    <BreadcrumbPage className="text-lg font-semibold text-zinc-900 truncate shrink-0">{pageTitle}</BreadcrumbPage>
                                     {pageDescription && (
                                         <TooltipProvider>
                                             <Tooltip delayDuration={300}>
                                                 <TooltipTrigger asChild>
-                                                    <button className="inline-flex items-center justify-center rounded-full w-5 h-5 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 transition-colors translate-y-[1px]">
+                                                    <button className="inline-flex items-center justify-center rounded-full w-5 h-5 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 transition-colors translate-y-[1px] shrink-0">
                                                         <Info className="w-4 h-4" />
                                                         <span className="sr-only">About {pageTitle}</span>
                                                     </button>
@@ -153,7 +153,7 @@ function NavBarType4Content({ children, pageTitle, initialActiveItemUrl, pageDes
                         </Breadcrumb>
                     </div>
 
-                    <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 shrink-0 ml-auto">
                         <DropdownMenu open={isProfileOpen} onOpenChange={setIsProfileOpen}>
                             <DropdownMenuTrigger asChild>
                                 <button className={cn(
