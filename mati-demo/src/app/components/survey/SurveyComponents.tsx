@@ -68,6 +68,80 @@ export interface SurveyItem {
 }
 
 // --- Dummy Data ---
+export const translations: Record<string, Record<string, string>> = {
+    hi: {
+        "What is your primary feedback on the MRV system?": "MRV प्रणाली पर आपकी प्राथमिक प्रतिक्रिया क्या है?",
+        "Describe any pest issues observed:": "देखे गए किसी भी कीट के मुद्दों का वर्णन करें:",
+        "Select the crops currently being harvested:": "वर्तमान में काटी जा रही फसलों का चयन करें:",
+        "Upload a photo of the soil sample:": "मिट्टी के नमूने की एक तस्वीर अपलोड करें:",
+        "Record a video of the crop health:": "फसल स्वास्थ्य का एक वीडियो रिकॉर्ड करें:",
+        "Attach the soil test report (PDF):": "मिट्टी परीक्षण रिपोर्ट (PDF) संलग्न करें:",
+        "Confirm the location of the field:": "खेत के स्थान की पुष्टि करें:",
+        "Measure the total cultivated area:": "कुल खेती वाले क्षेत्र को मापें:",
+        "Measure the total cultivated area: (in Acres)": "कुल खेती वाले क्षेत्र को मापें: (एकड़ में)",
+        "Enter the quantity of seeds used:": "उपयोग किए गए बीजों की मात्रा दर्ज करें:",
+        "Enter the quantity of seeds used: (in Tons)": "उपयोग किए गए बीजों की मात्रा दर्ज करें: (टन में)",
+        "How would you rate the new fertilizer efficiency?": "आप नई उर्वरक दक्षता को कैसे रेट करेंगे?",
+        "Estimated cost of inputs per acre:": "प्रति एकड़ इनपुट की अनुमानित लागत:",
+        "Estimated cost of inputs per acre: (in INR)": "प्रति एकड़ इनपुट की अनुमानित लागत: (INR में)",
+        "Date of sowing:": "बुवाई की तारीख:",
+        "Did you verify the soil pH level?": "क्या आपने मिट्टी के पीएच स्तर को सत्यापित किया?",
+        "Provided Contact Number:": "प्रदान किया गया संपर्क नंबर:",
+        "Provided Email Address:": "प्रदान किया गया ईमेल पता:",
+        "Primary Contact Number:": "प्राथमिक संपर्क नंबर:",
+        "Number of storage units available:": "उपलब्ध भंडारण इकाइयों की संख्या:",
+        "Average soil moisture content:": "औसत मिट्टी की नमी की मात्रा:",
+        "Total number of livestock:": "पशुधन की कुल संख्या:",
+        "Preferred contact method:": "पसंद का संपर्क तरीका:",
+        "Equipment available for rent:": "किराये के लिए उपलब्ध उपकरण:",
+        "Current crop season:": "वर्तमान फसल का मौसम:",
+        "Preferred time for field visit:": "खेत के दौरे के लिए पसंदीदा समय:",
+        "Overall satisfaction with the process:": "प्रक्रिया के साथ कुल संतुष्टि:",
+        "Rank the following priorities (1-3):": "निम्नलिखित प्राथमिकताओं को रैंक करें (1-3):",
+        "Voice note from the surveyor:": "सर्वेक्षक से वॉयस नोट:",
+        "Scan Farmer ID (QR Code):": "किसान आईडी (QR कोड) स्कैन करें:",
+        "Hierarchical Survey Structure (4 Levels):": "पदानुक्रमित सर्वेक्षण संरचना (4 स्तर):",
+        "Yes": "हाँ",
+        "No": "नहीं",
+        "Not available": "उपलब्ध नहीं",
+        "Acres": "एकड़",
+        "tons": "टन",
+        "Units": "इकाइयाँ",
+        "INR": "रुपये",
+        "Rice (Basmati)": "चावल (बासमती)",
+        "Wheat": "गेहूं",
+        "Mustard": "सरसों",
+        "WhatsApp": "व्हाट्सएप",
+        "Tractor": "ट्रैक्टर",
+        "Seeder": "सीडर",
+        "Harvester": "हार्वेस्टर",
+        "Kharif": "खरीफ",
+        "Water Management": "जल प्रबंधन",
+        "Soil Health": "मृदा स्वास्थ्य",
+        "Pest Control": "कीट नियंत्रण",
+        "Logged in successfully!": "सफलतापूर्वक लॉग इन किया गया!",
+        "Continue": "जारी रखें",
+        "Login to your account": "अपने खाते में लॉगिन करें",
+        "Login with your registered email id.": "अपने पंजीकृत ईमेल आईडी के साथ लॉगिन करें।",
+        "The real-time data accuracy is excellent for our needs.": "वास्तविक समय डेटा सटीकता हमारी आवश्यकताओं के लिए उत्कृष्ट है।",
+        "During the initial inspection of the north-east quad, we observed significant yellowing of the lower leaves on approximately 15% of the crop. Further examination revealed small entrance holes near the base of the stalks, which strongly suggests an early-stage infestation of stem borers. Additionally, there are minor traces of aphid activity on the younger shoots. We recommend an immediate application of organic neem-based pesticides followed by a secondary review in 48 hours to prevent further spread to the adjacent healthy quadrants.": "उत्तर-पूर्वी क्वाड के प्रारंभिक निरीक्षण के दौरान, हमने लगभग 15% फसल के निचले पत्तों पर महत्वपूर्ण पीलापन देखा। आगे की जांच में डंठल के आधार के पास छोटे प्रवेश छिद्र मिले, जो दृढ़ता से तना छेदक के शुरुआती चरण के संक्रमण का सुझाव देते हैं। इसके अतिरिक्त, युवा टहनियों पर एफिड गतिविधि के मामूली निशान हैं। हम आस-पास के स्वस्थ चतुर्थांशों में आगे फैलने से रोकने के लिए 48 घंटों में माध्यमिक समीक्षा के बाद जैविक नीम-आधारित कीटनाशकों के तत्काल उपयोग की सलाह देते हैं।",
+        "Add Comment": "टिप्पणी जोड़ें",
+        "optional": "वैकल्पिक",
+        "Share any additional observations or feedback regarding this survey.": "इस सर्वेक्षण के संबंध में कोई अतिरिक्त अवलोकन या प्रतिक्रिया साझा करें।",
+        "Type your comment here . . .": "अपनी टिप्पणी यहाँ टाइप करें . . .",
+        "Save": "सहेजें",
+        "Cancel": "रद्द करें",
+        "Report": "रिपोर्ट करें",
+        "Approving...": "अनुमोदन हो रहा है...",
+        "Approve": "अनुमोदन करें",
+        "Report Selected": "चयनित रिपोर्ट करें",
+        "Usage": "उपयोग",
+        "Preview": "पूर्वावलोकन",
+        "Entries Recorded": "प्रविष्टियाँ दर्ज की गईं",
+        "Entry Details": "प्रविष्टि विवरण"
+    }
+};
+
 export const surveyData: SurveyItem[] = [
     {
         id: "1",
@@ -718,7 +792,9 @@ export const SurveyCard = ({
     isSelected = false,
     onToggleSelect,
     disableDialog = false,
-    isInvalid = false
+    isInvalid = false,
+    onMapClick,
+    language = "en"
 }: {
     item: SurveyItem;
     style: string;
@@ -729,7 +805,14 @@ export const SurveyCard = ({
     disableDialog?: boolean;
     isInvalid?: boolean;
     onMapClick?: (item: SurveyItem) => void;
+    language?: "en" | "hi";
 }) => {
+    // Helper function to translate text
+    const t = (text: string) => {
+        if (language === "en") return text;
+        return translations[language]?.[text] || text;
+    };
+
     // Dynamic Styles based on selection
     const cardStyles = cn(
         "relative overflow-hidden transition-all duration-300",
@@ -771,7 +854,7 @@ export const SurveyCard = ({
                 )}>
                     <AlertCircle className="w-3 h-3 text-zinc-300 dark:text-zinc-600" />
                     <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
-                        Not available
+                        {t("Not available")}
                     </span>
                 </div>
             );
@@ -785,43 +868,26 @@ export const SurveyCard = ({
                             "text-zinc-500 dark:text-zinc-400 leading-relaxed",
                             style === "style-5" ? "text-base font-semibold text-zinc-900 dark:text-zinc-100 leading-snug" : "text-sm",
                             style === "style-5-feedback" && "text-base font-semibold text-zinc-900 dark:text-zinc-100 leading-snug"
-                        )}>{item.answer as string}</p>
+                        )}>{t(item.answer as string)}</p>
                     </CopyableText>
                 );
 
             case "long-text":
-                if (style === "style-5" || style === "style-5-feedback") {
-                    return (
-                        <CopyableText text={item.answer as string}>
-                            <ExpandableText text={item.answer as string} style={style} />
-                        </CopyableText>
-                    );
-                }
                 return (
                     <CopyableText text={item.answer as string}>
-                        <ExpandableText text={item.answer as string} style={style} />
+                        <ExpandableText text={t(item.answer as string)} style={style} />
                     </CopyableText>
                 );
 
             case "badge":
-                if (style === "style-5" || style === "style-5-feedback") {
-                    return (
-                        <div className="flex flex-wrap gap-1.5">
-                            {(item.answer as string[]).map((badge, idx) => (
-                                <Badge key={idx} variant="outline" className={cn(
-                                    "text-xs border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300"
-                                )}>
-                                    {badge}
-                                </Badge>
-                            ))}
-                        </div>
-                    );
-                }
                 return (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-1.5">
                         {(item.answer as string[]).map((badge, idx) => (
-                            <Badge key={idx} variant="secondary" className="bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-700">
-                                {badge}
+                            <Badge key={idx} variant="outline" className={cn(
+                                "text-xs border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300",
+                                !isStyle5 && "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                            )}>
+                                {t(badge)}
                             </Badge>
                         ))}
                     </div>
@@ -836,13 +902,6 @@ export const SurveyCard = ({
                                 <div className="group relative w-full">
                                     <div 
                                         className="flex items-center p-3 border border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer pr-10 attachment-preview-trigger"
-                                        onClick={(e) => {
-                                            if (disableDialog) {
-                                                // If dialog is disabled, we let the parent handle it via this class
-                                                // But we stop propagation to avoid triggering parent's generic card click if any
-                                                // e.stopPropagation(); 
-                                            }
-                                        }}
                                     >
                                         <div className="w-10 h-10 rounded overflow-hidden flex-shrink-0 border border-zinc-200 dark:border-zinc-700 bg-zinc-200 mr-3">
                                             <img src={item.answer as string} alt="Thumbnail" className="w-full h-full object-cover" />
@@ -917,11 +976,6 @@ export const SurveyCard = ({
                                 <div className="group relative w-full">
                                     <div 
                                         className="flex items-center p-3 border border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer pr-10 attachment-preview-trigger"
-                                        onClick={(e) => {
-                                            if (disableDialog) {
-                                                // Let parent handle it
-                                            }
-                                        }}
                                     >
                                         <div className="w-10 h-10 rounded overflow-hidden flex-shrink-0 border border-zinc-200 dark:border-zinc-700 bg-zinc-900 flex items-center justify-center mr-3">
                                             <Play className="w-4 h-4 text-white fill-white" />
@@ -1106,8 +1160,8 @@ export const SurveyCard = ({
                                     <MapPin className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{item.answer as string}</p>
-                                    {item.meta && <p className="text-xs text-zinc-500">{item.meta}</p>}
+                                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{t(item.answer as string)}</p>
+                                    {item.meta && <p className="text-xs text-zinc-500">{t(item.meta)}</p>}
                                 </div>
                             </div>
                         </HoverCardTrigger>
@@ -1130,12 +1184,12 @@ export const SurveyCard = ({
                                 <div className="absolute inset-0 bg-transparent" />
                                 <div className="absolute inset-0 border-2 border-white/20 pointer-events-none" />
                                 <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/60 backdrop-blur-md rounded text-[10px] text-white font-bold uppercase tracking-widest pointer-events-none">
-                                    Preview
+                                    {t("Preview")}
                                 </div>
                             </div>
                             <div className="p-3 bg-white dark:bg-zinc-950 border-t border-zinc-100 dark:border-zinc-800">
-                                <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{item.answer as string}</p>
-                                <p className="text-[10px] text-zinc-500 font-medium mt-1 uppercase tracking-tight">{item.meta || "GEO COORD"}</p>
+                                <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{t(item.answer as string)}</p>
+                                <p className="text-[10px] text-zinc-500 font-medium mt-1 uppercase tracking-tight">{t(item.meta || "GEO COORD")}</p>
                             </div>
                         </HoverCardContent>
                     </HoverCard>
@@ -1163,7 +1217,7 @@ export const SurveyCard = ({
                         isStyle5 && "text-base"
                     )}>
                         {!isStyle5 && <DollarSign className={cn("w-5 h-5 text-zinc-500", isStyle5 && "w-4 h-4")} />}
-                        {(item.answer as number).toLocaleString('en-US')} {!isStyle5 && <span className="text-xs font-normal text-zinc-500 uppercase">{item.meta}</span>}
+                        {(item.answer as number).toLocaleString('en-US')} {!isStyle5 && <span className="text-xs font-normal text-zinc-500 uppercase">{t(item.meta || "INR")}</span>}
                     </div>
                 );
 
@@ -1182,27 +1236,16 @@ export const SurveyCard = ({
                 );
 
             case "boolean":
-                if (isStyle5) {
-                    return (
-                        <div className={cn(
-                            "inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wide",
-                            item.answer
-                                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                                : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                        )}>
-                            {item.answer ? "Yes" : "No"}
-                        </div>
-                    );
-                }
                 return (
                     <div className={cn(
-                        "inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium",
+                        "inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wide",
                         item.answer
                             ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                            : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                            : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+                        !isStyle5 && "px-3 py-1.5 rounded-full text-sm font-medium"
                     )}>
-                        {item.answer ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
-                        {item.answer ? "Yes" : "No"}
+                        {!isStyle5 && (item.answer ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />)}
+                        {item.answer ? t("Yes") : t("No")}
                     </div>
                 );
 
@@ -1233,7 +1276,7 @@ export const SurveyCard = ({
                         isStyle5 && "text-base"
                     )}>
                         {!isStyle5 && <Ruler className={cn("w-5 h-5 text-zinc-500", isStyle5 && "w-4 h-4")} />}
-                        {item.answer as number} {!isStyle5 && <span className="text-xs font-normal text-zinc-500 uppercase">{item.meta}</span>}
+                        {item.answer as number} {!isStyle5 && <span className="text-xs font-normal text-zinc-500 uppercase">{t(item.meta || "Acres")}</span>}
                     </div>
                 );
 
@@ -1244,7 +1287,7 @@ export const SurveyCard = ({
                         isStyle5 && "text-base"
                     )}>
                         {!isStyle5 && <Package className={cn("w-5 h-5 text-zinc-500", isStyle5 && "w-4 h-4")} />}
-                        {item.answer as number} {!isStyle5 && <span className="text-xs font-normal text-zinc-500 uppercase">{item.meta}</span>}
+                        {item.answer as number} {!isStyle5 && <span className="text-xs font-normal text-zinc-500 uppercase">{t(item.meta || "Units")}</span>}
                     </div>
                 );
 
@@ -1274,7 +1317,7 @@ export const SurveyCard = ({
                                 <div className="w-6 h-6 flex items-center justify-center bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-[10px] font-bold rounded-md">
                                     {rankItem.rank}
                                 </div>
-                                <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{rankItem.label}</span>
+                                <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{t(rankItem.label)}</span>
                             </div>
                         ))}
                     </div>
@@ -1306,7 +1349,7 @@ export const SurveyCard = ({
                             <div className="bg-zinc-100 dark:bg-zinc-800 p-1.5 rounded-md">
                                 <Layers className="w-3.5 h-3.5 text-zinc-500" />
                             </div>
-                            <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">{entries.length} Entries Recorded</span>
+                            <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">{entries.length} {t("Entries Recorded")}</span>
                         </div>
                         <div className="space-y-4">
                             {entries.map((entry, idx) => (
@@ -1316,7 +1359,7 @@ export const SurveyCard = ({
                                             <span className="flex items-center justify-center w-5 h-5 rounded bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-[10px] font-bold">
                                                 {idx + 1}
                                             </span>
-                                            <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-tight">Entry Details</span>
+                                            <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-tight">{t("Entry Details")}</span>
                                         </div>
                                         <Badge variant="outline" className="text-[9px] font-bold bg-white dark:bg-zinc-950 px-1.5 h-5">ID: {entry.id}</Badge>
                                     </div>
@@ -1328,6 +1371,7 @@ export const SurveyCard = ({
                                                     style="style-5"
                                                     showDetails={false}
                                                     disableDialog={false}
+                                                    language={language}
                                                 />
                                             </div>
                                         ))}
@@ -1378,7 +1422,7 @@ export const SurveyCard = ({
                                         "text-[14px] tracking-tight leading-tight",
                                         level === 0 ? "font-bold text-zinc-900 dark:text-zinc-50" : "font-normal text-zinc-500 dark:text-zinc-400"
                                     )}>
-                                        {node.label}
+                                        {t(node.label)}
                                     </span>
                                 </div>
 
@@ -1415,10 +1459,7 @@ export const SurveyCard = ({
 
             default:
                 // Text, long-text, phone, email, etc.
-                if (isStyle5) {
-                    return <p className="font-semibold text-zinc-900 dark:text-zinc-100 text-base leading-snug">{item.answer as string}</p>;
-                }
-                return null;
+                return <p className="font-semibold text-zinc-900 dark:text-zinc-100 text-base leading-snug">{t(item.answer as string)}</p>;
         }
     };
 
@@ -1434,7 +1475,7 @@ export const SurveyCard = ({
                     </div>
                     <div className="flex-1 p-4 min-w-0">
                         <h3 className={questionStyles}>
-                            {item.question}
+                            {t(item.question)}
                         </h3>
                         <div>
                             {renderContent()}
@@ -1463,7 +1504,7 @@ export const SurveyCard = ({
                         </span>
                     )}
                     <h3 className={cn(questionStyles, style === "style-5-feedback" && "relative z-10")}>
-                        {item.question}
+                        {t(item.question)}
                     </h3>
                 </div>
                 <div className={cn((style !== "style-3" && style !== "style-5" && style !== "style-5-feedback") && "pl-8")}>
@@ -1477,7 +1518,7 @@ export const SurveyCard = ({
         <div className={cn("w-full transition-all", (style === "style-5" || style === "style-5-feedback") ? "mb-0" : "mb-2")}>
             {(showDetails && style !== "style-5" && style !== "style-5-feedback") && (
                 <div className="mb-2">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 pl-1">{item.label}</span>
+                    <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 pl-1">{t(item.label)}</span>
                 </div>
             )}
 
@@ -1509,7 +1550,7 @@ export const SurveyCard = ({
             {(showDetails && style !== "style-5") && (
                 <div className="mt-2">
                     <p className="text-xs text-zinc-400 italic pl-1">
-                        <span className="font-semibold not-italic">Usage:</span> {item.description}
+                        <span className="font-semibold not-italic">{t("Usage")}:</span> {t(item.description)}
                     </p>
                 </div>
             )}

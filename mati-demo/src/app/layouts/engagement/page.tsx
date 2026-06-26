@@ -13,18 +13,26 @@ import { EngagementRecord } from "./data/schema"
 import { cn } from "@/lib/utils"
 import { surveyData } from "@/app/components/survey/SurveyComponents"
 import { format } from "date-fns"
+import { Languages, ChevronDown, Check } from "lucide-react"
 import {
     Tooltip,
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export default function EngagementPage() {
     const [selectedRecord, setSelectedRecord] = React.useState<EngagementRecord | null>(null)
     const [isDrawerOpen, setIsDrawerOpen] = React.useState(false)
     const [activeTab, setActiveTab] = React.useState<"All" | "Verified" | "Pending" | "Invalid">("Verified")
     const [isLoading, setIsLoading] = React.useState(false)
+    const [language, setLanguage] = React.useState<"en" | "hi">("en")
 
     const handleTabChange = (val: string) => {
         setIsLoading(true)
@@ -152,6 +160,8 @@ export default function EngagementPage() {
                     totalCount={filteredData.length}
                     surveyData={filteredSurveyData}
                     hasLocationQuestion={hasLocationQuestion}
+                    language={language}
+                    onLanguageChange={setLanguage}
                 />
 
                 {/* Footer Section */}

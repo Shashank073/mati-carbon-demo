@@ -29,6 +29,7 @@ import { ChevronLeft, ChevronRight, MessageSquareText, AlertCircle, CheckCircle2
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
+import { Languages } from "lucide-react"
 import {
     HoverCard,
     HoverCardContent,
@@ -40,7 +41,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { SurveyItem, surveyData, SurveyCard } from "@/app/components/survey/SurveyComponents"
+import { SurveyItem, surveyData, SurveyCard, translations } from "@/app/components/survey/SurveyComponents"
 import { GoogleMap, useJsApiLoader, Marker, Polygon, InfoWindow } from "@react-google-maps/api"
 import { MOCK_FARMERS } from "@/data/mockData"
 import { Farmer, Plot } from "@/types/map"
@@ -203,6 +204,8 @@ interface EngagementDetailSheetProps {
     totalCount: number
     surveyData?: SurveyItem[]
     hasLocationQuestion?: boolean
+    language?: "en" | "hi"
+    onLanguageChange?: (lang: "en" | "hi") => void
 }
 
 function ImagePreview({ item, zoom, rotation, imageMode }: { item: SurveyItem, zoom: number, rotation: number, imageMode: "fill" | "fit" | "stretch" | "center" }) {
@@ -275,7 +278,9 @@ export function EngagementDetailSheet({
     currentIndex,
     totalCount,
     surveyData: customSurveyData,
-    hasLocationQuestion = true
+    hasLocationQuestion = true,
+    language = "en",
+    onLanguageChange
 }: EngagementDetailSheetProps) {
     const [comment, setComment] = React.useState("")
     const [isSavingComment, setIsSavingComment] = React.useState(false)
@@ -298,6 +303,12 @@ export function EngagementDetailSheet({
     const [specificMarker, setSpecificMarker] = React.useState<google.maps.LatLngLiteral | null>(null)
     const mapRef = React.useRef<google.maps.Map | null>(null);
     const isProgrammaticChange = React.useRef(false);
+
+    // Helper function to translate text
+    const t = React.useCallback((text: string) => {
+        if (language === "en") return text;
+        return translations[language]?.[text] || text;
+    }, [language]);
 
     // Find the farmer in MOCK_FARMERS to get plot data
     const farmerData = MOCK_FARMERS.find(f => f.name === record?.farmer.name) || MOCK_FARMERS[0];
@@ -922,14 +933,45 @@ export function EngagementDetailSheet({
                                 </div>
                             </div>
                             <div className="flex flex-col items-end gap-2 h-14 justify-center">
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all active:scale-95 -mr-1 focus-visible:ring-0 focus-visible:ring-offset-0"
-                                    onClick={handleCloseAll}
-                                >
-                                    <X className="h-4 w-4" />
-                                </Button>
+                                <div className="flex items-center gap-1.5">
+                                    {/* Language Dropdown moved to top right */}
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button 
+                                                variant="ghost" 
+                                                className="h-8 px-2 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all active:scale-95 focus-visible:ring-0 focus-visible:ring-offset-0 flex items-center gap-1"
+                                            >
+                                                <Languages className="h-4 w-4" />
+                                                <ChevronDown className="h-3 w-3 opacity-50" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end" className="w-32 z-[300]">
+                                            <DropdownMenuItem 
+                                                className="flex items-center justify-between text-xs font-bold uppercase tracking-wider"
+                                                onClick={() => onLanguageChange?.("en")}
+                                            >
+                                                English
+                                                {language === "en" && <Check className="h-3 w-3" />}
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem 
+                                                className="flex items-center justify-between text-xs font-bold uppercase tracking-wider"
+                                                onClick={() => onLanguageChange?.("hi")}
+                                            >
+                                                हिंदी
+                                                {language === "hi" && <Check className="h-3 w-3" />}
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all active:scale-95 focus-visible:ring-0 focus-visible:ring-offset-0"
+                                        onClick={handleCloseAll}
+                                    >
+                                        <X className="h-4 w-4" />
+                                    </Button>
+                                </div>
                                 <Badge
                                     variant="outline"
                                     className={cn(
@@ -1111,6 +1153,7 @@ export function EngagementDetailSheet({
                                                     disableDialog={true}
                                                     isInvalid={record.status === "Invalid"}
                                                     onMapClick={handleItemClick}
+                                                    language={language}
                                                 />
                                                 </div>
                                             </div>
@@ -1122,16 +1165,16 @@ export function EngagementDetailSheet({
                                         <div className="border-b border-zinc-100 dark:border-zinc-800 pt-2 pb-3">
                                             <div className="space-y-0.5 mb-3">
                                                 <div className="text-[12px] font-bold text-zinc-400 uppercase tracking-widest">
-                                                    Add Comment <span className="text-[10px] font-medium lowercase opacity-70">(optional)</span>
+                                                    {t("Add Comment")} <span className="text-[10px] font-medium lowercase opacity-70">({t("optional")})</span>
                                                 </div>
                                                 <div className="text-[12px] font-normal text-zinc-500 dark:text-zinc-400 leading-tight">
-                                                    Share any additional observations or feedback regarding this survey.
+                                                    {t("Share any additional observations or feedback regarding this survey.")}
                                                 </div>
                                             </div>
                                             <div className="flex flex-col">
                                                 <Textarea
                                                     rows={showCommentInput || comment.trim() ? 4 : 1}
-                                                    placeholder="Type your comment here . . ."
+                                                    placeholder={t("Type your comment here . . .")}
                                                     className={cn(
                                                         "w-full box-border bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-md resize-none focus-visible:ring-1 focus-visible:ring-zinc-200 dark:focus-visible:ring-zinc-800 px-3 py-2 placeholder:text-zinc-400 transition-[min-height] duration-300 ease-in-out md:text-sm !min-h-0",
                                                         showCommentInput || comment.trim()
@@ -1158,7 +1201,7 @@ export function EngagementDetailSheet({
                                                         {isSavingComment ? (
                                                             <Loader2 className="h-3 w-3 animate-spin mr-1.5" />
                                                         ) : null}
-                                                        Save
+                                                        {t("Save")}
                                                     </Button>
                                                     <Button
                                                         variant="ghost"
@@ -1169,7 +1212,7 @@ export function EngagementDetailSheet({
                                                             setShowCommentInput(false)
                                                         }}
                                                     >
-                                                        Cancel
+                                                        {t("Cancel")}
                                                     </Button>
                                                 </div>
                                             </div>
@@ -1310,7 +1353,7 @@ export function EngagementDetailSheet({
                                                     setReportedIds([])
                                                 }}
                                             >
-                                                Cancel
+                                                {t("Cancel")}
                                             </Button>
                                         ) : (
                                             <Button
@@ -1318,7 +1361,7 @@ export function EngagementDetailSheet({
                                                 className="h-9 px-4 text-xs font-bold border-zinc-100 text-zinc-500 hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all"
                                                 onClick={() => setIsReporting(true)}
                                             >
-                                                <AlertCircle className="mr-2 h-3.5 w-3.5" /> Report
+                                                <AlertCircle className="mr-2 h-3.5 w-3.5" /> {t("Report")}
                                             </Button>
                                         )}
                                         
@@ -1352,7 +1395,7 @@ export function EngagementDetailSheet({
                                                                 isApproveLoaded ? "text-white dark:text-zinc-900" : "text-zinc-300 dark:text-zinc-600"
                                                             )} />
                                                         )}
-                                                        <span>{isApproving ? "Approving..." : "Approve"}</span>
+                                                        <span>{isApproving ? t("Approving...") : t("Approve")}</span>
                                                     </div>
                                                 </Button>
                                             </div>
@@ -1368,7 +1411,7 @@ export function EngagementDetailSheet({
                                                 disabled={reportedIds.length === 0}
                                             >
                                                 <AlertCircle className="mr-2 h-3.5 w-3.5" />
-                                                {reportedIds.length === 0 ? "Report" : `Report Selected (${reportedIds.length})`}
+                                                {reportedIds.length === 0 ? t("Report") : `${t("Report Selected")} (${reportedIds.length})`}
                                             </Button>
                                         )}
                                     </div>
