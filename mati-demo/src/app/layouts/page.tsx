@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { ArrowLeft, ArrowRight, Table as TableIcon, MessageSquare } from "lucide-react";
+import { ArrowLeft, ArrowRight, Table as TableIcon, MessageSquare, Tractor } from "lucide-react";
 
 export default function LayoutsPage() {
     return (
@@ -61,6 +61,28 @@ export default function LayoutsPage() {
                                 <Link href="/layouts/engagement" className="block">
                                     <Button className="w-full group-hover:bg-zinc-900 group-hover:text-zinc-50 dark:group-hover:bg-zinc-50 dark:group-hover:text-zinc-900" variant="outline">
                                         View Engagement <ArrowRight className="ml-2 h-4 w-4" />
+                                    </Button>
+                                </Link>
+                            </CardContent>
+                        </Card>
+
+                        {/* Deployment Layout Card */}
+                        <Card className="hover:shadow-md transition-shadow group cursor-pointer border-zinc-200 dark:border-zinc-800">
+                            <CardHeader>
+                                <div className="flex items-center gap-3 mb-2">
+                                    <div className="p-2 bg-zinc-100 dark:bg-zinc-900 rounded-md group-hover:bg-mati-gold/10 transition-colors">
+                                        <Tractor className="h-5 w-5 text-zinc-700 dark:text-zinc-300 group-hover:text-mati-gold" />
+                                    </div>
+                                    <CardTitle className="text-lg">Deployment Layout</CardTitle>
+                                </div>
+                                <CardDescription className="line-clamp-2">
+                                    Interactive table and list views for managing farmer deployment processes and configurations.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <Link href="/layouts/deployment" className="block">
+                                    <Button className="w-full group-hover:bg-zinc-900 group-hover:text-zinc-50 dark:group-hover:bg-zinc-50 dark:group-hover:text-zinc-900" variant="outline">
+                                        View Deployment <ArrowRight className="ml-2 h-4 w-4" />
                                     </Button>
                                 </Link>
                             </CardContent>

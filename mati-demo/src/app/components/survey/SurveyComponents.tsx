@@ -895,13 +895,14 @@ export const SurveyCard = ({
 
             case "image":
                 if (style === "style-5" || style === "style-5-feedback") {
-                    const fileName = (item.answer as string).split('/').pop()?.split('?')[0] || "image.jpg";
+                    const decodedUrl = decodeURIComponent(item.answer as string);
+                    const fileName = decodedUrl.split('/').pop()?.split('?')[0] || "image.jpg";
                                     const imageContent = (
                         <HoverCard openDelay={200}>
                             <HoverCardTrigger asChild>
-                                <div className="group relative w-full">
+                                <div className="group relative w-full max-w-full overflow-hidden">
                                     <div 
-                                        className="flex items-center p-3 border border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer pr-10 attachment-preview-trigger"
+                                        className="flex items-center p-3 border border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer pr-10 attachment-preview-trigger w-full max-w-full overflow-hidden"
                                     >
                                         <div className="w-10 h-10 rounded overflow-hidden flex-shrink-0 border border-zinc-200 dark:border-zinc-700 bg-zinc-200 mr-3">
                                             <img src={item.answer as string} alt="Thumbnail" className="w-full h-full object-cover" />
@@ -969,13 +970,14 @@ export const SurveyCard = ({
 
             case "video":
                 if (style === "style-5-feedback") {
-                    const fileName = (item.answer as string).split('/').pop()?.split('?')[0] || "video.mp4";
+                    const decodedUrl = decodeURIComponent(item.answer as string);
+                    const fileName = decodedUrl.split('/').pop()?.split('?')[0] || "video.mp4";
                     const videoContent = (
                         <HoverCard openDelay={200}>
                             <HoverCardTrigger asChild>
-                                <div className="group relative w-full">
+                                <div className="group relative w-full max-w-full overflow-hidden">
                                     <div 
-                                        className="flex items-center p-3 border border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer pr-10 attachment-preview-trigger"
+                                        className="flex items-center p-3 border border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer pr-10 attachment-preview-trigger w-full max-w-full overflow-hidden"
                                     >
                                         <div className="w-10 h-10 rounded overflow-hidden flex-shrink-0 border border-zinc-200 dark:border-zinc-700 bg-zinc-900 flex items-center justify-center mr-3">
                                             <Play className="w-4 h-4 text-white fill-white" />
@@ -1493,7 +1495,7 @@ export const SurveyCard = ({
                     (style === "style-5" || style === "style-5-feedback") ? "mb-1" : "mb-3"
                 )}>
                     {/* Only show ID if NOT Style 3 or Style 5. For Style 5 Feedback, hide it when reporting to match Style 5 alignment */}
-                    {(style !== "style-3" && style !== "style-5" && !(style === "style-5-feedback" && isReporting)) && (
+                    {(style !== "style-3" && style !== "style-5" && style !== "style-5-feedback" && !(style === "style-5-feedback" && isReporting)) && (
                         <span className={cn(
                             "flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold",
                             style === "style-1" && "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900",
