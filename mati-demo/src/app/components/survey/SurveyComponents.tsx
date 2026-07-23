@@ -63,7 +63,7 @@ export interface SurveyItem {
         | TreeResponse[];
     meta?: string;
     label: string;
-    description: string;
+    description?: string;
     required?: boolean;
 }
 
@@ -1552,7 +1552,7 @@ export const SurveyCard = ({
             {(showDetails && style !== "style-5") && (
                 <div className="mt-2">
                     <p className="text-xs text-zinc-400 italic pl-1">
-                        <span className="font-semibold not-italic">{t("Usage")}:</span> {t(item.description)}
+                        <span className="font-semibold not-italic">{t("Usage")}:</span> {t(item.description || "")}
                     </p>
                 </div>
             )}

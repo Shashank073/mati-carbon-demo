@@ -43,7 +43,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { SurveyItem, surveyData, SurveyCard, translations } from "@/app/components/survey/SurveyComponents"
+import { SurveyItem, VariantType, surveyData, SurveyCard, translations } from "@/app/components/survey/SurveyComponents"
 import { GoogleMap, useJsApiLoader, Marker, Polygon, InfoWindow } from "@react-google-maps/api"
 import { MOCK_FARMERS } from "@/data/mockData"
 import { Farmer, Plot } from "@/types/map"
@@ -473,16 +473,7 @@ const REAL_DEPLOYMENT_DATA: Record<string, {
     }
 };
 
-interface SurveyItem {
-    id: string;
-    question: string;
-    type: string;
-    answer: any;
-    label: string;
-    description?: string;
-    meta?: string;
-    required?: boolean;
-}
+
 
 const getDispatchSurveyItems = (dispatch: any, record: EngagementRecord): SurveyItem[] => {
     const formatTimestamp = (ts: any) => {
@@ -583,14 +574,80 @@ const getDispatchSurveyItems = (dispatch: any, record: EngagementRecord): Survey
         }
     ];
 
+    if (dispatch.batch_id !== undefined) {
+        items.push({
+            id: "batch_id",
+            question: "batch_id:",
+            type: "text",
+            answer: dispatch.batch_id,
+            label: "Batch ID"
+        });
+    }
+    if (dispatch.material_type !== undefined) {
+        items.push({
+            id: "material_type",
+            question: "material_type:",
+            type: "text",
+            answer: dispatch.material_type,
+            label: "Material Type"
+        });
+    }
+    if (dispatch.crop_stage !== undefined) {
+        items.push({
+            id: "crop_stage",
+            question: "crop_stage:",
+            type: "text",
+            answer: dispatch.crop_stage,
+            label: "Crop Stage"
+        });
+    }
+    if (dispatch.field_condition !== undefined) {
+        items.push({
+            id: "field_condition",
+            question: "field_condition:",
+            type: "text",
+            answer: dispatch.field_condition,
+            label: "Field Condition"
+        });
+    }
+    if (dispatch.survey_type !== undefined) {
+        items.push({
+            id: "survey_type",
+            question: "survey_type:",
+            type: "text",
+            answer: dispatch.survey_type,
+            label: "Survey Type"
+        });
+    }
+    if (dispatch.remarks !== undefined) {
+        items.push({
+            id: "remarks",
+            question: "remarks:",
+            type: "text",
+            answer: dispatch.remarks,
+            label: "Remarks"
+        });
+    }
+    if (dispatch.responseId !== undefined) {
+        items.push({
+            id: "responseId",
+            question: "responseId:",
+            type: "text",
+            answer: dispatch.responseId,
+            label: "Response ID"
+        });
+    }
+
     // Add video
-    items.push({
-        id: "video",
-        question: "Deployment video 1*:",
-        type: "video",
-        answer: dispatch.video || "https://www.w3schools.com/html/mov_bbb.mp4",
-        label: "Video of Deployment"
-    });
+    if (dispatch.video) {
+        items.push({
+            id: "video",
+            question: "Deployment video 1*:",
+            type: "video",
+            answer: dispatch.video,
+            label: "Video of Deployment"
+        });
+    }
 
     return items;
 };
@@ -620,6 +677,64 @@ const getDeploymentSurveyItems = (depl: any, record: EngagementRecord, dispatchP
             label: "GPS Coordinates"
         }
     ];
+
+    if (depl.plot_code !== undefined) {
+        items.push({
+            id: "plot_code",
+            question: "plot_code:",
+            type: "text",
+            answer: Array.isArray(depl.plot_code) ? depl.plot_code.join(", ") : depl.plot_code,
+            label: "Plot Code"
+        });
+    }
+    if (depl.amt_deploy !== undefined) {
+        // Already handled by amt_deploy in standard items
+    }
+    if (depl.verbal_plot_area_enrolled !== undefined) {
+        items.push({
+            id: "verbal_plot_area_enrolled",
+            question: "verbal_plot_area_enrolled:",
+            type: "text",
+            answer: `${depl.verbal_plot_area_enrolled} Acres`,
+            label: "Verbal Plot Area Enrolled"
+        });
+    }
+    if (depl.boost_amount_plot_applied !== undefined) {
+        items.push({
+            id: "boost_amount_plot_applied",
+            question: "boost_amount_plot_applied:",
+            type: "text",
+            answer: `${depl.boost_amount_plot_applied} kg/l`,
+            label: "Boost Amount Plot Applied"
+        });
+    }
+    if (depl.plot_area !== undefined) {
+        items.push({
+            id: "plot_area",
+            question: "plot_area:",
+            type: "text",
+            answer: `${depl.plot_area} Acres`,
+            label: "Plot Area"
+        });
+    }
+    if (depl.baler_type !== undefined) {
+        items.push({
+            id: "baler_type",
+            question: "baler_type:",
+            type: "text",
+            answer: depl.baler_type,
+            label: "Baler Type"
+        });
+    }
+    if (depl.num_bales_prepared !== undefined) {
+        items.push({
+            id: "num_bales_prepared",
+            question: "num_bales_prepared:",
+            type: "text",
+            answer: `${depl.num_bales_prepared} Bales`,
+            label: "Number of Bales Prepared"
+        });
+    }
 
     // Determine deployment pictures from the parent dispatch pictures
     const picturesToUse: string[] = [];
@@ -796,7 +911,45 @@ export function EngagementDetailSheet({
 
             // Populate dictionary states for all dispatches/deployments of this record
             let recordDispatches: any[] = [];
-            if (record.farmer.name === "Aditya Puri") {
+            if (record.farmer.name === "Farmer Science") {
+                recordDispatches = [
+                    { id: "DISP-1774084912326", deployments: [{ id: "DEPL-1774084912326" }] },
+                    { id: "DISP-1774085356761", deployments: [{ id: "DEPL-1774085356761" }] }
+                ];
+            } else if (record.farmer.name === "Farmer AWD") {
+                recordDispatches = [
+                    {
+                        id: "DISP-1776233378346",
+                        deployments: [
+                            { id: "DEPL-1776233378346-1" },
+                            { id: "DEPL-1776233378346-2" },
+                            { id: "DEPL-1776233378346-3" },
+                            { id: "DEPL-1776233378346-4" },
+                            { id: "DEPL-1776233378346-5" },
+                            { id: "DEPL-1776233378346-6" },
+                            { id: "DEPL-1776233378346-7" }
+                        ]
+                    }
+                ];
+            } else if (record.farmer.name === "Farmer MatiBoost") {
+                recordDispatches = [
+                    {
+                        id: "DISP-1771928026711",
+                        deployments: [
+                            { id: "DEPL-1771928026711-1" },
+                            { id: "DEPL-1771928026711-2" },
+                            { id: "DEPL-1771928026711-3" },
+                            { id: "DEPL-1771928026711-4" }
+                        ]
+                    }
+                ];
+            } else if (record.farmer.name === "Farmer Biomass") {
+                recordDispatches = [
+                    { id: "DISP-1775797163737", deployments: [{ id: "DEPL-1775797163737-1" }, { id: "DEPL-1775797163737-2" }] },
+                    { id: "DISP-1775797204167", deployments: [{ id: "DEPL-1775797204167-1" }, { id: "DEPL-1775797204167-2" }] },
+                    { id: "DISP-1775797244198", deployments: [{ id: "DEPL-1775797244198-1" }, { id: "DEPL-1775797244198-2" }] }
+                ];
+            } else if (record.farmer.name === "Aditya Puri") {
                 recordDispatches = [
                     { id: "DISP-1766990550669", deployments: [{ id: "DEPL-1766990550669" }] },
                     { id: "DISP-1766990514355", deployments: [{ id: "DEPL-1766990514355" }] },
@@ -1061,6 +1214,373 @@ export function EngagementDetailSheet({
 
     const mockDispatches = React.useMemo(() => {
         if (!record) return [];
+        if (record.farmer.name === "Farmer Science") {
+            return [
+                {
+                    id: "DISP-1774084912326",
+                    date: "21 Mar 2026",
+                    date_raw: 1774051200000,
+                    vehicleId: "N/A",
+                    trailer_no: ",,",
+                    source_name: "Mati Boost",
+                    carrier: "Mati Boost",
+                    cluster_name: "Cluster 1",
+                    surveyor_name: "Nilesh Kumar",
+                    surveyor_registred_no: "+919406277649",
+                    quantity: "2 Tons",
+                    batch_id: "B7,12/03/26",
+                    material_type: "Mati Boost",
+                    created_at_raw: 1774084912326,
+                    updated_at_raw: 1774085276544,
+                    video: "https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2FgHoTyOaEEmMPQfbfYcr4euSuE3p2%2Fvideos%2F2026_03_21_14_56_50_853.mp4?alt=media&token=cd23817e-38f0-410b-8152-5e29d6984ec9",
+                    deployments: [
+                        {
+                            id: "DEPL-1774084912326",
+                            plot_no: 1,
+                            plot: "Plot 1",
+                            plot_code: "CB12",
+                            amt_deploy: 2,
+                            quantity: "2 Tons",
+                            coordinates: "22.6889° N, 81.8894° E",
+                            plot_location: [{ lat: 22.688934343645382, lng: 81.88942708075047 }]
+                        }
+                    ]
+                },
+                {
+                    id: "DISP-1774085356761",
+                    date: "21 Mar 2026",
+                    date_raw: 1774051200000,
+                    vehicleId: "N/A",
+                    trailer_no: ",,",
+                    source_name: "Mati Boost",
+                    carrier: "Mati Boost",
+                    cluster_name: "Cluster 1",
+                    surveyor_name: "Nilesh Kumar",
+                    surveyor_registred_no: "+919406277649",
+                    quantity: "3 Tons",
+                    batch_id: "B7,12/03/26",
+                    material_type: "Mati Boost",
+                    created_at_raw: 1774085356761,
+                    updated_at_raw: 1774085762954,
+                    video: "https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2FgHoTyOaEEmMPQfbfYcr4euSuE3p2%2Fvideos%2F2026_03_21_15_04_20_959.mp4?alt=media&token=26ab24f2-89a9-4ced-8f9c-b7f2850b6df0",
+                    pictures: [
+                        "https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2FgHoTyOaEEmMPQfbfYcr4euSuE3p2%2Fimages%2F2026_03_21_15_05_47_616.jpg?alt=media&token=ba76cd27-000f-41b0-9897-a0015b14ba06"
+                    ],
+                    deployments: [
+                        {
+                            id: "DEPL-1774085356761",
+                            plot_no: 1,
+                            plot: "Plot 1",
+                            plot_code: "CB11",
+                            amt_deploy: 3,
+                            quantity: "3 Tons",
+                            coordinates: "22.6879° N, 81.8890° E",
+                            plot_location: [{ lat: 22.687945102798523, lng: 81.88903514295816 }]
+                        }
+                    ]
+                }
+            ];
+        }
+        if (record.farmer.name === "Farmer AWD") {
+            return [
+                {
+                    id: "DISP-1776233378346",
+                    date: "15 Apr 2026",
+                    date_raw: 1776211200000,
+                    vehicleId: "N/A",
+                    trailer_no: "N/A",
+                    source_name: "AWD",
+                    carrier: "AWD",
+                    cluster_name: "Cluster 2",
+                    surveyor_name: "anuj kori",
+                    surveyor_registred_no: "+916267685519",
+                    quantity: "3 Tons",
+                    num_plots_unload: 7,
+                    created_at_raw: 1776233378346,
+                    updated_at_raw: 1776262659876,
+                    pictures: [
+                        "https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_04_15_11_40_32_417.jpg?alt=media&token=3a1ff781-d242-4c38-820f-d3089539c816",
+                        "https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_04_15_11_42_13_251.jpg?alt=media&token=5d425b7f-6c4e-4ec6-9a08-3da2c91723a8",
+                        "https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_04_15_11_42_46_553.jpg?alt=media&token=75ac5888-c66d-4255-acb4-af7d08bc05f1",
+                        "https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_04_15_11_44_27_794.jpg?alt=media&token=eca216ce-afce-4900-ab30-ab9d6e60e426",
+                        "https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_04_15_11_46_05_637.jpg?alt=media&token=3fbeaaf0-d059-4c6b-a842-165bdd3f5345",
+                        "https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_04_15_11_47_12_343.jpg?alt=media&token=e3960ef1-b7e3-4c4b-807f-e2a4f7829ccc",
+                        "https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_04_15_11_48_38_860.jpg?alt=media&token=b764abc4-ccfa-4dbd-9f7c-2f95e8d37115"
+                    ],
+                    deployments: [
+                        {
+                            id: "DEPL-1776233378346-1",
+                            plot_no: 1,
+                            plot: "Plot 1",
+                            verbal_plot_area_enrolled: 0.5,
+                            coordinates: "22.7892° N, 81.9863° E",
+                            plot_location: [{ lat: 22.78924359078403, lng: 81.98627896606922 }],
+                            pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_04_15_11_40_32_417.jpg?alt=media&token=3a1ff781-d242-4c38-820f-d3089539c816"]
+                        },
+                        {
+                            id: "DEPL-1776233378346-2",
+                            plot_no: 2,
+                            plot: "Plot 2",
+                            verbal_plot_area_enrolled: 0.4,
+                            coordinates: "22.7893° N, 81.9857° E",
+                            plot_location: [{ lat: 22.789254409391848, lng: 81.98565803468227 }],
+                            pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_04_15_11_42_13_251.jpg?alt=media&token=5d425b7f-6c4e-4ec6-9a08-3da2c91723a8"]
+                        },
+                        {
+                            id: "DEPL-1776233378346-3",
+                            plot_no: 3,
+                            plot: "Plot 3",
+                            verbal_plot_area_enrolled: 0.4,
+                            coordinates: "22.7891° N, 81.9860° E",
+                            plot_location: [{ lat: 22.78905689238813, lng: 81.98604360222816 }],
+                            pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_04_15_11_42_46_553.jpg?alt=media&token=75ac5888-c66d-4255-acb4-af7d08bc05f1"]
+                        },
+                        {
+                            id: "DEPL-1776233378346-4",
+                            plot_no: 4,
+                            plot: "Plot 4",
+                            verbal_plot_area_enrolled: 0.2,
+                            coordinates: "22.7888° N, 81.9858° E",
+                            plot_location: [{ lat: 22.788847629147178, lng: 81.98580253869295 }],
+                            pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_04_15_11_44_27_794.jpg?alt=media&token=eca216ce-afce-4900-ab30-ab9d6e60e426"]
+                        },
+                        {
+                            id: "DEPL-1776233378346-5",
+                            plot_no: 5,
+                            plot: "Plot 5",
+                            verbal_plot_area_enrolled: 0.6,
+                            coordinates: "22.7887° N, 81.9863° E",
+                            plot_location: [{ lat: 22.788697713629446, lng: 81.98633294552565 }],
+                            pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_04_15_11_46_05_637.jpg?alt=media&token=3fbeaaf0-d059-4c6b-a842-165bdd3f5345"]
+                        },
+                        {
+                            id: "DEPL-1776233378346-6",
+                            plot_no: 6,
+                            plot: "Plot 6",
+                            verbal_plot_area_enrolled: 0.4,
+                            coordinates: "22.7889° N, 81.9866° E",
+                            plot_location: [{ lat: 22.78885659316262, lng: 81.98655422776937 }],
+                            pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_04_15_11_47_12_343.jpg?alt=media&token=e3960ef1-b7e3-4c4b-807f-e2a4f7829ccc"]
+                        },
+                        {
+                            id: "DEPL-1776233378346-7",
+                            plot_no: 7,
+                            plot: "Plot 7",
+                            verbal_plot_area_enrolled: 0.5,
+                            coordinates: "22.7889° N, 81.9855° E",
+                            plot_location: [{ lat: 22.788887812660025, lng: 81.98553130030632 }],
+                            pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_04_15_11_48_38_860.jpg?alt=media&token=b764abc4-ccfa-4dbd-9f7c-2f95e8d37115"]
+                        }
+                    ]
+                }
+            ];
+        }
+        if (record.farmer.name === "Farmer MatiBoost") {
+            return [
+                {
+                    id: "DISP-1771928026711",
+                    date: "24 Feb 2026",
+                    date_raw: 1771891200000,
+                    vehicleId: "N/A",
+                    trailer_no: "N/A",
+                    source_name: "MatiBoost",
+                    carrier: "MatiBoost",
+                    cluster_name: "Cluster 2",
+                    surveyor_name: "anuj kori",
+                    surveyor_registred_no: "+916267685519",
+                    quantity: "62 Units",
+                    num_plots_unload: 4,
+                    crop_stage: "Sowing",
+                    field_condition: "Wet",
+                    batch_id: "b2",
+                    created_at_raw: 1771928026711,
+                    updated_at_raw: 1771928433785,
+                    video: "https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fvideos%2F2026_02_24_15_44_16_736.mp4?alt=media&token=aacade01-a3e9-42a0-850a-677f4b87730e",
+                    pictures: [
+                        "https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_02_24_15_48_22_191.jpg?alt=media&token=a4ce0038-efa9-453b-93ac-f2e8d101a5bf",
+                        "https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_02_24_15_48_42_597.jpg?alt=media&token=8b470950-be62-4c95-af92-f86f5d3611c8",
+                        "https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_02_24_15_49_03_955.jpg?alt=media&token=f9f44dc0-af5b-4092-b822-b0b19e3ce86d",
+                        "https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_02_24_15_50_03_349.jpg?alt=media&token=be1976ac-0c6c-4533-b4fa-3f3a5884029b"
+                    ],
+                    deployments: [
+                        {
+                            id: "DEPL-1771928026711-1",
+                            plot_no: 1,
+                            plot: "Plot 1",
+                            boost_amount_plot_applied: 20,
+                            coordinates: "22.7890° N, 81.9861° E",
+                            plot_location: [{ lat: 22.789047928385862, lng: 81.98608685284853 }],
+                            pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_02_24_15_48_22_191.jpg?alt=media&token=a4ce0038-efa9-453b-93ac-f2e8d101a5bf"]
+                        },
+                        {
+                            id: "DEPL-1771928026711-2",
+                            plot_no: 2,
+                            plot: "Plot 2",
+                            boost_amount_plot_applied: 20,
+                            coordinates: "22.7888° N, 81.9866° E",
+                            plot_location: [{ lat: 22.788822591721672, lng: 81.98656395077705 }],
+                            pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_02_24_15_48_42_597.jpg?alt=media&token=8b470950-be62-4c95-af92-f86f5d3611c8"]
+                        },
+                        {
+                            id: "DEPL-1771928026711-3",
+                            plot_no: 3,
+                            plot: "Plot 3",
+                            boost_amount_plot_applied: 20,
+                            coordinates: "22.7887° N, 81.9864° E",
+                            plot_location: [{ lat: 22.78868967691664, lng: 81.9863611087203 }],
+                            pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_02_24_15_49_03_955.jpg?alt=media&token=f9f44dc0-af5b-4092-b822-b0b19e3ce86d"]
+                        },
+                        {
+                            id: "DEPL-1771928026711-4",
+                            plot_no: 4,
+                            plot: "Plot 4",
+                            boost_amount_plot_applied: 2,
+                            coordinates: "22.7888° N, 81.9858° E",
+                            plot_location: [{ lat: 22.78884391989926, lng: 81.98578611016273 }],
+                            pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_02_24_15_50_03_349.jpg?alt=media&token=be1976ac-0c6c-4533-b4fa-3f3a5884029b"]
+                        }
+                    ]
+                }
+            ];
+        }
+        if (record.farmer.name === "Farmer Biomass") {
+            return [
+                {
+                    id: "DISP-1775797163737",
+                    date: "10 Apr 2026",
+                    date_raw: 1775779200000,
+                    vehicleId: "TEST01ABCD124",
+                    trailer_no: "TEST01ABCD124",
+                    trailer_id: 1775797124964,
+                    source_name: "Biomass Pellet",
+                    carrier: "Biomass Pellet",
+                    cluster_name: "Cluster 1",
+                    surveyor_name: "Test Surveyor ",
+                    surveyor_registred_no: "+911111122225",
+                    quantity: "3 Acres",
+                    num_plots_unload: 2,
+                    remarks: "no",
+                    survey_type: "slashingOps",
+                    responseId: "1775797163737",
+                    created_at_raw: 1775797169434,
+                    updated_at_raw: 1776246030870,
+                    pictures: [
+                        "https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2FIRJo6Z75tHUenwfxXL9TOnIuB7c2%2Fimages%2F2026_04_10_10_29_35_331.jpg?alt=media&token=675252e1-1d2c-4939-9337-c5eb7f7613bf",
+                        "https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2FIRJo6Z75tHUenwfxXL9TOnIuB7c2%2Fimages%2F2026_04_10_10_29_42_932.jpg?alt=media&token=11e18bf1-b036-4712-ae58-d2e5b6bb5818"
+                    ],
+                    deployments: [
+                        {
+                            id: "DEPL-1775797163737-1",
+                            plot_no: 1,
+                            plot: "Plot 1",
+                            plot_area: 1,
+                            coordinates: "12.8608° N, 77.6020° E",
+                            plot_location: [{ lat: 12.860813660360131, lng: 77.60198134928942 }],
+                            pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2FIRJo6Z75tHUenwfxXL9TOnIuB7c2%2Fimages%2F2026_04_10_10_29_35_331.jpg?alt=media&token=675252e1-1d2c-4939-9337-c5eb7f7613bf"]
+                        },
+                        {
+                            id: "DEPL-1775797163737-2",
+                            plot_no: 2,
+                            plot: "Plot 2",
+                            plot_area: 2,
+                            coordinates: "12.8561° N, 77.6048° E",
+                            plot_location: [{ lat: 12.85605478372246, lng: 77.60484896600246 }],
+                            pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2FIRJo6Z75tHUenwfxXL9TOnIuB7c2%2Fimages%2F2026_04_10_10_29_42_932.jpg?alt=media&token=11e18bf1-b036-4712-ae58-d2e5b6bb5818"]
+                        }
+                    ]
+                },
+                {
+                    id: "DISP-1775797204167",
+                    date: "10 Apr 2026",
+                    date_raw: 1775779200000,
+                    vehicleId: "TEST01ABCD124",
+                    trailer_no: "TEST01ABCD124",
+                    trailer_id: 1775797124964,
+                    source_name: "Biomass Pellet",
+                    carrier: "Biomass Pellet",
+                    cluster_name: "Cluster 1",
+                    surveyor_name: "Test Surveyor ",
+                    surveyor_registred_no: "+911111122225",
+                    quantity: "3 Acres",
+                    num_plots_unload: 2,
+                    remarks: "test",
+                    survey_type: "rackingOps",
+                    responseId: "1775797204167",
+                    created_at_raw: 1775797207641,
+                    updated_at_raw: 1775797230077,
+                    pictures: [
+                        "https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2FIRJo6Z75tHUenwfxXL9TOnIuB7c2%2Fimages%2F2026_04_10_10_30_13_161.jpg?alt=media&token=6eb2e62f-8ee6-4878-8c7a-75baf1d56d39",
+                        "https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2FIRJo6Z75tHUenwfxXL9TOnIuB7c2%2Fimages%2F2026_04_10_10_30_22_212.jpg?alt=media&token=04d19eeb-f9b4-4dcc-89fe-9bf9e5c20855"
+                    ],
+                    deployments: [
+                        {
+                            id: "DEPL-1775797204167-1",
+                            plot_no: 1,
+                            plot: "Plot 1",
+                            plot_area: 1,
+                            coordinates: "12.8608° N, 77.6020° E",
+                            plot_location: [{ lat: 12.860815621551774, lng: 77.60197129100561 }],
+                            pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2FIRJo6Z75tHUenwfxXL9TOnIuB7c2%2Fimages%2F2026_04_10_10_30_13_161.jpg?alt=media&token=6eb2e62f-8ee6-4878-8c7a-75baf1d56d39"]
+                        },
+                        {
+                            id: "DEPL-1775797204167-2",
+                            plot_no: 2,
+                            plot: "Plot 2",
+                            plot_area: 2,
+                            coordinates: "12.8557° N, 77.6044° E",
+                            plot_location: [{ lat: 12.855676920017505, lng: 77.60444931685925 }],
+                            pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2FIRJo6Z75tHUenwfxXL9TOnIuB7c2%2Fimages%2F2026_04_10_10_30_22_212.jpg?alt=media&token=04d19eeb-f9b4-4dcc-89fe-9bf9e5c20855"]
+                        }
+                    ]
+                },
+                {
+                    id: "DISP-1775797244198",
+                    date: "10 Apr 2026",
+                    date_raw: 1775779200000,
+                    vehicleId: "TEST01ABCD124",
+                    trailer_no: "TEST01ABCD124",
+                    trailer_id: 1775797124964,
+                    source_name: "Biomass Pellet",
+                    carrier: "Biomass Pellet",
+                    cluster_name: "Cluster 1",
+                    surveyor_name: "Test Surveyor ",
+                    surveyor_registred_no: "+911111122225",
+                    quantity: "3 Acres",
+                    num_plots_unload: 2,
+                    remarks: "test",
+                    survey_type: "balingOps",
+                    responseId: "1775797244198",
+                    created_at_raw: 1775797248002,
+                    updated_at_raw: 1775797274757,
+                    pictures: [
+                        "https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2FIRJo6Z75tHUenwfxXL9TOnIuB7c2%2Fimages%2F2026_04_10_10_30_54_422.jpg?alt=media&token=a27308ea-966b-4802-9869-1fdcfe334edf",
+                        "https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2FIRJo6Z75tHUenwfxXL9TOnIuB7c2%2Fimages%2F2026_04_10_10_31_08_107.jpg?alt=media&token=f90f27c2-df0d-4987-9241-b9c4de1b8475"
+                    ],
+                    deployments: [
+                        {
+                            id: "DEPL-1775797244198-1",
+                            plot_no: 1,
+                            plot: "Plot 1",
+                            baler_type: "Round Baler",
+                            num_bales_prepared: 1,
+                            coordinates: "12.8608° N, 77.6020° E",
+                            plot_location: [{ lat: 12.860821505126589, lng: 77.60197162628174 }],
+                            pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2FIRJo6Z75tHUenwfxXL9TOnIuB7c2%2Fimages%2F2026_04_10_10_30_54_422.jpg?alt=media&token=a27308ea-966b-4802-9869-1fdcfe334edf"]
+                        },
+                        {
+                            id: "DEPL-1775797244198-2",
+                            plot_no: 2,
+                            plot: "Plot 2",
+                            baler_type: "Square Baler",
+                            num_bales_prepared: 10,
+                            coordinates: "12.8556° N, 77.6037° E",
+                            plot_location: [{ lat: 12.855608930639983, lng: 77.60367549955845 }],
+                            pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2FIRJo6Z75tHUenwfxXL9TOnIuB7c2%2Fimages%2F2026_04_10_10_31_08_107.jpg?alt=media&token=f90f27c2-df0d-4987-9241-b9c4de1b8475"]
+                        }
+                    ]
+                }
+            ];
+        }
         if (record.farmer.name === "Aditya Puri") {
             return [
                 {
@@ -2272,10 +2792,10 @@ export function EngagementDetailSheet({
                                                 <CardHeader className="pb-3 bg-zinc-50/50 dark:bg-zinc-900/10">
                                                     <div className="flex items-center gap-3">
                                                         <div className="h-10 w-10 rounded-full bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center font-bold text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">
-                                                            {record.farmer.split(" ").map(n => n[0]).join("")}
+                                                            {record.farmer.name.split(" ").map((n: any) => n[0]).join("")}
                                                         </div>
                                                         <div>
-                                                            <CardTitle className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{record.farmer}</CardTitle>
+                                                            <CardTitle className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{record.farmer.name}</CardTitle>
                                                             <CardDescription className="text-xs text-zinc-500">Farmer profile & location</CardDescription>
                                                         </div>
                                                     </div>
@@ -2287,7 +2807,7 @@ export function EngagementDetailSheet({
                                                     </div>
                                                     <div className="space-y-0.5">
                                                         <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">Surveyor</span>
-                                                        <span className="font-semibold text-zinc-700 dark:text-zinc-300">{record.surveyor}</span>
+                                                        <span className="font-semibold text-zinc-700 dark:text-zinc-300">{record.surveyor.name}</span>
                                                     </div>
                                                     <div className="space-y-0.5">
                                                         <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">Submitted Date</span>
@@ -2340,7 +2860,7 @@ export function EngagementDetailSheet({
                                                         <Badge variant="outline" className={cn(
                                                             "text-[9px] font-bold tracking-wider uppercase px-2 py-0.5 mt-0.5",
                                                             record.status === "Verified" ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400" :
-                                                            record.status === "Need Correction" ? "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/20 dark:text-red-400" :
+                                                            record.status === "Invalid" ? "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/20 dark:text-red-400" :
                                                             "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/20 dark:text-amber-400"
                                                         )}>
                                                             {record.status}
@@ -2348,11 +2868,11 @@ export function EngagementDetailSheet({
                                                     </div>
                                                     <div className="space-y-0.5">
                                                         <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">Verified By</span>
-                                                        <span className="font-semibold text-zinc-700 dark:text-zinc-300">{record.verifiedBy || "Pending Review"}</span>
+                                                        <span className="font-semibold text-zinc-700 dark:text-zinc-300">{record.verified?.verifier || "Pending Review"}</span>
                                                     </div>
                                                     <div className="space-y-0.5">
                                                         <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">Verified On</span>
-                                                        <span className="font-semibold text-zinc-700 dark:text-zinc-300">{record.verifiedOn || "-"}</span>
+                                                        <span className="font-semibold text-zinc-700 dark:text-zinc-300">{record.verified?.date ? format(new Date(record.verified.date), 'dd MMM yyyy') : "-"}</span>
                                                     </div>
                                                 </CardContent>
                                             </Card>
@@ -2642,7 +3162,7 @@ export function EngagementDetailSheet({
                                                                                             <div className="px-4 pb-4 border-t border-zinc-100 dark:border-zinc-900 bg-zinc-50/20 dark:bg-zinc-900/5 flex flex-col gap-3">
                                                                                                 {/* Survey checklist */}
                                                                                                 <div className="space-y-3 pt-2">
-                                                                                                    {getDeploymentSurveyItems(depl, record, dispatch.pictures).map((item) => {
+                                                                                                    {getDeploymentSurveyItems(depl, record, (dispatch as any).pictures).map((item) => {
                                                                                                         return (
                                                                                                             <div key={item.id} className="cursor-pointer" onClick={(e) => {
                                                                                                                     const target = e.target as HTMLElement;
@@ -3075,7 +3595,7 @@ export function EngagementDetailSheet({
                                                                         <span className="text-[10px] text-zinc-500 font-mono">ID: #{depl.id}</span>
                                                                     </div>
                                                                     <div className="p-3 space-y-2 bg-white dark:bg-zinc-950">
-                                                                        {getDeploymentSurveyItems(depl, record, activeReportingDispatch.pictures).map(item => {
+                                                                        {getDeploymentSurveyItems(depl, record, (activeReportingDispatch as any)?.pictures || (activeReportingDispatch as any)?.picture_deployment).map(item => {
                                                                             const uniqueId = `${depl.id}_${item.id}`;
                                                                             const isChecked = selectedReportFields.includes(uniqueId);
                                                                             return (
@@ -3124,11 +3644,11 @@ export function EngagementDetailSheet({
                                         return (
                                             <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden bg-zinc-50/30 dark:bg-zinc-900/5">
                                                 <div className="p-3 bg-zinc-50/50 dark:bg-zinc-900/10 border-b border-zinc-100 dark:border-zinc-900 flex items-center justify-between">
-                                                    <span className="font-bold text-[11px] uppercase tracking-wider text-zinc-500">Deployment Details ({activeReportingDeployment.plot || `Plot ${activeReportingDeployment.plot_no}`})</span>
+                                                    <span className="font-bold text-[11px] uppercase tracking-wider text-zinc-500">Deployment Details ({activeReportingDeployment.plot || `Plot ${(activeReportingDeployment as any).plot_no}`})</span>
                                                     <span className="text-[10px] text-zinc-500 font-mono">ID: #{activeReportingDeployment.id}</span>
                                                 </div>
                                                 <div className="p-3 space-y-2 bg-white dark:bg-zinc-950">
-                                                    {getDeploymentSurveyItems(activeReportingDeployment, record, activeReportingDeploymentParentDispatch?.pictures).map(item => {
+                                                    {getDeploymentSurveyItems(activeReportingDeployment, record, (activeReportingDeploymentParentDispatch as any)?.pictures || (activeReportingDeploymentParentDispatch as any)?.picture_deployment).map(item => {
                                                         const isChecked = selectedReportFields.includes(item.id);
                                                         return (
                                                             <div 

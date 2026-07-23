@@ -142,7 +142,7 @@ export default function EngagementPage() {
                                 pending: pendingCount,
                                 invalid: invalidCount,
                             }}
-                            selectedId={selectedRecord?.id}
+                            selectedId={selectedRecord?.id?.toString()}
                             isLoading={isLoading}
                         />
                     </div>

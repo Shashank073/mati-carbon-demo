@@ -142,7 +142,7 @@ export default function DeploymentPage() {
                                 pending: pendingCount,
                                 invalid: invalidCount,
                             }}
-                            selectedId={selectedRecord?.id}
+                            selectedId={selectedRecord?.id?.toString()}
                             isLoading={isLoading}
                         />
                     </div>

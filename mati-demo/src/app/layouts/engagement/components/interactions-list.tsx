@@ -25,13 +25,13 @@ export function InteractionsList({ data, onItemClick }: InteractionsListProps) {
                     <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
                             <Avatar className="h-10 w-10 border border-zinc-200 dark:border-zinc-800">
-                                <AvatarImage src={`/avatars/${(item.id % 5) + 1}.png`} alt={item.farmerName} />
-                                <AvatarFallback>{item.farmerName.substring(0, 2).toUpperCase()}</AvatarFallback>
+                                <AvatarImage src={`/avatars/${(item.id % 5) + 1}.png`} alt={item.farmer.name} />
+                                <AvatarFallback>{item.farmer.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                             </Avatar>
                             <div>
-                                <h4 className="font-semibold text-zinc-900 dark:text-zinc-100">{item.farmerName}</h4>
+                                <h4 className="font-semibold text-zinc-900 dark:text-zinc-100">{item.farmer.name}</h4>
                                 <div className="flex items-center gap-2 text-xs text-zinc-500">
-                                    <span>{item.farmerId}</span>
+                                    <span>{item.farmer.id}</span>
                                     <span>•</span>
                                     <span className="flex items-center gap-1">
                                         <MapPin className="h-3 w-3" /> {item.village}
@@ -41,12 +41,12 @@ export function InteractionsList({ data, onItemClick }: InteractionsListProps) {
                         </div>
                         <div className="flex flex-col items-end gap-1">
                             <span className="text-xs text-zinc-400">
-                                {formatDistanceToNow(item.date, { addSuffix: true })}
+                                {formatDistanceToNow(new Date(item.submittedOn), { addSuffix: true })}
                             </span>
-                            <Badge variant={item.status === 'Approved' ? 'default' : 'secondary'} className={cn(
+                            <Badge variant={item.status === 'Verified' ? 'default' : 'secondary'} className={cn(
                                 "text-[10px] h-5",
-                                item.status === 'Approved' && "bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400",
-                                item.status === 'Rejected' && "bg-red-100 text-red-700 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400",
+                                item.status === 'Verified' && "bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400",
+                                item.status === 'Invalid' && "bg-red-100 text-red-700 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400",
                                 item.status === 'Pending' && "bg-yellow-100 text-yellow-700 hover:bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-400"
                             )}>
                                 {item.status}
@@ -59,7 +59,7 @@ export function InteractionsList({ data, onItemClick }: InteractionsListProps) {
                         <div className="bg-zinc-50 dark:bg-zinc-900/50 rounded-lg p-3 border border-zinc-100 dark:border-zinc-800">
                             <div className="flex items-center gap-2 mb-1.5">
                                 <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-zinc-300 text-zinc-500">
-                                    {item.type}
+                                    {item.engagementType}
                                 </Badge>
                                 <div className="flex items-center gap-0.5 ml-auto">
                                     {[1, 2, 3, 4, 5].map((star) => (
