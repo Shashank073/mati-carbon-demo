@@ -1221,7 +1221,7 @@ export function EngagementDetailSheet({
                     date: "21 Mar 2026",
                     date_raw: 1774051200000,
                     vehicleId: "N/A",
-                    trailer_no: ",,",
+                    trailer_no: "MP 22 AB 9081",
                     source_name: "Mati Boost",
                     carrier: "Mati Boost",
                     cluster_name: "Cluster 1",
@@ -1251,7 +1251,7 @@ export function EngagementDetailSheet({
                     date: "21 Mar 2026",
                     date_raw: 1774051200000,
                     vehicleId: "N/A",
-                    trailer_no: ",,",
+                    trailer_no: "MP 22 AB 9081",
                     source_name: "Mati Boost",
                     carrier: "Mati Boost",
                     cluster_name: "Cluster 1",
@@ -1288,7 +1288,7 @@ export function EngagementDetailSheet({
                     date: "15 Apr 2026",
                     date_raw: 1776211200000,
                     vehicleId: "N/A",
-                    trailer_no: "N/A",
+                    trailer_no: "MP 22 MA 5163",
                     source_name: "AWD",
                     carrier: "AWD",
                     cluster_name: "Cluster 2",
@@ -1313,6 +1313,7 @@ export function EngagementDetailSheet({
                             plot_no: 1,
                             plot: "Plot 1",
                             verbal_plot_area_enrolled: 0.5,
+                            amt_deploy: 0.5,
                             coordinates: "22.7892° N, 81.9863° E",
                             plot_location: [{ lat: 22.78924359078403, lng: 81.98627896606922 }],
                             pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_04_15_11_40_32_417.jpg?alt=media&token=3a1ff781-d242-4c38-820f-d3089539c816"]
@@ -1322,6 +1323,7 @@ export function EngagementDetailSheet({
                             plot_no: 2,
                             plot: "Plot 2",
                             verbal_plot_area_enrolled: 0.4,
+                            amt_deploy: 0.4,
                             coordinates: "22.7893° N, 81.9857° E",
                             plot_location: [{ lat: 22.789254409391848, lng: 81.98565803468227 }],
                             pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_04_15_11_42_13_251.jpg?alt=media&token=5d425b7f-6c4e-4ec6-9a08-3da2c91723a8"]
@@ -1331,6 +1333,7 @@ export function EngagementDetailSheet({
                             plot_no: 3,
                             plot: "Plot 3",
                             verbal_plot_area_enrolled: 0.4,
+                            amt_deploy: 0.4,
                             coordinates: "22.7891° N, 81.9860° E",
                             plot_location: [{ lat: 22.78905689238813, lng: 81.98604360222816 }],
                             pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_04_15_11_42_46_553.jpg?alt=media&token=75ac5888-c66d-4255-acb4-af7d08bc05f1"]
@@ -1340,6 +1343,7 @@ export function EngagementDetailSheet({
                             plot_no: 4,
                             plot: "Plot 4",
                             verbal_plot_area_enrolled: 0.2,
+                            amt_deploy: 0.2,
                             coordinates: "22.7888° N, 81.9858° E",
                             plot_location: [{ lat: 22.788847629147178, lng: 81.98580253869295 }],
                             pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_04_15_11_44_27_794.jpg?alt=media&token=eca216ce-afce-4900-ab30-ab9d6e60e426"]
@@ -1349,6 +1353,7 @@ export function EngagementDetailSheet({
                             plot_no: 5,
                             plot: "Plot 5",
                             verbal_plot_area_enrolled: 0.6,
+                            amt_deploy: 0.6,
                             coordinates: "22.7887° N, 81.9863° E",
                             plot_location: [{ lat: 22.788697713629446, lng: 81.98633294552565 }],
                             pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_04_15_11_46_05_637.jpg?alt=media&token=3fbeaaf0-d059-4c6b-a842-165bdd3f5345"]
@@ -1358,6 +1363,7 @@ export function EngagementDetailSheet({
                             plot_no: 6,
                             plot: "Plot 6",
                             verbal_plot_area_enrolled: 0.4,
+                            amt_deploy: 0.4,
                             coordinates: "22.7889° N, 81.9866° E",
                             plot_location: [{ lat: 22.78885659316262, lng: 81.98655422776937 }],
                             pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_04_15_11_47_12_343.jpg?alt=media&token=e3960ef1-b7e3-4c4b-807f-e2a4f7829ccc"]
@@ -1367,6 +1373,7 @@ export function EngagementDetailSheet({
                             plot_no: 7,
                             plot: "Plot 7",
                             verbal_plot_area_enrolled: 0.5,
+                            amt_deploy: 0.5,
                             coordinates: "22.7889° N, 81.9855° E",
                             plot_location: [{ lat: 22.788887812660025, lng: 81.98553130030632 }],
                             pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_04_15_11_48_38_860.jpg?alt=media&token=b764abc4-ccfa-4dbd-9f7c-2f95e8d37115"]
@@ -1382,7 +1389,7 @@ export function EngagementDetailSheet({
                     date: "24 Feb 2026",
                     date_raw: 1771891200000,
                     vehicleId: "N/A",
-                    trailer_no: "N/A",
+                    trailer_no: "MP 22 MA 7842",
                     source_name: "MatiBoost",
                     carrier: "MatiBoost",
                     cluster_name: "Cluster 2",
@@ -1408,6 +1415,7 @@ export function EngagementDetailSheet({
                             plot_no: 1,
                             plot: "Plot 1",
                             boost_amount_plot_applied: 20,
+                            amt_deploy: 2.0,
                             coordinates: "22.7890° N, 81.9861° E",
                             plot_location: [{ lat: 22.789047928385862, lng: 81.98608685284853 }],
                             pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_02_24_15_48_22_191.jpg?alt=media&token=a4ce0038-efa9-453b-93ac-f2e8d101a5bf"]
@@ -1417,6 +1425,7 @@ export function EngagementDetailSheet({
                             plot_no: 2,
                             plot: "Plot 2",
                             boost_amount_plot_applied: 20,
+                            amt_deploy: 2.0,
                             coordinates: "22.7888° N, 81.9866° E",
                             plot_location: [{ lat: 22.788822591721672, lng: 81.98656395077705 }],
                             pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_02_24_15_48_42_597.jpg?alt=media&token=8b470950-be62-4c95-af92-f86f5d3611c8"]
@@ -1426,6 +1435,7 @@ export function EngagementDetailSheet({
                             plot_no: 3,
                             plot: "Plot 3",
                             boost_amount_plot_applied: 20,
+                            amt_deploy: 2.0,
                             coordinates: "22.7887° N, 81.9864° E",
                             plot_location: [{ lat: 22.78868967691664, lng: 81.9863611087203 }],
                             pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_02_24_15_49_03_955.jpg?alt=media&token=f9f44dc0-af5b-4092-b822-b0b19e3ce86d"]
@@ -1435,6 +1445,7 @@ export function EngagementDetailSheet({
                             plot_no: 4,
                             plot: "Plot 4",
                             boost_amount_plot_applied: 2,
+                            amt_deploy: 0.2,
                             coordinates: "22.7888° N, 81.9858° E",
                             plot_location: [{ lat: 22.78884391989926, lng: 81.98578611016273 }],
                             pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2Fjk3k1HGfkqgnR7vaB7jJ1W0P4O72%2Fimages%2F2026_02_24_15_50_03_349.jpg?alt=media&token=be1976ac-0c6c-4533-b4fa-3f3a5884029b"]
@@ -1474,6 +1485,7 @@ export function EngagementDetailSheet({
                             plot_no: 1,
                             plot: "Plot 1",
                             plot_area: 1,
+                            amt_deploy: 1.0,
                             coordinates: "12.8608° N, 77.6020° E",
                             plot_location: [{ lat: 12.860813660360131, lng: 77.60198134928942 }],
                             pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2FIRJo6Z75tHUenwfxXL9TOnIuB7c2%2Fimages%2F2026_04_10_10_29_35_331.jpg?alt=media&token=675252e1-1d2c-4939-9337-c5eb7f7613bf"]
@@ -1483,6 +1495,7 @@ export function EngagementDetailSheet({
                             plot_no: 2,
                             plot: "Plot 2",
                             plot_area: 2,
+                            amt_deploy: 2.0,
                             coordinates: "12.8561° N, 77.6048° E",
                             plot_location: [{ lat: 12.85605478372246, lng: 77.60484896600246 }],
                             pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2FIRJo6Z75tHUenwfxXL9TOnIuB7c2%2Fimages%2F2026_04_10_10_29_42_932.jpg?alt=media&token=11e18bf1-b036-4712-ae58-d2e5b6bb5818"]
@@ -1518,6 +1531,7 @@ export function EngagementDetailSheet({
                             plot_no: 1,
                             plot: "Plot 1",
                             plot_area: 1,
+                            amt_deploy: 1.0,
                             coordinates: "12.8608° N, 77.6020° E",
                             plot_location: [{ lat: 12.860815621551774, lng: 77.60197129100561 }],
                             pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2FIRJo6Z75tHUenwfxXL9TOnIuB7c2%2Fimages%2F2026_04_10_10_30_13_161.jpg?alt=media&token=6eb2e62f-8ee6-4878-8c7a-75baf1d56d39"]
@@ -1527,6 +1541,7 @@ export function EngagementDetailSheet({
                             plot_no: 2,
                             plot: "Plot 2",
                             plot_area: 2,
+                            amt_deploy: 2.0,
                             coordinates: "12.8557° N, 77.6044° E",
                             plot_location: [{ lat: 12.855676920017505, lng: 77.60444931685925 }],
                             pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2FIRJo6Z75tHUenwfxXL9TOnIuB7c2%2Fimages%2F2026_04_10_10_30_22_212.jpg?alt=media&token=04d19eeb-f9b4-4dcc-89fe-9bf9e5c20855"]
@@ -1563,6 +1578,7 @@ export function EngagementDetailSheet({
                             plot: "Plot 1",
                             baler_type: "Round Baler",
                             num_bales_prepared: 1,
+                            amt_deploy: 1.0,
                             coordinates: "12.8608° N, 77.6020° E",
                             plot_location: [{ lat: 12.860821505126589, lng: 77.60197162628174 }],
                             pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2FIRJo6Z75tHUenwfxXL9TOnIuB7c2%2Fimages%2F2026_04_10_10_30_54_422.jpg?alt=media&token=a27308ea-966b-4802-9869-1fdcfe334edf"]
@@ -1573,6 +1589,7 @@ export function EngagementDetailSheet({
                             plot: "Plot 2",
                             baler_type: "Square Baler",
                             num_bales_prepared: 10,
+                            amt_deploy: 2.0,
                             coordinates: "12.8556° N, 77.6037° E",
                             plot_location: [{ lat: 12.855608930639983, lng: 77.60367549955845 }],
                             pictures: ["https://firebasestorage.googleapis.com/v0/b/mati-9b7e9.appspot.com/o/apps%2Ffarmer%2Frelease%2FIRJo6Z75tHUenwfxXL9TOnIuB7c2%2Fimages%2F2026_04_10_10_31_08_107.jpg?alt=media&token=f90f27c2-df0d-4987-9241-b9c4de1b8475"]
