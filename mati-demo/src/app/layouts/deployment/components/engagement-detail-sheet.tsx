@@ -25,7 +25,7 @@ import { Calendar, XCircle, Truck, Tractor } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, MessageSquareText, AlertCircle, CheckCircle2, X, Check, Image as ImageIcon, Play, FileText, MapPin, Download, Info, MessageSquareWarning, Trash2, ZoomIn, ZoomOut, RotateCw, Maximize2, Minimize2, Scaling, AlignCenter, SlidersHorizontal, RotateCcw, Loader2, ChevronDown, User, Phone, Eye, EyeOff, Plus, Inbox } from "lucide-react"
+import { ArrowLeft, ChevronLeft, ChevronRight, MessageSquareText, AlertCircle, CheckCircle2, X, Check, Image as ImageIcon, Play, FileText, MapPin, Download, Info, MessageSquareWarning, Trash2, ZoomIn, ZoomOut, RotateCw, Maximize2, Minimize2, Scaling, AlignCenter, SlidersHorizontal, RotateCcw, Loader2, ChevronDown, User, Phone, Eye, EyeOff, Plus, Inbox } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -282,23 +282,23 @@ function MapPreviewContent({
                         </button>
                     </div>
                     <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-xs">
-                        <div className="flex flex-col">
+                        <div className="flex">
                             <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-0.5">Plot ID</span>
                             <span className="font-semibold text-zinc-800 dark:text-zinc-200 font-mono">
                                 {activeDetailsPlot.id.match(/^\d+$/) ? `12AB${activeDetailsPlot.id.slice(-2)}` : activeDetailsPlot.id}
                             </span>
                         </div>
-                        <div className="flex flex-col">
+                        <div className="flex">
                             <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-0.5">Area</span>
                             <span className="font-semibold text-zinc-800 dark:text-zinc-200">{activeDetailsPlot.area} Acres</span>
                         </div>
-                        <div className="flex flex-col">
+                        <div className="flex">
                             <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-0.5">Created on</span>
                             <span className="font-semibold text-zinc-800 dark:text-zinc-200">
                                 {record?.submittedOn ? format(record.submittedOn, "dd MMM yy").toUpperCase() : "01 JUL 26"}
                             </span>
                         </div>
-                        <div className="flex flex-col">
+                        <div className="flex">
                             <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-0.5">Created by</span>
                             <span className="font-semibold text-zinc-800 dark:text-zinc-200">
                                 {record?.surveyor.name || "Surveyor A"}
@@ -853,6 +853,32 @@ export function EngagementDetailSheet({
     const [deploymentReportComment, setDeploymentReportComment] = React.useState("")
     const [toastMessage, setToastMessage] = React.useState<{ title: string; description: string; type: "success" | "error" } | null>(null)
     const [activeTab, setActiveTab] = React.useState<"all" | "verified" | "pending" | "need_correction" | "details">("all")
+    const [selectedDispatchId, setSelectedDispatchId] = React.useState<string | null>(null)
+    const [selectedDeploymentId, setSelectedDeploymentId] = React.useState<string | null>(null)
+    // Per-section comment maps (dispatch and deployment level)
+    const [dispatchCommentDraft, setDispatchCommentDraft] = React.useState<Record<string, string>>({})
+    const [deploymentCommentDraft, setDeploymentCommentDraft] = React.useState<Record<string, string>>({})
+    const [dispatchCommentsList, setDispatchCommentsList] = React.useState<Record<string, VerificationComment[]>>({})
+    const [deploymentCommentsList, setDeploymentCommentsList] = React.useState<Record<string, VerificationComment[]>>({})
+    const [showDispatchCommentInput, setShowDispatchCommentInput] = React.useState<Record<string, boolean>>({})
+    const [showDeploymentCommentInput, setShowDeploymentCommentInput] = React.useState<Record<string, boolean>>({})
+
+    React.useEffect(() => {
+        setSelectedDispatchId(null);
+        setSelectedDeploymentId(null);
+    }, [record?.id, open]);
+
+    React.useEffect(() => {
+        setSelectedDeploymentId(null);
+    }, [selectedDispatchId]);
+
+    React.useEffect(() => {
+        setIsReporting(false);
+        setReportingCardType(null);
+        setActiveReportingCardId(null);
+        setReportedIds([]);
+        setReportComment("");
+    }, [selectedDispatchId, selectedDeploymentId]);
 
     React.useEffect(() => {
         if (open && defaultTab) {
@@ -2367,6 +2393,41 @@ export function EngagementDetailSheet({
 
     const handleReportSubmit = () => {
         setIsSubmittingReport(true)
+        
+        if (reportingCardType === "dispatch" || reportingCardType === "deployment") {
+            setTimeout(() => {
+                const nowStr = format(new Date(), "dd MMM yyyy, hh:mm a");
+                const targetId = activeReportingCardId!;
+                
+                if (reportingCardType === "dispatch") {
+                    setDispatchStatuses(prev => ({ ...prev, [targetId]: "Need Correction" }));
+                    setDispatchReporterNames(prev => ({ ...prev, [targetId]: "Admin (You)" }));
+                    setDispatchReporterTimes(prev => ({ ...prev, [targetId]: nowStr }));
+                    setDispatchReportComments(prev => ({ ...prev, [targetId]: reportComment }));
+                } else {
+                    setDeploymentStatuses(prev => ({ ...prev, [targetId]: "Need Correction" }));
+                    setDeploymentReporterNames(prev => ({ ...prev, [targetId]: "Admin (You)" }));
+                    setDeploymentReporterTimes(prev => ({ ...prev, [targetId]: nowStr }));
+                    setDeploymentReportComments(prev => ({ ...prev, [targetId]: reportComment }));
+                }
+                
+                setIsSubmittingReport(false);
+                setReportSuccess(true);
+                
+                setTimeout(() => {
+                    setReportSuccess(false);
+                    setIsReportingFinalStep(false);
+                    setIsReporting(false);
+                    setReportingCardType(null);
+                    setActiveReportingCardId(null);
+                    setReportedIds([]);
+                    setReportComment("");
+                    showToast("Reported Successfully", "Report submitted successfully.", "success");
+                }, 1500);
+            }, 1000);
+            return;
+        }
+
         // Simulate API call
         setTimeout(() => {
             console.log("Reporting items:", reportedIds, "with comment:", reportComment)
@@ -2762,8 +2823,238 @@ export function EngagementDetailSheet({
                         <div>AZ {record.azs} . {record.azName || "Rice"}</div>
                     </div>
                     
-                    <div className="px-6 py-2 bg-white dark:bg-zinc-950 border-b border-zinc-100 dark:border-zinc-800">
-                        <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-wider overflow-x-auto no-scrollbar py-0.5">
+                    {selectedDeploymentId ? (() => {
+                        const dispatch = mockDispatches.find(d => d.deployments?.some(dep => dep.id === selectedDeploymentId));
+                        const deployment = dispatch?.deployments?.find(dep => dep.id === selectedDeploymentId);
+                        if (!deployment || !dispatch) return null;
+                        const status = deploymentStatuses[deployment.id] || "Pending";
+                        return (
+                            <>
+                                <div className="pl-4 pr-6 py-4 bg-white dark:bg-zinc-950 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between w-full select-none text-left gap-2">
+                                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => {
+                                                setSelectedDeploymentId(null);
+                                                setIsReporting(false);
+                                                setReportingCardType(null);
+                                                setActiveReportingCardId(null);
+                                                setReportedIds([]);
+                                                setReportComment("");
+                                            }}
+                                            className="h-8 w-8 rounded-lg text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all active:scale-95 shrink-0 -ml-1.5"
+                                        >
+                                            <ArrowLeft className="h-5 w-5" />
+                                        </Button>
+                                        <div className="flex flex-col text-left min-w-0 flex-1 overflow-hidden">
+                                            <div className="flex items-center gap-1.5">
+                                                <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-50 leading-none">Deployment</h2>
+                                                <HoverCard openDelay={100} closeDelay={100}>
+                                                    <HoverCardTrigger asChild>
+                                                        <Button variant="ghost" size="icon" className="h-4 w-4 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 shrink-0 p-0" onClick={(e) => e.stopPropagation()}>
+                                                            <Info className="h-3 w-3" />
+                                                        </Button>
+                                                    </HoverCardTrigger>
+                                                    <HoverCardContent align="start" className="w-80 p-4 z-[300] bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-xl rounded-xl">
+                                                        {deploymentActivityInfo}
+                                                    </HoverCardContent>
+                                                </HoverCard>
+                                            </div>
+                                            <div className="text-[11px] text-zinc-500 font-mono mt-1.5 flex items-center gap-1 select-none whitespace-nowrap overflow-hidden leading-none text-left w-full">
+                                                <button 
+                                                    onClick={() => setSelectedDispatchId(null)}
+                                                    className="hover:underline hover:text-zinc-850 dark:hover:text-zinc-150 transition-colors focus:outline-none shrink-0"
+                                                >
+                                                    All
+                                                </button>
+                                                <span className="text-zinc-400 shrink-0">/</span>
+                                                
+                                                <HoverCard openDelay={200} closeDelay={100}>
+                                                    <HoverCardTrigger asChild>
+                                                        <button 
+                                                            onClick={() => setSelectedDeploymentId(null)}
+                                                            className="hover:underline hover:text-zinc-850 dark:hover:text-zinc-150 transition-colors focus:outline-none truncate max-w-[85px] sm:max-w-[110px] min-w-0 shrink block text-left"
+                                                        >
+                                                            {dispatch.id}
+                                                        </button>
+                                                    </HoverCardTrigger>
+                                                    <HoverCardContent align="start" side="bottom" className="w-auto p-2 text-[10px] font-mono bg-zinc-900 text-white border-zinc-800 shadow-xl rounded-md z-[300] select-text">
+                                                        {dispatch.id}
+                                                    </HoverCardContent>
+                                                </HoverCard>
+
+                                                <span className="text-zinc-400 shrink-0">/</span>
+
+                                                <HoverCard openDelay={200} closeDelay={100}>
+                                                    <HoverCardTrigger asChild>
+                                                        <span className="text-zinc-400 dark:text-zinc-605 truncate max-w-[85px] sm:max-w-[110px] min-w-0 shrink block cursor-help">
+                                                            {deployment.id}
+                                                        </span>
+                                                    </HoverCardTrigger>
+                                                    <HoverCardContent align="start" side="bottom" className="w-auto p-2 text-[10px] font-mono bg-zinc-900 text-white border-zinc-800 shadow-xl rounded-md z-[300] select-text">
+                                                        {deployment.id}
+                                                    </HoverCardContent>
+                                                </HoverCard>
+
+                                                <span className="text-zinc-450 dark:text-zinc-600 font-normal select-none mx-0.5 shrink-0">•</span>
+
+                                                <HoverCard openDelay={200} closeDelay={100}>
+                                                    <HoverCardTrigger asChild>
+                                                        <span className="text-zinc-400 dark:text-zinc-650 truncate min-w-0 shrink-0 cursor-help">
+                                                            {dispatch.date}
+                                                        </span>
+                                                    </HoverCardTrigger>
+                                                    <HoverCardContent align="start" side="bottom" className="w-auto p-2 text-[10px] font-mono bg-zinc-900 text-white border-zinc-800 shadow-xl rounded-md z-[300] select-text">
+                                                        {dispatch.date}
+                                                    </HoverCardContent>
+                                                </HoverCard>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <Badge variant="outline" className={cn(
+                                        "text-[9px] font-bold uppercase tracking-wider py-0.5 px-2 rounded-full border shadow-none",
+                                        status === "Verified" && "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/50",
+                                        status === "Pending" && "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50",
+                                        status === "Need Correction" && "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-900/50"
+                                    )}>
+                                        {status}
+                                    </Badge>
+                                </div>
+                                {/* Subheader for Verification / Reporting info directly below the header */}
+                                {status === "Verified" && (
+                                     <div className="bg-emerald-50/30 dark:bg-emerald-950/10 border-b border-emerald-100/50 dark:border-emerald-900/20 px-6 py-2.5 flex items-center gap-2 text-left w-full animate-in fade-in duration-300">
+                                         <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                                         <span className="text-[11px] text-emerald-700 dark:text-emerald-300 font-medium">
+                                             Verified by <strong className="font-semibold text-emerald-800 dark:text-emerald-200">{deploymentVerifierNames[deployment.id] || "Admin (You)"}</strong> • {deploymentVerifierTimes[deployment.id]}
+                                         </span>
+                                     </div>
+                                 )}
+                                {status === "Need Correction" && (
+                                     <div className="bg-red-50/40 dark:bg-red-950/10 border-b border-red-100 dark:border-red-900/20 px-6 py-3 flex flex-col gap-1 text-left w-full animate-in fade-in duration-300">
+                                         <div className="flex items-center gap-2">
+                                             <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400 shrink-0" />
+                                             <span className="text-[10px] font-bold text-red-800 dark:text-red-400 uppercase tracking-widest leading-none">Report Comment</span>
+                                         </div>
+                                         <div className="pl-6 text-xs text-red-700 dark:text-red-300 leading-relaxed font-medium break-words [word-break:break-word]">
+                                             {deploymentReportComments[deployment.id] || "No comments provided."}
+                                         </div>
+                                         <div className="pl-6 text-[10px] text-red-700/80 dark:text-red-300/80 font-semibold uppercase tracking-wider mt-0.5">
+                                             Reported by <strong className="font-bold text-red-800 dark:text-red-200">{deploymentReporterNames[deployment.id] || "Admin (You)"}</strong> • {deploymentReporterTimes[deployment.id]}
+                                         </div>
+                                     </div>
+                                 )}
+                            </>
+                        );
+                    })() : selectedDispatchId ? (() => {
+                        const dispatch = mockDispatches.find(d => d.id === selectedDispatchId);
+                        if (!dispatch) return null;
+                        const status = dispatchStatuses[dispatch.id] || "Pending";
+                        return (
+                            <>
+                                <div className="pl-4 pr-6 py-4 bg-white dark:bg-zinc-950 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between w-full select-none text-left gap-2">
+                                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => {
+                                                setSelectedDispatchId(null);
+                                                setIsReporting(false);
+                                                setReportingCardType(null);
+                                                setActiveReportingCardId(null);
+                                                setReportedIds([]);
+                                                setReportComment("");
+                                            }}
+                                            className="h-8 w-8 rounded-lg text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all active:scale-95 shrink-0 -ml-1.5"
+                                        >
+                                            <ArrowLeft className="h-5 w-5" />
+                                        </Button>
+                                        <div className="flex flex-col text-left min-w-0 flex-1 overflow-hidden">
+                                            <div className="flex items-center gap-1.5">
+                                                <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-50 leading-none">Dispatch</h2>
+                                                <HoverCard openDelay={100} closeDelay={100}>
+                                                    <HoverCardTrigger asChild>
+                                                        <Button variant="ghost" size="icon" className="h-4 w-4 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 shrink-0 p-0" onClick={(e) => e.stopPropagation()}>
+                                                            <Info className="h-3 w-3" />
+                                                        </Button>
+                                                    </HoverCardTrigger>
+                                                    <HoverCardContent align="start" className="w-80 p-4 z-[300] bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-xl rounded-xl">
+                                                        {dispatchActivityInfo}
+                                                    </HoverCardContent>
+                                                </HoverCard>
+                                            </div>
+                                            <div className="text-[11px] text-zinc-500 font-mono mt-1.5 flex items-center gap-1 select-none whitespace-nowrap overflow-hidden leading-none text-left w-full">
+                                                <button 
+                                                    onClick={() => setSelectedDispatchId(null)}
+                                                    className="hover:underline hover:text-zinc-855 dark:hover:text-zinc-145 transition-colors focus:outline-none shrink-0"
+                                                >
+                                                    All
+                                                </button>
+                                                <span className="text-zinc-400 shrink-0">/</span>
+                                                
+                                                <HoverCard openDelay={200} closeDelay={100}>
+                                                    <HoverCardTrigger asChild>
+                                                        <span className="text-zinc-450 dark:text-zinc-550 truncate max-w-[100px] xs:max-w-[160px] sm:max-w-[220px] min-w-0 shrink block cursor-help">
+                                                            {dispatch.id}
+                                                        </span>
+                                                    </HoverCardTrigger>
+                                                    <HoverCardContent align="start" side="bottom" className="w-auto p-2 text-[10px] font-mono bg-zinc-900 text-white border-zinc-800 shadow-xl rounded-md z-[300] select-text">
+                                                        {dispatch.id}
+                                                    </HoverCardContent>
+                                                </HoverCard>
+
+                                                <span className="text-zinc-455 dark:text-zinc-600 font-normal select-none mx-0.5 shrink-0">•</span>
+
+                                                <HoverCard openDelay={200} closeDelay={100}>
+                                                    <HoverCardTrigger asChild>
+                                                        <span className="text-zinc-400 dark:text-zinc-600 truncate min-w-0 shrink-0 cursor-help">
+                                                            {dispatch.date}
+                                                        </span>
+                                                    </HoverCardTrigger>
+                                                    <HoverCardContent align="start" side="bottom" className="w-auto p-2 text-[10px] font-mono bg-zinc-900 text-white border-zinc-800 shadow-xl rounded-md z-[300] select-text">
+                                                        {dispatch.date}
+                                                    </HoverCardContent>
+                                                </HoverCard>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <Badge variant="outline" className={cn(
+                                        "text-[9px] font-bold uppercase tracking-wider py-0.5 px-2 rounded-full border shadow-none",
+                                        status === "Verified" && "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/50",
+                                        status === "Pending" && "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50",
+                                        status === "Need Correction" && "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-900/50"
+                                    )}>
+                                        {status}
+                                    </Badge>
+                                </div>
+                                {/* Subheader for Verification / Reporting info directly below the header */}
+                                {status === "Verified" && (
+                                     <div className="bg-emerald-50/30 dark:bg-emerald-950/10 border-b border-emerald-100/50 dark:border-emerald-900/20 px-6 py-2.5 flex items-center gap-2 text-left w-full animate-in fade-in duration-300">
+                                         <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                                         <span className="text-[11px] text-emerald-700 dark:text-emerald-300 font-medium">
+                                             Verified by <strong className="font-semibold text-emerald-800 dark:text-emerald-200">{dispatchVerifierNames[dispatch.id] || "Admin (You)"}</strong> • {dispatchVerifierTimes[dispatch.id]}
+                                         </span>
+                                     </div>
+                                 )}
+                                {status === "Need Correction" && (
+                                     <div className="bg-red-50/40 dark:bg-red-950/10 border-b border-red-100 dark:border-red-900/20 px-6 py-3 flex flex-col gap-1 text-left w-full animate-in fade-in duration-300">
+                                         <div className="flex items-center gap-2">
+                                             <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400 shrink-0" />
+                                             <span className="text-[10px] font-bold text-red-800 dark:text-red-400 uppercase tracking-widest leading-none">Report Comment</span>
+                                         </div>
+                                         <div className="pl-6 text-xs text-red-700 dark:text-red-300 leading-relaxed font-medium break-words [word-break:break-word]">
+                                             {dispatchReportComments[dispatch.id] || "No comments provided."}
+                                         </div>
+                                         <div className="pl-6 text-[10px] text-red-700/80 dark:text-red-300/80 font-semibold uppercase tracking-wider mt-0.5">
+                                             Reported by <strong className="font-bold text-red-800 dark:text-red-200">{dispatchReporterNames[dispatch.id] || "Admin (You)"}</strong> • {dispatchReporterTimes[dispatch.id]}
+                                         </div>
+                                     </div>
+                                 )}
+                            </>
+                        );
+                    })() : (
+                        <div className="px-6 py-2 bg-white dark:bg-zinc-950 border-b border-zinc-100 dark:border-zinc-800">
+                            <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-wider overflow-x-auto no-scrollbar py-0.5">
                             {[
                                 { id: "all", label: "All" },
                                 { id: "pending", label: "Pending" },
@@ -2788,11 +3079,22 @@ export function EngagementDetailSheet({
                             })}
                         </div>
                     </div>
+                )}
                     </div>
 
 
                 {/* Content section - Style 5 (Feedback based) */}
                 <ScrollArea ref={scrollAreaRef} className="flex-1 relative">
+                    {/* Floating Selection Banner for Reporting mode */}
+                    {isReporting && (
+                        <div className="sticky top-0 z-[5] bg-red-50 dark:bg-red-955/20 border-b border-red-100 dark:border-red-900/30 px-6 py-3 flex items-center gap-3 animate-in slide-in-from-top duration-300 select-none">
+                            <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400 shrink-0" />
+                            <p className="text-xs text-red-800 dark:text-red-300 font-medium text-left">
+                                Select the fields that need correction. Click on individual cards to select.
+                            </p>
+                        </div>
+                    )}
+                    
                     <div className="p-6">
                         <div className="space-y-4">
                             {isDataLoading ? (
@@ -2802,7 +3104,122 @@ export function EngagementDetailSheet({
                                 </div>
                             ) : (
                                 <div className="space-y-4">
-                                    {activeTab === "details" ? (
+                                    {selectedDeploymentId ? (() => {
+                                        const dispatch = mockDispatches.find(d => d.deployments?.some(dep => dep.id === selectedDeploymentId));
+                                        const deployment = dispatch?.deployments?.find(dep => dep.id === selectedDeploymentId);
+                                        if (!deployment || !dispatch) return null;
+                                        return (
+                                            <div className="space-y-5 text-left animate-in fade-in duration-300">
+                                                <div className="space-y-3">
+                                                    {getDeploymentSurveyItems(deployment, record, (dispatch as any).pictures || (dispatch as any).survey_pictures).map((item) => (
+                                                        <div key={item.id} className="cursor-pointer" onClick={(e) => {
+                                                                const target = e.target as HTMLElement;
+                                                                if (target.closest('.attachment-preview-trigger') || item.type === 'map') {
+                                                                    handleItemClick(item);
+                                                                }
+                                                            }}>
+                                                            <SurveyCard
+                                                                item={item}
+                                                                style="style-5-feedback"
+                                                                showDetails={false}
+                                                                isReporting={isReporting}
+                                                                isSelected={reportedIds.includes(item.id)}
+                                                                onToggleSelect={() => toggleReportId(item.id)}
+                                                                disableDialog={true}
+                                                                isInvalid={record.status === "Invalid"}
+                                                                onMapClick={handleItemClick}
+                                                                language={language}
+                                                            />
+                                                        </div>
+                                                    ))}
+                                                </div>
+
+                                                {/* Add / View Comment Section for Deployment */}
+                                                {!isReporting && (() => {
+                                                    const draftKey = selectedDeploymentId || "";
+                                                    const draftVal = deploymentCommentDraft[draftKey] || "";
+                                                    const comments = deploymentCommentsList[draftKey] || [];
+                                                    const showInput = showDeploymentCommentInput[draftKey] || false;
+                                                    return (
+                                                        <div className="space-y-3 pt-2">
+                                                            <div className="border-t border-zinc-100 dark:border-zinc-800 pt-3">
+                                                                <div className="mb-2">
+                                                                    <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+                                                                        Add Comment{" "}
+                                                                        <span className="text-[10px] font-medium lowercase opacity-70">(optional)</span>
+                                                                    </span>
+                                                                </div>
+                                                                <div className="flex">
+                                                                    <Textarea
+                                                                        rows={showInput || draftVal.trim() ? 4 : 1}
+                                                                        placeholder="Type your comment here . . ."
+                                                                        className={cn(
+                                                                            "w-full box-border bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-md resize-none focus-visible:ring-1 focus-visible:ring-zinc-200 dark:focus-visible:ring-zinc-800 px-3 py-2 placeholder:text-zinc-400 transition-[min-height] duration-300 ease-in-out md:text-sm !min-h-0",
+                                                                            showInput || draftVal.trim()
+                                                                                ? "min-h-[100px] text-base"
+                                                                                : "h-10 min-h-0 max-h-10 text-sm leading-tight"
+                                                                        )}
+                                                                        value={draftVal}
+                                                                        onChange={(e) => setDeploymentCommentDraft(prev => ({ ...prev, [draftKey]: e.target.value }))}
+                                                                        onFocus={() => setShowDeploymentCommentInput(prev => ({ ...prev, [draftKey]: true }))}
+                                                                        onBlur={() => {
+                                                                            if (!draftVal.trim()) setShowDeploymentCommentInput(prev => ({ ...prev, [draftKey]: false }));
+                                                                        }}
+                                                                    />
+                                                                    <div className={cn(
+                                                                        "flex items-center gap-2 overflow-hidden transition-[height,opacity,margin-top] duration-300 ease-in-out",
+                                                                        draftVal.trim() ? "mt-2 h-7 opacity-100" : "mt-0 h-0 opacity-0 pointer-events-none"
+                                                                    )}>
+                                                                        <Button
+                                                                            size="sm"
+                                                                            className="h-6 px-3 text-[10px] font-bold uppercase tracking-wider bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 rounded-md shadow-sm"
+                                                                            onClick={() => {
+                                                                                if (!draftVal.trim()) return;
+                                                                                const newC: VerificationComment = { id: Date.now().toString(), date: new Date(), verifier: "Admin (You)", text: draftVal.trim() };
+                                                                                setDeploymentCommentsList(prev => ({ ...prev, [draftKey]: [...(prev[draftKey] || []), newC] }));
+                                                                                setDeploymentCommentDraft(prev => ({ ...prev, [draftKey]: "" }));
+                                                                                setShowDeploymentCommentInput(prev => ({ ...prev, [draftKey]: false }));
+                                                                            }}
+                                                                            disabled={!draftVal.trim()}
+                                                                        >Save</Button>
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            size="sm"
+                                                                            className="h-6 px-2 text-[10px] font-bold text-zinc-400 hover:text-zinc-900 transition-colors"
+                                                                            onClick={() => {
+                                                                                setDeploymentCommentDraft(prev => ({ ...prev, [draftKey]: "" }));
+                                                                                setShowDeploymentCommentInput(prev => ({ ...prev, [draftKey]: false }));
+                                                                            }}
+                                                                        >Cancel</Button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            {comments.length > 0 && (
+                                                                <div className="py-2 border-t border-zinc-100 dark:border-zinc-800">
+                                                                    <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-2">
+                                                                        {comments.length > 1 ? "Comments" : "Comment"}
+                                                                    </div>
+                                                                    <div className="space-y-3">
+                                                                        {comments.map((c, idx) => (
+                                                                            <div key={c.id} className="relative pl-4 animate-in fade-in slide-in-from-left-2 duration-500" style={{ animationDelay: `${idx * 100}ms` }}>
+                                                                                <div className="absolute left-0 top-1 bottom-1 w-0.5 bg-zinc-200 dark:bg-zinc-800 rounded-full" />
+                                                                                <div className="text-[13px] text-zinc-700 dark:text-zinc-300 leading-relaxed italic">"{c.text}"</div>
+                                                                                <div className="flex items-center gap-2 pt-1">
+                                                                                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">{c.verifier}</span>
+                                                                                    <span className="text-zinc-300 dark:text-zinc-700">•</span>
+                                                                                    <span className="text-[10px] text-zinc-400 font-medium uppercase">{format(c.date, "dd MMM yyyy")}</span>
+                                                                                </div>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })()}
+                                            </div>
+                                        );
+                                    })() : activeTab === "details" ? (
                                         <div className="space-y-5 animate-in fade-in duration-300 text-left">
                                             {/* Farmer Card */}
                                             <Card className="border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden bg-white dark:bg-zinc-950">
@@ -2924,469 +3341,263 @@ export function EngagementDetailSheet({
 
                                             return (
                                                 <div className="space-y-4">
-                                                    {filteredDispatches.map((dispatch) => {
+                                                    {selectedDispatchId ? (() => {
+                                                        const dispatch = mockDispatches.find(d => d.id === selectedDispatchId);
+                                                        if (!dispatch) return null;
+                                                        return (
+                                                            <div className="space-y-5 text-left animate-in fade-in duration-300">
+                                                                {/* Checklist Items */}
+                                                                <div className="space-y-3">
+                                                                    {getDispatchSurveyItems(dispatch, record).map((item) => (
+                                                                        <div key={item.id} className="cursor-pointer" onClick={(e) => {
+                                                                                const target = e.target as HTMLElement;
+                                                                                if (target.closest('.attachment-preview-trigger') || item.type === 'map') {
+                                                                                    handleItemClick(item);
+                                                                                }
+                                                                            }}>
+                                                                            <SurveyCard
+                                                                                item={item}
+                                                                                style="style-5-feedback"
+                                                                                showDetails={false}
+                                                                                isReporting={isReporting}
+                                                                                isSelected={reportedIds.includes(item.id)}
+                                                                                onToggleSelect={() => toggleReportId(item.id)}
+                                                                                disableDialog={true}
+                                                                                isInvalid={record.status === "Invalid"}
+                                                                                onMapClick={handleItemClick}
+                                                                                language={language}
+                                                                            />
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+
+                                                                {/* Add Comment Section for Dispatch */}
+                                                                {!isReporting && (() => {
+                                                                    const draftKey = selectedDispatchId || "";
+                                                                    const draftVal = dispatchCommentDraft[draftKey] || "";
+                                                                    const comments = dispatchCommentsList[draftKey] || [];
+                                                                    const showInput = showDispatchCommentInput[draftKey] || false;
+                                                                    return (
+                                                                        <div className="space-y-3 pt-2">
+                                                                            <div className="border-t border-zinc-100 dark:border-zinc-800 pt-3">
+                                                                                <div className="mb-2">
+                                                                                    <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+                                                                                        Add Comment{" "}
+                                                                                        <span className="text-[10px] font-medium lowercase opacity-70">(optional)</span>
+                                                                                    </span>
+                                                                                </div>
+                                                                                <div className="flex">
+                                                                                    <Textarea
+                                                                                        rows={showInput || draftVal.trim() ? 4 : 1}
+                                                                                        placeholder="Type your comment here . . ."
+                                                                                        className={cn(
+                                                                                            "w-full box-border bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-md resize-none focus-visible:ring-1 focus-visible:ring-zinc-200 dark:focus-visible:ring-zinc-800 px-3 py-2 placeholder:text-zinc-400 transition-[min-height] duration-300 ease-in-out md:text-sm !min-h-0",
+                                                                                            showInput || draftVal.trim()
+                                                                                                ? "min-h-[100px] text-base"
+                                                                                                : "h-10 min-h-0 max-h-10 text-sm leading-tight"
+                                                                                        )}
+                                                                                        value={draftVal}
+                                                                                        onChange={(e) => setDispatchCommentDraft(prev => ({ ...prev, [draftKey]: e.target.value }))}
+                                                                                        onFocus={() => setShowDispatchCommentInput(prev => ({ ...prev, [draftKey]: true }))}
+                                                                                        onBlur={() => {
+                                                                                            if (!draftVal.trim()) setShowDispatchCommentInput(prev => ({ ...prev, [draftKey]: false }));
+                                                                                        }}
+                                                                                    />
+                                                                                    <div className={cn(
+                                                                                        "flex items-center gap-2 overflow-hidden transition-[height,opacity,margin-top] duration-300 ease-in-out",
+                                                                                        draftVal.trim() ? "mt-2 h-7 opacity-100" : "mt-0 h-0 opacity-0 pointer-events-none"
+                                                                                    )}>
+                                                                                        <Button
+                                                                                            size="sm"
+                                                                                            className="h-6 px-3 text-[10px] font-bold uppercase tracking-wider bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 rounded-md shadow-sm"
+                                                                                            onClick={() => {
+                                                                                                if (!draftVal.trim()) return;
+                                                                                                const newC: VerificationComment = { id: Date.now().toString(), date: new Date(), verifier: "Admin (You)", text: draftVal.trim() };
+                                                                                                setDispatchCommentsList(prev => ({ ...prev, [draftKey]: [...(prev[draftKey] || []), newC] }));
+                                                                                                setDispatchCommentDraft(prev => ({ ...prev, [draftKey]: "" }));
+                                                                                                setShowDispatchCommentInput(prev => ({ ...prev, [draftKey]: false }));
+                                                                                            }}
+                                                                                            disabled={!draftVal.trim()}
+                                                                                        >Save</Button>
+                                                                                        <Button
+                                                                                            variant="ghost"
+                                                                                            size="sm"
+                                                                                            className="h-6 px-2 text-[10px] font-bold text-zinc-400 hover:text-zinc-900 transition-colors"
+                                                                                            onClick={() => {
+                                                                                                setDispatchCommentDraft(prev => ({ ...prev, [draftKey]: "" }));
+                                                                                                setShowDispatchCommentInput(prev => ({ ...prev, [draftKey]: false }));
+                                                                                            }}
+                                                                                        >Cancel</Button>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                            {comments.length > 0 && (
+                                                                                <div className="py-2 border-t border-zinc-100 dark:border-zinc-800">
+                                                                                    <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-2">
+                                                                                        {comments.length > 1 ? "Comments" : "Comment"}
+                                                                                    </div>
+                                                                                    <div className="space-y-3">
+                                                                                        {comments.map((c, idx) => (
+                                                                                            <div key={c.id} className="relative pl-4 animate-in fade-in slide-in-from-left-2 duration-500" style={{ animationDelay: `${idx * 100}ms` }}>
+                                                                                                <div className="absolute left-0 top-1 bottom-1 w-0.5 bg-zinc-200 dark:bg-zinc-800 rounded-full" />
+                                                                                                <div className="text-[13px] text-zinc-700 dark:text-zinc-300 leading-relaxed italic">"{c.text}"</div>
+                                                                                                <div className="flex items-center gap-2 pt-1">
+                                                                                                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">{c.verifier}</span>
+                                                                                                    <span className="text-zinc-300 dark:text-zinc-700">•</span>
+                                                                                                    <span className="text-[10px] text-zinc-400 font-medium uppercase">{format(c.date, "dd MMM yyyy")}</span>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        ))}
+                                                                                    </div>
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    );
+                                                                })()}
+
+                                                                {/* Nested Deployments list */}
+                                                                {dispatch.deployments && dispatch.deployments.length > 0 && (
+                                                                    <div className="space-y-4 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+                                                                        <div className="text-[10px] font-bold tracking-widest text-zinc-400 dark:text-zinc-500 uppercase select-none text-left mb-2">
+                                                                            Deployments ({dispatch.deployments.length})
+                                                                        </div>
+                                                                        <div className="space-y-3">
+                                                                            {dispatch.deployments.map((depl: any) => {
+                                                                                return (
+                                                                                    <div key={depl.id} className="relative">
+                                                                                        <Card className="border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden bg-white dark:bg-zinc-950 transition-all cursor-pointer hover:bg-zinc-50/50 dark:hover:bg-zinc-900/50"
+                                                                                            onClick={() => {
+                                                                                                setSelectedDeploymentId(depl.id);
+                                                                                                setIsReporting(false);
+                                                                                                setReportingCardType(null);
+                                                                                                setActiveReportingCardId(null);
+                                                                                                setReportedIds([]);
+                                                                                                setReportComment("");
+                                                                                            }}
+                                                                                        >
+                                                                                            <div className="p-3.5 flex flex-col select-none">
+                                                                                                <div className="flex items-center justify-between w-full">
+                                                                                                    <div className="flex flex-col text-left">
+                                                                                                        <div className="flex items-center gap-1.5">
+                                                                                                            <span className="font-bold text-sm text-zinc-900 dark:text-zinc-50">Deployment</span>
+                                                                                                            <HoverCard openDelay={100} closeDelay={100}>
+                                                                                                                <HoverCardTrigger asChild>
+                                                                                                                    <Button variant="ghost" size="icon" className="h-3.5 w-3.5 rounded text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 shrink-0" onClick={(e) => e.stopPropagation()}>
+                                                                                                                        <Info className="h-2.5 w-2.5" />
+                                                                                                                    </Button>
+                                                                                                                </HoverCardTrigger>
+                                                                                                                <HoverCardContent align="start" className="w-80 p-4 z-[300] bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-xl rounded-xl">
+                                                                                                                    {deploymentActivityInfo}
+                                                                                                                </HoverCardContent>
+                                                                                                            </HoverCard>
+                                                                                                        </div>
+                                                                                                        <span className="text-[11px] text-zinc-500 font-mono block mt-0.5">{depl.id}</span>
+                                                                                                    </div>
+                                                                                                    <div className="flex items-center gap-2">
+                                                                                                        <Badge variant="outline" className={cn(
+                                                                                                            "text-[9px] font-bold uppercase tracking-wider py-0 px-1.5 rounded-full border shadow-none",
+                                                                                                            (deploymentStatuses[depl.id] || "Pending") === "Verified" && "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/50",
+                                                                                                            (deploymentStatuses[depl.id] || "Pending") === "Pending" && "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50",
+                                                                                                            (deploymentStatuses[depl.id] || "Pending") === "Need Correction" && "bg-red-50 text-red-700 border-red-200 dark:bg-red-955/30 dark:text-red-400 dark:border-red-900/50"
+                                                                                                        )}>
+                                                                                                            {deploymentStatuses[depl.id] || "Pending"}
+                                                                                                        </Badge>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                                {/* Separate Section Banner for Verification / Reporting Info */}
+                                                                                                {(deploymentStatuses[depl.id] || "Pending") === "Verified" && (
+                                                                                                     <div className="mt-2 pt-1.5 border-t border-zinc-100 dark:border-zinc-800/60 flex items-center gap-1.5 text-left w-full">
+                                                                                                         <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                                                                                                         <span className="text-[11px] text-emerald-700 dark:text-emerald-300 font-medium">
+                                                                                                             Verified by <strong className="font-semibold text-emerald-800 dark:text-emerald-200">{deploymentVerifierNames[depl.id] || "Admin (You)"}</strong> • {deploymentVerifierTimes[depl.id]}
+                                                                                                         </span>
+                                                                                                     </div>
+                                                                                                 )}
+                                                                                                {(deploymentStatuses[depl.id] || "Pending") === "Need Correction" && (
+                                                                                                     <div className="mt-2 pt-1.5 border-t border-zinc-100 dark:border-zinc-800/60 flex items-center gap-1.5 text-left w-full">
+                                                                                                         <AlertCircle className="h-3.5 w-3.5 text-red-500 dark:text-red-400 shrink-0" />
+                                                                                                         <span className="text-[11px] text-red-700 dark:text-red-300 font-medium">
+                                                                                                             Reported by <strong className="font-semibold text-red-800 dark:text-red-200">{deploymentReporterNames[depl.id] || "Admin (You)"}</strong> • {deploymentReporterTimes[depl.id]}
+                                                                                                         </span>
+                                                                                                     </div>
+                                                                                                 )}
+                                                                                            </div>
+                                                                                        </Card>
+                                                                                    </div>
+                                                                                );
+                                                                            })}
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })() : (
+                                                    filteredDispatches.map((dispatch) => {
                                                         const isDispExpanded = expandedDispatches.includes(dispatch.id);
                                                         return (
                                                             <div key={dispatch.id} className="space-y-4">
-                                                                {/* Date Separator */}
-                                                                <div className="flex items-center gap-2 py-1 select-none">
-                                                                    <span className="text-[9px] font-bold tracking-widest text-zinc-400 dark:text-zinc-500 uppercase">
-                                                                        {dispatch.date}
-                                                                    </span>
-                                                                    <div className="h-[1px] flex-1 bg-zinc-100 dark:bg-zinc-800/60" />
-                                                                </div>
-
                                                                 {/* Dispatch Card (Level 1) */}
-                                                                <Card className="border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden bg-white dark:bg-zinc-950 transition-all">
-                                                                    <div 
-                                                                        className="p-3 flex flex-col gap-2.5 cursor-pointer hover:bg-zinc-50/50 dark:hover:bg-zinc-900/50 transition-colors select-none"
-                                                                        onClick={() => toggleDispatch(dispatch.id)}
-                                                                    >
-                                                                        {/* Top Header Row: Title, Badge, ID & Actions */}
+                                                                <Card 
+                                                                    className="border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden bg-white dark:bg-zinc-950 transition-all cursor-pointer hover:bg-zinc-50/50 dark:hover:bg-zinc-900/50"
+                                                                    onClick={() => setSelectedDispatchId(dispatch.id)}
+                                                                >
+                                                                    <div className="p-3.5 flex flex-col select-none">
+                                                                        {/* Top Header Row: Title, Badge, ID */}
                                                                         <div className="flex items-center justify-between w-full">
-                                                                            <div className="text-left">
-                                                                                <div className="flex items-center gap-2">
+                                                                            <div className="flex flex-col text-left">
+                                                                                <div className="flex items-center gap-1.5">
                                                                                     <span className="font-bold text-sm text-zinc-900 dark:text-zinc-50">Dispatch</span>
-                                                                                    <Badge variant="outline" className={cn(
-                                                                                        "text-[9px] font-bold uppercase tracking-wider py-0 px-1.5 rounded-full border shadow-none",
-                                                                                        (dispatchStatuses[dispatch.id] || "Pending") === "Verified" && "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/50",
-                                                                                        (dispatchStatuses[dispatch.id] || "Pending") === "Pending" && "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50",
-                                                                                        (dispatchStatuses[dispatch.id] || "Pending") === "Need Correction" && "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-900/50"
-                                                                                    )}>
-                                                                                        {dispatchStatuses[dispatch.id] || "Pending"}
-                                                                                    </Badge>
+                                                                                    <HoverCard openDelay={100} closeDelay={100}>
+                                                                                        <HoverCardTrigger asChild>
+                                                                                            <Button 
+                                                                                                variant="ghost" 
+                                                                                                size="icon" 
+                                                                                                className="h-3.5 w-3.5 rounded text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 shrink-0"
+                                                                                                onClick={(e) => e.stopPropagation()}
+                                                                                            >
+                                                                                                <Info className="h-2.5 w-2.5" />
+                                                                                            </Button>
+                                                                                        </HoverCardTrigger>
+                                                                                        <HoverCardContent align="start" className="w-80 p-4 z-[300] bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-xl rounded-xl">
+                                                                                            {dispatchActivityInfo}
+                                                                                        </HoverCardContent>
+                                                                                    </HoverCard>
                                                                                 </div>
-                                                                                <span className="text-[11px] text-zinc-500 font-mono block mt-0.5">ID: #{dispatch.id}</span>
+                                                                                <span className="text-[11px] text-zinc-500 font-mono block mt-0.5">{dispatch.id} • {dispatch.date}</span>
                                                                             </div>
-                                                                            <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                                                                                <HoverCard openDelay={100} closeDelay={100}>
-                                                                                    <HoverCardTrigger asChild>
-                                                                                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50">
-                                                                                            <Info className="h-4 w-4" />
-                                                                                        </Button>
-                                                                                    </HoverCardTrigger>
-                                                                                    <HoverCardContent align="end" className="w-80 p-4 z-[300] bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-xl rounded-xl">
-                                                                                        {dispatchActivityInfo}
-                                                                                    </HoverCardContent>
-                                                                                </HoverCard>
-                                                                                <div 
-                                                                                    className="text-zinc-400 hover:text-zinc-900 p-1 cursor-pointer"
-                                                                                    onClick={() => toggleDispatch(dispatch.id)}
-                                                                                >
-                                                                                    <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", isDispExpanded ? "rotate-0" : "-rotate-90")} />
-                                                                                </div>
-                                                                            </div>
+                                                                            <Badge variant="outline" className={cn(
+                                                                                "text-[9px] font-bold uppercase tracking-wider py-0 px-1.5 rounded-full border shadow-none",
+                                                                                (dispatchStatuses[dispatch.id] || "Pending") === "Verified" && "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/50",
+                                                                                (dispatchStatuses[dispatch.id] || "Pending") === "Pending" && "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50",
+                                                                                (dispatchStatuses[dispatch.id] || "Pending") === "Need Correction" && "bg-red-50 text-red-700 border-red-200 dark:bg-red-955/30 dark:text-red-400 dark:border-red-900/50"
+                                                                            )}>
+                                                                                {dispatchStatuses[dispatch.id] || "Pending"}
+                                                                            </Badge>
                                                                         </div>
 
                                                                         {/* Separate Section Banner for Verification / Reporting Info */}
                                                                         {(dispatchStatuses[dispatch.id] || "Pending") === "Verified" && (
                                                                              <div className="mt-2 pt-1.5 border-t border-zinc-100 dark:border-zinc-800/60 flex items-center gap-1.5 text-left w-full">
                                                                                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                                                                                 <span className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">
-                                                                                     Verified by <strong className="font-semibold text-zinc-800 dark:text-zinc-200">{dispatchVerifierName}</strong> • {dispatchVerifierTime}
+                                                                                 <span className="text-[11px] text-emerald-700 dark:text-emerald-300 font-medium">
+                                                                                     Verified by <strong className="font-semibold text-emerald-800 dark:text-emerald-200">{dispatchVerifierNames[dispatch.id] || "Admin (You)"}</strong> • {dispatchVerifierTimes[dispatch.id]}
                                                                                  </span>
                                                                              </div>
                                                                          )}
                                                                         {(dispatchStatuses[dispatch.id] || "Pending") === "Need Correction" && (
-                                                                             <div className="mt-2 pt-1.5 border-t border-zinc-100 dark:border-zinc-800/60 flex items-center gap-1.5 text-left w-full">
-                                                                                 <AlertCircle className="h-3.5 w-3.5 text-red-500 dark:text-red-400 shrink-0" />
-                                                                                 <span className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">
-                                                                                     Reported by <strong className="font-semibold text-zinc-800 dark:text-zinc-200">{dispatchReporterName}</strong> • {dispatchReporterTime}
-                                                                                 </span>
-                                                                             </div>
-                                                                         )}
-                                                                    </div>
-                                                                    {isDispExpanded && (
-                                                                        <div className="px-4 pb-4 border-t border-zinc-100 dark:border-zinc-900 bg-zinc-50/20 dark:bg-zinc-900/5 flex flex-col gap-3">
-                                                                            {/* Survey checklist */}
-                                                                            <div className="space-y-3 pt-2">
-                                                                                {getDispatchSurveyItems(dispatch, record).map((item) => {
-                                                                                    return (
-                                                                                        <div key={item.id} className="cursor-pointer" onClick={(e) => {
-                                                                                                const target = e.target as HTMLElement;
-                                                                                                if (target.closest('.attachment-preview-trigger') || item.type === 'map') {
-                                                                                                    handleItemClick(item);
-                                                                                                }
-                                                                                            }}>
-                                                                                            <SurveyCard
-                                                                                                item={item}
-                                                                                                style="style-5-feedback"
-                                                                                                showDetails={false}
-                                                                                                isReporting={isReporting}
-                                                                                                isSelected={reportedIds.includes(item.id)}
-                                                                                                onToggleSelect={() => toggleReportId(item.id)}
-                                                                                                disableDialog={true}
-                                                                                                isInvalid={record.status === "Invalid"}
-                                                                                                onMapClick={handleItemClick}
-                                                                                                language={language}
-                                                                                            />
-                                                                                        </div>
-                                                                                    );
-                                                                                })}
+                                                                            <div className="mt-2 pt-1.5 border-t border-zinc-100 dark:border-zinc-800/60 flex items-center gap-1.5 text-left w-full">
+                                                                                <AlertCircle className="h-3.5 w-3.5 text-red-500 dark:text-red-400 shrink-0" />
+                                                                                <span className="text-[11px] text-red-700 dark:text-red-300 font-medium">
+                                                                                    Reported by <strong className="font-semibold text-red-800 dark:text-red-200">{dispatchReporterNames[dispatch.id] || "Admin (You)"}</strong> • {dispatchReporterTimes[dispatch.id]}
+                                                                                </span>
                                                                             </div>
-
-                                                                            {/* Action Buttons Row */}
-                                                                            {(dispatchStatuses[dispatch.id] || "Pending") === "Pending" && (
-                                                                                <div className="flex items-center justify-end gap-2 bg-transparent pt-3" onClick={(e) => e.stopPropagation()}>
-                                                                                    <Button 
-                                                                                        size="sm"
-                                                                                        variant="outline"
-                                                                                        className="h-7 px-3 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md shadow-none hover:bg-zinc-50 dark:hover:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
-                                                                                        onClick={() => {
-                                                                                            const nowStr = format(new Date(), "dd MMM yyyy, hh:mm a");
-                                                                                            setDispatchStatuses(prev => ({ ...prev, [dispatch.id]: "Verified" }));
-                                                                                            setDispatchVerifierNames(prev => ({ ...prev, [dispatch.id]: "Admin (You)" }));
-                                                                                            setDispatchVerifierTimes(prev => ({ ...prev, [dispatch.id]: nowStr }));
-
-                                                                                            if (dispatch.deployments) {
-                                                                                                setDeploymentStatuses(prev => {
-                                                                                                    const updated = { ...prev };
-                                                                                                    dispatch.deployments.forEach((depl: any) => {
-                                                                                                        updated[depl.id] = "Verified";
-                                                                                                    });
-                                                                                                    return updated;
-                                                                                                });
-                                                                                                setDeploymentVerifierNames(prev => {
-                                                                                                    const updated = { ...prev };
-                                                                                                    dispatch.deployments.forEach((depl: any) => {
-                                                                                                        updated[depl.id] = "Admin (You)";
-                                                                                                    });
-                                                                                                    return updated;
-                                                                                                });
-                                                                                                setDeploymentVerifierTimes(prev => {
-                                                                                                    const updated = { ...prev };
-                                                                                                    dispatch.deployments.forEach((depl: any) => {
-                                                                                                        updated[depl.id] = nowStr;
-                                                                                                    });
-                                                                                                    return updated;
-                                                                                                });
-                                                                                            }
-
-                                                                                            setHiddenDispatches(prev => [...prev, dispatch.id]);
-                                                                                            showToast("Approved Successfully", "Dispatch and its deployments approved successfully.", "success");
-                                                                                        }}
-                                                                                    >
-                                                                                        Approve
-                                                                                    </Button>
-                                                                                    <Button 
-                                                                                        size="sm"
-                                                                                        variant="outline"
-                                                                                        className="h-7 px-3 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md shadow-none hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 hover:text-red-700 border-red-100 dark:border-red-900/30"
-                                                                                        onClick={() => {
-                                                                                            setReportingCardType("dispatch");
-                                                                                            setActiveReportingCardId(dispatch.id);
-                                                                                            setSelectedReportFields([]);
-                                                                                            setCardReportComment("");
-                                                                                        }}
-                                                                                    >
-                                                                                        Report
-                                                                                    </Button>
-                                                                                </div>
-                                                                            )}
-                                                                            {(dispatchStatuses[dispatch.id] || "Pending") === "Need Correction" && (
-                                                                                <div className="py-2 border-t border-zinc-100 dark:border-zinc-900 bg-red-50/30 dark:bg-red-950/5 text-left pt-2" onClick={(e) => e.stopPropagation()}>
-                                                                                    <div className="flex items-center gap-2 mb-1">
-                                                                                        <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400 shrink-0" />
-                                                                                        <span className="text-[10px] font-bold text-red-800 dark:text-red-400 uppercase tracking-widest">Report Comment</span>
-                                                                                    </div>
-                                                                                    <div className="pl-6 text-xs text-red-700 dark:text-red-300 leading-relaxed font-medium">
-                                                                                        {dispatchReportComments[dispatch.id] || ""}
-                                                                                    </div>
-                                                                                </div>
-                                                                            )}
-                                                                        </div>
-                                                                    )}
+                                                                        )}
+                                                                    </div>
                                                                 </Card>
-
-                                                                {/* Deployment Card (Level 2) - nested if dispatch is expanded */}
-                                                                {isDispExpanded && (
-                                                                    <div className="pl-4 border-l-2 border-dashed border-zinc-200 dark:border-zinc-800 ml-3 py-1 space-y-4 relative">
-                                                                        {dispatch.deployments
-                                                                            .filter(dep => {
-                                                                                const status = deploymentStatuses[dep.id] || "Pending";
-                                                                                if (activeTab === "all") return true;
-                                                                                if (activeTab === "pending") return status === "Pending";
-                                                                                if (activeTab === "verified") return status === "Verified";
-                                                                                if (activeTab === "need_correction") return status === "Need Correction";
-                                                                                return true;
-                                                                            })
-                                                                            .map((depl) => {
-                                                                            const isDeplExpanded = expandedDeployments.includes(depl.id);
-                                                                            return (
-                                                                                <div key={depl.id} className="relative space-y-4">
-                                                                                    <div className="absolute left-[-16px] top-6 w-3 h-[2px] bg-zinc-200 dark:bg-zinc-800 border-dashed" />
-                                                                                    
-                                                                                    <Card className="border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden bg-white dark:bg-zinc-950 transition-all">
-                                                                    <div 
-                                                                        className="p-3 flex flex-col gap-2.5 cursor-pointer hover:bg-zinc-50/50 dark:hover:bg-zinc-900/50 transition-colors select-none"
-                                                                        onClick={() => toggleDeployment(depl.id)}
-                                                                    >
-                                                                        {/* Top Header Row: Title, Badge, ID & Actions */}
-                                                                        <div className="flex items-center justify-between w-full">
-                                                                            <div className="text-left">
-                                                                                <div className="flex items-center gap-2">
-                                                                                    <span className="font-bold text-sm text-zinc-900 dark:text-zinc-50">Deployment</span>
-                                                                                    <Badge variant="outline" className={cn(
-                                                                                        "text-[9px] font-bold uppercase tracking-wider py-0 px-1.5 rounded-full border shadow-none",
-                                                                                        (deploymentStatuses[depl.id] || "Pending") === "Verified" && "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/50",
-                                                                                        (deploymentStatuses[depl.id] || "Pending") === "Pending" && "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50",
-                                                                                        (deploymentStatuses[depl.id] || "Pending") === "Need Correction" && "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-900/50"
-                                                                                    )}>
-                                                                                        {deploymentStatuses[depl.id] || "Pending"}
-                                                                                    </Badge>
-                                                                                </div>
-                                                                                <span className="text-[11px] text-zinc-500 font-mono block mt-0.5">ID: #{depl.id}</span>
-                                                                            </div>
-                                                                            <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                                                                                <HoverCard openDelay={100} closeDelay={100}>
-                                                                                    <HoverCardTrigger asChild>
-                                                                                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50">
-                                                                                            <Info className="h-4 w-4" />
-                                                                                        </Button>
-                                                                                    </HoverCardTrigger>
-                                                                                    <HoverCardContent align="end" className="w-80 p-4 z-[300] bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-xl rounded-xl">
-                                                                                        {deploymentActivityInfo}
-                                                                                    </HoverCardContent>
-                                                                                </HoverCard>
-                                                                                <div 
-                                                                                    className="text-zinc-400 hover:text-zinc-900 p-1 cursor-pointer"
-                                                                                    onClick={() => toggleDeployment(depl.id)}
-                                                                                >
-                                                                                    <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", isDeplExpanded ? "rotate-0" : "-rotate-90")} />
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-
-                                                                        {/* Separate Section Banner for Verification / Reporting Info */}
-                                                                        {(deploymentStatuses[depl.id] || "Pending") === "Verified" && (
-                                                                             <div className="mt-2 pt-1.5 border-t border-zinc-100 dark:border-zinc-800/60 flex items-center gap-1.5 text-left w-full">
-                                                                                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                                                                                 <span className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">
-                                                                                     Verified by <strong className="font-semibold text-zinc-800 dark:text-zinc-200">{deploymentVerifierName}</strong> • {deploymentVerifierTime}
-                                                                                 </span>
-                                                                             </div>
-                                                                         )}
-                                                                        {(deploymentStatuses[depl.id] || "Pending") === "Need Correction" && (
-                                                                             <div className="mt-2 pt-1.5 border-t border-zinc-100 dark:border-zinc-800/60 flex items-center gap-1.5 text-left w-full">
-                                                                                 <AlertCircle className="h-3.5 w-3.5 text-red-500 dark:text-red-400 shrink-0" />
-                                                                                 <span className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">
-                                                                                     Reported by <strong className="font-semibold text-zinc-800 dark:text-zinc-200">{deploymentReporterNames[depl.id] || "Admin (You)"}</strong> • {deploymentReporterTimes[depl.id] || ""}
-                                                                                 </span>
-                                                                             </div>
-                                                                         )}
-                                                                    </div>
-                                                                                        {isDeplExpanded && (
-                                                                                            <div className="px-4 pb-4 border-t border-zinc-100 dark:border-zinc-900 bg-zinc-50/20 dark:bg-zinc-900/5 flex flex-col gap-3">
-                                                                                                {/* Survey checklist */}
-                                                                                                <div className="space-y-3 pt-2">
-                                                                                                    {getDeploymentSurveyItems(depl, record, (dispatch as any).pictures).map((item) => {
-                                                                                                        return (
-                                                                                                            <div key={item.id} className="cursor-pointer" onClick={(e) => {
-                                                                                                                    const target = e.target as HTMLElement;
-                                                                                                                    if (target.closest('.attachment-preview-trigger') || item.type === 'map') {
-                                                                                                                        handleItemClick(item);
-                                                                                                                    }
-                                                                                                                }}>
-                                                                                                                <SurveyCard
-                                                                                                                    item={item}
-                                                                                                                    style="style-5-feedback"
-                                                                                                                    showDetails={false}
-                                                                                                                    isReporting={isReporting}
-                                                                                                                    isSelected={reportedIds.includes(item.id)}
-                                                                                                                    onToggleSelect={() => toggleReportId(item.id)}
-                                                                                                                    disableDialog={true}
-                                                                                                                    isInvalid={record.status === "Invalid"}
-                                                                                                                    onMapClick={handleItemClick}
-                                                                                                                    language={language}
-                                                                                                                />
-                                                                                                            </div>
-                                                                                                        );
-                                                                                                    })}
-                                                                                                </div>
-
-                                                                                                {/* Comment inputs block */}
-                                                                                                {record.status === "Pending" && (
-                                                                                                    <div className="py-2 text-left border-t border-zinc-100 dark:border-zinc-900">
-                                                                                                        <div className="space-y-0.5 mb-3 pt-1">
-                                                                                                            <div className="text-[12px] font-bold text-zinc-400 uppercase tracking-widest">
-                                                                                                                Add Comment <span className="text-[10px] font-medium lowercase opacity-70">(optional)</span>
-                                                                                                            </div>
-                                                                                                            <div className="text-[12px] font-normal text-zinc-500 dark:text-zinc-400 leading-tight">
-                                                                                                                Share any additional observations or feedback regarding this survey.
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                        <div className="flex flex-col">
-                                                                                                            <Textarea
-                                                                                                                rows={showCommentInput || comment.trim() ? 4 : 1}
-                                                                                                                placeholder="Type your comment here . . ."
-                                                                                                                className={cn(
-                                                                                                                    "w-full box-border bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-md resize-none focus-visible:ring-1 focus-visible:ring-zinc-200 dark:focus-visible:ring-zinc-800 px-3 py-2 placeholder:text-zinc-400 transition-[min-height] duration-300 ease-in-out md:text-sm !min-h-0",
-                                                                                                                    showCommentInput || comment.trim()
-                                                                                                                        ? "min-h-[100px] text-base"
-                                                                                                                        : "h-10 min-h-0 max-h-10 text-sm leading-tight"
-                                                                                                                )}
-                                                                                                                value={comment}
-                                                                                                                onChange={(e) => setComment(e.target.value)}
-                                                                                                                onFocus={() => setShowCommentInput(true)}
-                                                                                                                onBlur={() => {
-                                                                                                                    if (!comment.trim()) setShowCommentInput(false);
-                                                                                                                }}
-                                                                                                            />
-                                                                                                            <div className={cn(
-                                                                                                                "flex items-center gap-2 overflow-hidden transition-[height,opacity,margin-top] duration-300 ease-in-out",
-                                                                                                                comment.trim() || showCommentInput ? "mt-2 h-7 opacity-100" : "mt-0 h-0 opacity-0 pointer-events-none"
-                                                                                                            )}>
-                                                                                                                <Button 
-                                                                                                                    size="sm"
-                                                                                                                    className="h-6 px-3 text-[10px] font-bold uppercase tracking-wider bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-950 rounded-md shadow-sm transition-all duration-200"
-                                                                                                                    onClick={async () => {
-                                                                                                                        if (!comment.trim()) return;
-                                                                                                                        setIsSavingComment(true);
-                                                                                                                        await new Promise(resolve => setTimeout(resolve, 800));
-                                                                                                                        const newComment: VerificationComment = {
-                                                                                                                            id: Date.now().toString(),
-                                                                                                                            text: comment.trim(),
-                                                                                                                            verifier: "Verifier admin",
-                                                                                                                            date: new Date()
-                                                                                                                        };
-                                                                                                                        setLocalComments([newComment, ...localComments]);
-                                                                                                                        setComment("");
-                                                                                                                        setIsSavingComment(false);
-                                                                                                                        setShowCommentInput(false);
-                                                                                                                        showToast("Comment Added", "Comment added successfully.", "success");
-                                                                                                                    }}
-                                                                                                                    disabled={isSavingComment || !comment.trim()}
-                                                                                                                >
-                                                                                                                    {isSavingComment ? (
-                                                                                                                        <Loader2 className="h-3 w-3 animate-spin mr-1.5" />
-                                                                                                                    ) : null}
-                                                                                                                    Save
-                                                                                                                </Button>
-                                                                                                                <Button
-                                                                                                                    variant="ghost"
-                                                                                                                    size="sm"
-                                                                                                                    className="h-6 px-2 text-[10px] font-bold text-zinc-400 hover:text-zinc-900 transition-colors"
-                                                                                                                    onClick={() => {
-                                                                                                                        setComment("");
-                                                                                                                        setShowCommentInput(false);
-                                                                                                                    }}
-                                                                                                                >
-                                                                                                                    Cancel
-                                                                                                                </Button>
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                    </div>
-                                                                                                )}
-
-                                                                                                {/* Comments Log List */}
-                                                                                                {localComments.length > 0 && (
-                                                                                                    <div className="py-2 text-left border-t border-zinc-100 dark:border-zinc-900">
-                                                                                                        <div className="flex items-center gap-2 text-[12px] font-bold text-zinc-400 uppercase tracking-widest mb-2 pt-1">
-                                                                                                            {localComments.length > 1 ? 'Comments' : 'Comment'}
-                                                                                                        </div>
-                                                                                                        <div className="space-y-3">
-                                                                                                            {localComments.map((c, idx) => (
-                                                                                                                <div key={c.id} className="relative pl-4 animate-in fade-in slide-in-from-left-2 duration-500" style={{ animationDelay: `${idx * 100}ms` }}>
-                                                                                                                    <div className="absolute left-0 top-1 bottom-1.5 w-0.5 bg-zinc-200 dark:bg-zinc-800 rounded-full" />
-                                                                                                                    <div className="text-[14px] text-zinc-700 dark:text-zinc-300 leading-relaxed italic">
-                                                                                                                        "{c.text}"
-                                                                                                                    </div>
-                                                                                                                    <div className="flex items-center gap-2 pt-1">
-                                                                                                                        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
-                                                                                                                            {c.verifier}
-                                                                                                                        </span>
-                                                                                                                        <span className="text-zinc-300 dark:text-zinc-700">•</span>
-                                                                                                                        <span className="text-[10px] text-zinc-400 font-medium uppercase">
-                                                                                                                            {format(c.date, "dd MMM yyyy")}
-                                                                                                                        </span>
-                                                                                                                    </div>
-                                                                                                                </div>
-                                                                                                            ))}
-                                                                                                        </div>
-                                                                                                    </div>
-                                                                                                )}
-
-                                                                                                {/* Display Comment for Verified (Legacy Support) */}
-                                                                                                {record.status === "Verified" && (record.verified?.comment || record.approvalComment) && localComments.length === 0 && (
-                                                                                                    <div className="py-2 text-left border-t border-zinc-100 dark:border-zinc-900">
-                                                                                                        <div className="flex items-center gap-2 text-[12px] font-bold text-zinc-400 uppercase tracking-widest mb-2 pt-1">
-                                                                                                            Comment
-                                                                                                        </div>
-                                                                                                        <div className="space-y-3">
-                                                                                                            <div className="relative pl-4 animate-in fade-in slide-in-from-left-2 duration-500">
-                                                                                                                <div className="absolute left-0 top-1 bottom-1 w-0.5 bg-zinc-200 dark:bg-zinc-800 rounded-full" />
-                                                                                                                <div className="text-[14px] text-zinc-700 dark:text-zinc-300 leading-relaxed italic">
-                                                                                                                    "{record.verified?.comment || record.approvalComment}"
-                                                                                                                </div>
-                                                                                                                <div className="flex items-center gap-2 pt-1">
-                                                                                                                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
-                                                                                                                        {record.verified?.verifier}
-                                                                                                                    </span>
-                                                                                                                    <span className="text-zinc-300 dark:text-zinc-700">•</span>
-                                                                                                                    <span className="text-[10px] text-zinc-400 font-medium uppercase">
-                                                                                                                        {record.verified?.date ? format(record.verified.date, "dd MMM yyyy") : ""}
-                                                                                                                    </span>
-                                                                                                                </div>
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                    </div>
-                                                                                                )}
-
-                                                                                                {/* Action Buttons Row */}
-                                                                                                {(deploymentStatuses[depl.id] || "Pending") === "Pending" && (
-                                                                                                    <div className="flex items-center justify-end gap-2 bg-transparent pt-3" onClick={(e) => e.stopPropagation()}>
-                                                                                                        <Button 
-                                                                                                            size="sm"
-                                                                                                            variant="outline"
-                                                                                                            className="h-7 px-3 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md shadow-none hover:bg-zinc-50 dark:hover:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
-                                                                                                            onClick={() => {
-                                                                                                                const nowStr = format(new Date(), "dd MMM yyyy, hh:mm a");
-                                                                                                                setDeploymentStatuses(prev => ({ ...prev, [depl.id]: "Verified" }));
-                                                                                                                setDeploymentVerifierNames(prev => ({ ...prev, [depl.id]: "Admin (You)" }));
-                                                                                                                setDeploymentVerifierTimes(prev => ({ ...prev, [depl.id]: nowStr }));
-                                                                                                                setHiddenDeployments(prev => [...prev, depl.id]);
-                                                                                                                showToast("Approved Successfully", "Deployment approved successfully.", "success");
-                                                                                                            }}
-                                                                                                        >
-                                                                                                            Approve
-                                                                                                        </Button>
-                                                                                                        <Button 
-                                                                                                            size="sm"
-                                                                                                            variant="outline"
-                                                                                                            className="h-7 px-3 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md shadow-none hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 hover:text-red-700 border-red-100 dark:border-red-900/30"
-                                                                                                            onClick={() => {
-                                                                                                                setReportingCardType("deployment");
-                                                                                                                setActiveReportingCardId(depl.id);
-                                                                                                                setSelectedReportFields([]);
-                                                                                                                setCardReportComment("");
-                                                                                                            }}
-                                                                                                        >
-                                                                                                            Report
-                                                                                                        </Button>
-                                                                                                    </div>
-                                                                                                )}
-                                                                                                {(deploymentStatuses[depl.id] || "Pending") === "Need Correction" && (
-                                                                                                    <div className="py-2 border-t border-zinc-100 dark:border-zinc-900 bg-red-50/30 dark:bg-red-950/5 text-left pt-2" onClick={(e) => e.stopPropagation()}>
-                                                                                                        <div className="flex items-center gap-2 mb-1">
-                                                                                                            <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400 shrink-0" />
-                                                                                                            <span className="text-[10px] font-bold text-red-800 dark:text-red-400 uppercase tracking-widest">Report Comment</span>
-                                                                                                        </div>
-                                                                                                        <div className="pl-6 text-xs text-red-700 dark:text-red-300 leading-relaxed font-medium">
-                                                                                                            {deploymentReportComments[depl.id] || ""}
-                                                                                                        </div>
-                                                                                                    </div>
-                                                                                                )}
-                                                                                            </div>
-                                                                                        )}
-                                                                                    </Card>
-                                                                                </div>
-                                                                            );
-                                                                        })}
-                                                                    </div>
-                                                                )}
                                                             </div>
                                                         );
-                                                    })}
+                                                    })
+                                                )}
                                                 </div>
                                             );
                                         })()
@@ -3424,6 +3635,164 @@ export function EngagementDetailSheet({
                                 <ChevronRight className="h-5 w-5" />
                             </Button>
                         </div>
+
+                        {/* Right: Actions for selected Dispatch / Deployment */}
+                        {(selectedDeploymentId || selectedDispatchId) && (() => {
+                            if (selectedDeploymentId) {
+                                const dispatch = mockDispatches.find(d => d.deployments?.some(dep => dep.id === selectedDeploymentId));
+                                const deployment = dispatch?.deployments?.find(dep => dep.id === selectedDeploymentId);
+                                if (!deployment) return null;
+                                const status = deploymentStatuses[deployment.id] || "Pending";
+                                if (status !== "Pending") return null;
+                                return (
+                                    <div className="flex items-center gap-2">
+                                        {isReporting ? (
+                                            <>
+                                                <Button
+                                                    variant="outline"
+                                                    className="h-9 px-4 text-xs font-bold border-zinc-200 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 transition-all dark:bg-zinc-950 dark:border-zinc-800"
+                                                    onClick={() => {
+                                                        setIsReporting(false);
+                                                        setReportingCardType(null);
+                                                        setActiveReportingCardId(null);
+                                                        setReportedIds([]);
+                                                    }}
+                                                >
+                                                    Cancel
+                                                </Button>
+                                                <Button
+                                                    className={cn(
+                                                        "h-9 px-5 text-xs font-bold shadow-md transition-all active:scale-[0.98] bg-red-600 hover:bg-red-700 text-white dark:bg-red-600 dark:text-white"
+                                                    )}
+                                                    onClick={() => setIsReportingFinalStep(true)}
+                                                    disabled={reportedIds.length === 0}
+                                                >
+                                                    <AlertCircle className="mr-2 h-3.5 w-3.5" />
+                                                    {reportedIds.length === 0 ? "Report" : `Report Selected (${reportedIds.length})`}
+                                                </Button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Button
+                                                    variant="outline"
+                                                    className="h-9 px-4 text-xs font-bold border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all dark:bg-zinc-955 dark:hover:bg-red-950/20"
+                                                    onClick={() => {
+                                                        setIsReporting(true);
+                                                        setReportingCardType("deployment");
+                                                        setActiveReportingCardId(deployment.id);
+                                                        setReportedIds([]);
+                                                    }}
+                                                >
+                                                    <AlertCircle className="mr-2 h-3.5 w-3.5" />
+                                                    Report
+                                                </Button>
+                                                <Button
+                                                    className="h-9 px-5 text-xs font-bold shadow-md transition-all active:scale-[0.98] bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900"
+                                                    onClick={() => {
+                                                        const nowStr = format(new Date(), "dd MMM yyyy, hh:mm a");
+                                                        setDeploymentStatuses(prev => ({ ...prev, [deployment.id]: "Verified" }));
+                                                        setDeploymentVerifierNames(prev => ({ ...prev, [deployment.id]: "Admin (You)" }));
+                                                        setDeploymentVerifierTimes(prev => ({ ...prev, [deployment.id]: nowStr }));
+                                                        showToast("Approved Successfully", "Deployment approved successfully.", "success");
+                                                    }}
+                                                >
+                                                    <CheckCircle2 className="mr-2 h-3.5 w-3.5" />
+                                                    Approve
+                                                </Button>
+                                            </>
+                                        )}
+                                    </div>
+                                );
+                            } else {
+                                const dispatch = mockDispatches.find(d => d.id === selectedDispatchId);
+                                if (!dispatch) return null;
+                                const status = dispatchStatuses[dispatch.id] || "Pending";
+                                if (status !== "Pending") return null;
+                                return (
+                                    <div className="flex items-center gap-2">
+                                        {isReporting ? (
+                                            <>
+                                                <Button
+                                                    variant="outline"
+                                                    className="h-9 px-4 text-xs font-bold border-zinc-200 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 transition-all dark:bg-zinc-950 dark:border-zinc-800"
+                                                    onClick={() => {
+                                                        setIsReporting(false);
+                                                        setReportingCardType(null);
+                                                        setActiveReportingCardId(null);
+                                                        setReportedIds([]);
+                                                    }}
+                                                >
+                                                    Cancel
+                                                </Button>
+                                                <Button
+                                                    className={cn(
+                                                        "h-9 px-5 text-xs font-bold shadow-md transition-all active:scale-[0.98] bg-red-600 hover:bg-red-700 text-white dark:bg-red-600 dark:text-white"
+                                                    )}
+                                                    onClick={() => setIsReportingFinalStep(true)}
+                                                    disabled={reportedIds.length === 0}
+                                                >
+                                                    <AlertCircle className="mr-2 h-3.5 w-3.5" />
+                                                    {reportedIds.length === 0 ? "Report" : `Report Selected (${reportedIds.length})`}
+                                                </Button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Button
+                                                    variant="outline"
+                                                    className="h-9 px-4 text-xs font-bold border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all dark:bg-zinc-955 dark:hover:bg-red-950/20"
+                                                    onClick={() => {
+                                                        setIsReporting(true);
+                                                        setReportingCardType("dispatch");
+                                                        setActiveReportingCardId(dispatch.id);
+                                                        setReportedIds([]);
+                                                    }}
+                                                >
+                                                    <AlertCircle className="mr-2 h-3.5 w-3.5" />
+                                                    Report
+                                                </Button>
+                                                <Button
+                                                    className="h-9 px-5 text-xs font-bold shadow-md transition-all active:scale-[0.98] bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900"
+                                                    onClick={() => {
+                                                    const nowStr = format(new Date(), "dd MMM yyyy, hh:mm a");
+                                                    setDispatchStatuses(prev => ({ ...prev, [dispatch.id]: "Verified" }));
+                                                    setDispatchVerifierNames(prev => ({ ...prev, [dispatch.id]: "Admin (You)" }));
+                                                    setDispatchVerifierTimes(prev => ({ ...prev, [dispatch.id]: nowStr }));
+
+                                                    if (dispatch.deployments) {
+                                                        setDeploymentStatuses(prev => {
+                                                            const updated = { ...prev };
+                                                            dispatch.deployments.forEach((depl: any) => {
+                                                                updated[depl.id] = "Verified";
+                                                            });
+                                                            return updated;
+                                                        });
+                                                        setDeploymentVerifierNames(prev => {
+                                                            const updated = { ...prev };
+                                                            dispatch.deployments.forEach((depl: any) => {
+                                                                updated[depl.id] = "Admin (You)";
+                                                            });
+                                                            return updated;
+                                                        });
+                                                        setDeploymentVerifierTimes(prev => {
+                                                            const updated = { ...prev };
+                                                            dispatch.deployments.forEach((depl: any) => {
+                                                                updated[depl.id] = nowStr;
+                                                            });
+                                                            return updated;
+                                                        });
+                                                    }
+                                                    showToast("Approved Successfully", "Dispatch and its deployments approved successfully.", "success");
+                                                }}
+                                            >
+                                                <CheckCircle2 className="mr-2 h-3.5 w-3.5" />
+                                                Approve
+                                            </Button>
+                                        </>
+                                    )}
+                                </div>
+                            );
+                            }
+                        })()}
                     </div>
                 </div>
 
@@ -3525,272 +3894,7 @@ export function EngagementDetailSheet({
                 </DialogContent>
             </Dialog>
 
-            {/* New Card Fields Report Pop-up */}
-            <Dialog open={reportingCardType !== null} onOpenChange={(open) => { if (!open) setReportingCardType(null); }}>
-                <DialogContent className="max-w-[500px] p-0 overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-xl z-[600] rounded-xl [&>button]:hidden bg-white dark:bg-zinc-950">
-                    <DialogTitle className="sr-only">Confirm field to report</DialogTitle>
-                    <DialogDescription className="sr-only">Choose fields to report and enter additional comments.</DialogDescription>
-                    
-                    <div className="p-6 pb-0 flex items-start justify-between">
-                        <div className="space-y-1 text-left">
-                            <h3 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Confirm field</h3>
-                            <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium">
-                                Choose fields to report.
-                            </p>
-                        </div>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-all"
-                            onClick={() => setReportingCardType(null)}
-                        >
-                            <X className="h-4 w-4" />
-                        </Button>
-                    </div>
 
-                    {/* Fields List */}
-                    <div className="p-6 py-4">
-                        <div className="max-h-[300px] overflow-y-auto pr-1.5 space-y-2.5 scrollbar-thin">
-                            <div className="grid grid-cols-1 gap-2.5 text-left">
-                                {(() => {
-                                    if (reportingCardType === "dispatch" && activeReportingDispatch) {
-                                        return (
-                                            <div className="space-y-4">
-                                                {/* Dispatch Card (Level 1) */}
-                                                <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden bg-zinc-50/30 dark:bg-zinc-900/5">
-                                                    <div className="p-3 bg-zinc-50/50 dark:bg-zinc-900/10 border-b border-zinc-100 dark:border-zinc-900 flex items-center justify-between">
-                                                        <span className="font-bold text-[11px] uppercase tracking-wider text-zinc-500">Dispatch Details</span>
-                                                        <span className="text-[10px] text-zinc-500 font-mono">ID: #{activeReportingDispatch.id}</span>
-                                                    </div>
-                                                    <div className="p-3 space-y-2 bg-white dark:bg-zinc-950">
-                                                        {getDispatchSurveyItems(activeReportingDispatch, record).map(item => {
-                                                            const isChecked = selectedReportFields.includes(item.id);
-                                                            return (
-                                                                <div 
-                                                                    key={item.id}
-                                                                    className={cn(
-                                                                        "flex items-start gap-2.5 p-2.5 rounded-lg border transition-colors cursor-pointer text-left",
-                                                                        isChecked 
-                                                                            ? "border-red-200 dark:border-red-900/50 bg-red-50/20 dark:bg-red-950/10" 
-                                                                            : "border-zinc-100 dark:border-zinc-900 hover:bg-zinc-50/50 dark:hover:bg-zinc-900/10"
-                                                                    )}
-                                                                    onClick={() => {
-                                                                        if (isChecked) {
-                                                                            setSelectedReportFields(selectedReportFields.filter(f => f !== item.id));
-                                                                        } else {
-                                                                            setSelectedReportFields([...selectedReportFields, item.id]);
-                                                                        }
-                                                                    }}
-                                                                >
-                                                                    <Checkbox 
-                                                                        id={`report_${item.id}`}
-                                                                        checked={isChecked}
-                                                                        onCheckedChange={() => {}}
-                                                                        className="mt-0.5"
-                                                                    />
-                                                                    <div className="flex-1 min-w-0">
-                                                                        <span className="font-semibold text-zinc-900 dark:text-zinc-100 text-[11px] leading-tight block">{item.question.replace(":", "")}</span>
-                                                                        <span className="text-[10px] text-zinc-500 font-medium truncate block mt-0.5">
-                                                                            {typeof item.answer === "string" ? item.answer : "Attachment"}
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                </div>
-
-                                                {/* Nested Deployment Cards (Level 2) */}
-                                                {activeReportingDispatch.deployments && (
-                                                    <div className="pl-4 border-l-2 border-dashed border-zinc-200 dark:border-zinc-800 ml-3 py-1 space-y-3 relative">
-                                                        {activeReportingDispatch.deployments.map((depl: any) => (
-                                                            <div key={depl.id} className="relative space-y-2 mt-2">
-                                                                <div className="absolute left-[-16px] top-6 w-3 h-[2px] bg-zinc-200 dark:bg-zinc-800 border-dashed" />
-                                                                <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden bg-zinc-50/30 dark:bg-zinc-900/5">
-                                                                    <div className="p-3 bg-zinc-50/50 dark:bg-zinc-900/10 border-b border-zinc-100 dark:border-zinc-900 flex items-center justify-between">
-                                                                        <span className="font-bold text-[11px] uppercase tracking-wider text-zinc-500">{depl.plot || `Plot ${depl.plot_no}`}</span>
-                                                                        <span className="text-[10px] text-zinc-500 font-mono">ID: #{depl.id}</span>
-                                                                    </div>
-                                                                    <div className="p-3 space-y-2 bg-white dark:bg-zinc-950">
-                                                                        {getDeploymentSurveyItems(depl, record, (activeReportingDispatch as any)?.pictures || (activeReportingDispatch as any)?.picture_deployment).map(item => {
-                                                                            const uniqueId = `${depl.id}_${item.id}`;
-                                                                            const isChecked = selectedReportFields.includes(uniqueId);
-                                                                            return (
-                                                                                <div 
-                                                                                    key={uniqueId}
-                                                                                    className={cn(
-                                                                                        "flex items-start gap-2.5 p-2.5 rounded-lg border transition-colors cursor-pointer text-left",
-                                                                                        isChecked 
-                                                                                            ? "border-red-200 dark:border-red-900/50 bg-red-50/20 dark:bg-red-950/10" 
-                                                                                            : "border-zinc-100 dark:border-zinc-900 hover:bg-zinc-50/50 dark:hover:bg-zinc-900/10"
-                                                                                    )}
-                                                                                    onClick={() => {
-                                                                                        if (isChecked) {
-                                                                                            setSelectedReportFields(selectedReportFields.filter(f => f !== uniqueId));
-                                                                                        } else {
-                                                                                            setSelectedReportFields([...selectedReportFields, uniqueId]);
-                                                                                        }
-                                                                                    }}
-                                                                                >
-                                                                                    <Checkbox 
-                                                                                        id={`report_${uniqueId}`}
-                                                                                        checked={isChecked}
-                                                                                        onCheckedChange={() => {}}
-                                                                                        className="mt-0.5"
-                                                                                    />
-                                                                                    <div className="flex-1 min-w-0">
-                                                                                        <span className="font-semibold text-zinc-900 dark:text-zinc-100 text-[11px] leading-tight block">{item.question.replace(":", "")}</span>
-                                                                                        <span className="text-[10px] text-zinc-500 font-medium truncate block mt-0.5">
-                                                                                            {typeof item.answer === "string" ? item.answer : "Attachment"}
-                                                                                        </span>
-                                                                                    </div>
-                                                                                </div>
-                                                                            );
-                                                                        })}
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        );
-                                    }
-
-                                    if (reportingCardType === "deployment" && activeReportingDeployment) {
-                                        return (
-                                            <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden bg-zinc-50/30 dark:bg-zinc-900/5">
-                                                <div className="p-3 bg-zinc-50/50 dark:bg-zinc-900/10 border-b border-zinc-100 dark:border-zinc-900 flex items-center justify-between">
-                                                    <span className="font-bold text-[11px] uppercase tracking-wider text-zinc-500">Deployment Details ({activeReportingDeployment.plot || `Plot ${(activeReportingDeployment as any).plot_no}`})</span>
-                                                    <span className="text-[10px] text-zinc-500 font-mono">ID: #{activeReportingDeployment.id}</span>
-                                                </div>
-                                                <div className="p-3 space-y-2 bg-white dark:bg-zinc-950">
-                                                    {getDeploymentSurveyItems(activeReportingDeployment, record, (activeReportingDeploymentParentDispatch as any)?.pictures || (activeReportingDeploymentParentDispatch as any)?.picture_deployment).map(item => {
-                                                        const isChecked = selectedReportFields.includes(item.id);
-                                                        return (
-                                                            <div 
-                                                                key={item.id}
-                                                                className={cn(
-                                                                    "flex items-start gap-2.5 p-2.5 rounded-lg border transition-colors cursor-pointer text-left",
-                                                                    isChecked 
-                                                                        ? "border-red-200 dark:border-red-900/50 bg-red-50/20 dark:bg-red-950/10" 
-                                                                        : "border-zinc-100 dark:border-zinc-900 hover:bg-zinc-50/50 dark:hover:bg-zinc-900/10"
-                                                                )}
-                                                                onClick={() => {
-                                                                    if (isChecked) {
-                                                                        setSelectedReportFields(selectedReportFields.filter(f => f !== item.id));
-                                                                    } else {
-                                                                        setSelectedReportFields([...selectedReportFields, item.id]);
-                                                                    }
-                                                                }}
-                                                            >
-                                                                <Checkbox 
-                                                                    id={`report_${item.id}`}
-                                                                    checked={isChecked}
-                                                                    onCheckedChange={() => {}}
-                                                                    className="mt-0.5"
-                                                                />
-                                                                <div className="flex-1 min-w-0">
-                                                                    <span className="font-semibold text-zinc-900 dark:text-zinc-100 text-[11px] leading-tight block">{item.question.replace(":", "")}</span>
-                                                                    <span className="text-[10px] text-zinc-500 font-medium truncate block mt-0.5">
-                                                                        {typeof item.answer === "string" ? item.answer : "Attachment"}
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </div>
-                                        );
-                                    }
-                                    return null;
-                                })()}
-                            </div>
-                        </div>
-
-                        {/* Comment section */}
-                        <div className="space-y-2 mt-4 text-left">
-                            <Label className="text-xs font-bold text-zinc-900 dark:text-zinc-50">Comment</Label>
-                            <Textarea 
-                                placeholder="Add your comment here"
-                                className="min-h-[90px] resize-none border-zinc-200 dark:border-zinc-800 focus-visible:ring-zinc-950 dark:focus-visible:ring-zinc-50 rounded-md bg-transparent p-3 text-sm leading-relaxed"
-                                value={cardReportComment}
-                                onChange={(e) => setCardReportComment(e.target.value)}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Footer */}
-                    <div className="p-6 pt-0 flex items-center justify-end gap-3">
-                        <Button 
-                            variant="outline"
-                            className="h-9 px-4 text-xs font-bold"
-                            onClick={() => setReportingCardType(null)}
-                        >
-                            Cancel
-                        </Button>
-                        <Button 
-                            className="h-9 px-4 text-xs font-bold bg-red-600 hover:bg-red-700 text-white shadow-none"
-                            onClick={() => {
-                                const nowStr = format(new Date(), "dd MMM yyyy, hh:mm a");
-                                if (reportingCardType === "dispatch" && activeReportingCardId) {
-                                    setDispatchStatuses(prev => ({ ...prev, [activeReportingCardId]: "Need Correction" }));
-                                    setDispatchReporterNames(prev => ({ ...prev, [activeReportingCardId]: "Admin (You)" }));
-                                    setDispatchReporterTimes(prev => ({ ...prev, [activeReportingCardId]: nowStr }));
-                                    setDispatchReportComments(prev => ({ ...prev, [activeReportingCardId]: cardReportComment }));
-
-                                    if (activeReportingDispatch && activeReportingDispatch.deployments) {
-                                        setDeploymentStatuses(prev => {
-                                            const updated = { ...prev };
-                                            activeReportingDispatch.deployments.forEach((depl: any) => {
-                                                updated[depl.id] = "Need Correction";
-                                            });
-                                            return updated;
-                                        });
-                                        setDeploymentReporterNames(prev => {
-                                            const updated = { ...prev };
-                                            activeReportingDispatch.deployments.forEach((depl: any) => {
-                                                updated[depl.id] = "Admin (You)";
-                                            });
-                                            return updated;
-                                        });
-                                        setDeploymentReporterTimes(prev => {
-                                            const updated = { ...prev };
-                                            activeReportingDispatch.deployments.forEach((depl: any) => {
-                                                updated[depl.id] = nowStr;
-                                            });
-                                            return updated;
-                                        });
-                                        setDeploymentReportComments(prev => {
-                                            const updated = { ...prev };
-                                            activeReportingDispatch.deployments.forEach((depl: any) => {
-                                                updated[depl.id] = cardReportComment;
-                                            });
-                                            return updated;
-                                        });
-                                    }
-
-                                    setHiddenDispatches(prev => [...prev, activeReportingCardId]);
-                                    showToast("Reported Successfully", "Dispatch reported successfully. Item moved to Need Correction.", "error");
-                                } else if (reportingCardType === "deployment" && activeReportingCardId) {
-                                    setDeploymentStatuses(prev => ({ ...prev, [activeReportingCardId]: "Need Correction" }));
-                                    setDeploymentReporterNames(prev => ({ ...prev, [activeReportingCardId]: "Admin (You)" }));
-                                    setDeploymentReporterTimes(prev => ({ ...prev, [activeReportingCardId]: nowStr }));
-                                    setDeploymentReportComments(prev => ({ ...prev, [activeReportingCardId]: cardReportComment }));
-                                    setHiddenDeployments(prev => [...prev, activeReportingCardId]);
-                                    showToast("Reported Successfully", "Deployment reported successfully. Item moved to Need Correction.", "error");
-                                }
-                                setReportingCardType(null);
-                                setActiveReportingCardId(null);
-                            }}
-                            disabled={!cardReportComment.trim()}
-                        >
-                            <AlertCircle className="mr-2 h-3.5 w-3.5" />
-                            Report
-                        </Button>
-                    </div>
-                </DialogContent>
-            </Dialog>
 
             {/* Custom Toast Message */}
             {toastMessage && (

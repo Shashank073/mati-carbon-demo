@@ -55,6 +55,12 @@ const config = {
     			},
     			'mati-gold': '#DAA520',
     			'mati-green': '#228B22',
+    			'mati-accent': '#559BE1',
+    			'mati-charcoal': '#1B1614',
+    			'mati-beige': '#F5EBE6',
+    			'mati-farm': '#2D7F4B',
+    			'mati-warehouse': '#C08A0E',
+    			'mati-lab': '#6B46C1',
     			sidebar: {
     				DEFAULT: 'hsl(var(--sidebar-background))',
     				foreground: 'hsl(var(--sidebar-foreground))',
