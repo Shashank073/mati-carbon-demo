@@ -524,20 +524,6 @@ const getDispatchSurveyItems = (dispatch: any, record: EngagementRecord): Survey
             label: "Cluster Name"
         },
         {
-            id: "surveyor_name",
-            question: "surveyor_name:",
-            type: "text",
-            answer: dispatch.surveyor_name || record.surveyor.name || "-",
-            label: "Surveyor Name"
-        },
-        {
-            id: "surveyor_registred_no",
-            question: "surveyor_registred_no:",
-            type: "text",
-            answer: dispatch.surveyor_registred_no || record.surveyor.phoneNumber || "-",
-            label: "Surveyor Phone"
-        },
-        {
             id: "num_tons",
             question: "Number of Tonnes loaded on this tractor?:",
             type: "quantity",
@@ -557,20 +543,6 @@ const getDispatchSurveyItems = (dispatch: any, record: EngagementRecord): Survey
             type: "text",
             answer: dispatch.date_raw ? formatDate(dispatch.date_raw) : dispatch.date || "-",
             label: "Dispatch Date"
-        },
-        {
-            id: "created_at",
-            question: "created_at:",
-            type: "text",
-            answer: dispatch.created_at_raw ? formatTimestamp(dispatch.created_at_raw) : "-",
-            label: "Created At"
-        },
-        {
-            id: "updated_at",
-            question: "updated_at:",
-            type: "text",
-            answer: dispatch.updated_at_raw ? formatTimestamp(dispatch.updated_at_raw) : "-",
-            label: "Updated At"
         }
     ];
 
@@ -2848,22 +2820,14 @@ export function EngagementDetailSheet({
                                             <ArrowLeft className="h-5 w-5" />
                                         </Button>
                                         <div className="flex flex-col text-left min-w-0 flex-1 overflow-hidden">
-                                            <div className="flex items-center gap-1.5">
-                                                <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-50 leading-none">Deployment</h2>
-                                                <HoverCard openDelay={100} closeDelay={100}>
-                                                    <HoverCardTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="h-4 w-4 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 shrink-0 p-0" onClick={(e) => e.stopPropagation()}>
-                                                            <Info className="h-3 w-3" />
-                                                        </Button>
-                                                    </HoverCardTrigger>
-                                                    <HoverCardContent align="start" className="w-80 p-4 z-[300] bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-xl rounded-xl">
-                                                        {deploymentActivityInfo}
-                                                    </HoverCardContent>
-                                                </HoverCard>
-                                            </div>
+                                            <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-50 leading-none">Deployment</h2>
+                                            
                                             <div className="text-[11px] text-zinc-500 font-mono mt-1.5 flex items-center gap-1 select-none whitespace-nowrap overflow-hidden leading-none text-left w-full">
                                                 <button 
-                                                    onClick={() => setSelectedDispatchId(null)}
+                                                    onClick={() => {
+                                                        setSelectedDispatchId(null);
+                                                        setSelectedDeploymentId(null);
+                                                    }}
                                                     className="hover:underline hover:text-zinc-850 dark:hover:text-zinc-150 transition-colors focus:outline-none shrink-0"
                                                 >
                                                     All
@@ -2874,7 +2838,7 @@ export function EngagementDetailSheet({
                                                     <HoverCardTrigger asChild>
                                                         <button 
                                                             onClick={() => setSelectedDeploymentId(null)}
-                                                            className="hover:underline hover:text-zinc-850 dark:hover:text-zinc-150 transition-colors focus:outline-none truncate max-w-[85px] sm:max-w-[110px] min-w-0 shrink block text-left"
+                                                            className="hover:underline hover:text-zinc-850 dark:hover:text-zinc-150 transition-colors focus:outline-none truncate min-w-0 shrink block text-left"
                                                         >
                                                             {dispatch.id}
                                                         </button>
@@ -2888,25 +2852,12 @@ export function EngagementDetailSheet({
 
                                                 <HoverCard openDelay={200} closeDelay={100}>
                                                     <HoverCardTrigger asChild>
-                                                        <span className="text-zinc-400 dark:text-zinc-605 truncate max-w-[85px] sm:max-w-[110px] min-w-0 shrink block cursor-help">
+                                                        <span className="text-zinc-500 dark:text-zinc-400 truncate min-w-0 shrink block cursor-help font-semibold">
                                                             {deployment.id}
                                                         </span>
                                                     </HoverCardTrigger>
                                                     <HoverCardContent align="start" side="bottom" className="w-auto p-2 text-[10px] font-mono bg-zinc-900 text-white border-zinc-800 shadow-xl rounded-md z-[300] select-text">
                                                         {deployment.id}
-                                                    </HoverCardContent>
-                                                </HoverCard>
-
-                                                <span className="text-zinc-450 dark:text-zinc-600 font-normal select-none mx-0.5 shrink-0">•</span>
-
-                                                <HoverCard openDelay={200} closeDelay={100}>
-                                                    <HoverCardTrigger asChild>
-                                                        <span className="text-zinc-400 dark:text-zinc-650 truncate min-w-0 shrink-0 cursor-help">
-                                                            {dispatch.date}
-                                                        </span>
-                                                    </HoverCardTrigger>
-                                                    <HoverCardContent align="start" side="bottom" className="w-auto p-2 text-[10px] font-mono bg-zinc-900 text-white border-zinc-800 shadow-xl rounded-md z-[300] select-text">
-                                                        {dispatch.date}
                                                     </HoverCardContent>
                                                 </HoverCard>
                                             </div>
@@ -2970,53 +2921,28 @@ export function EngagementDetailSheet({
                                             <ArrowLeft className="h-5 w-5" />
                                         </Button>
                                         <div className="flex flex-col text-left min-w-0 flex-1 overflow-hidden">
-                                            <div className="flex items-center gap-1.5">
-                                                <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-50 leading-none">Dispatch</h2>
-                                                <HoverCard openDelay={100} closeDelay={100}>
-                                                    <HoverCardTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="h-4 w-4 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 shrink-0 p-0" onClick={(e) => e.stopPropagation()}>
-                                                            <Info className="h-3 w-3" />
-                                                        </Button>
-                                                    </HoverCardTrigger>
-                                                    <HoverCardContent align="start" className="w-80 p-4 z-[300] bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-xl rounded-xl">
-                                                        {dispatchActivityInfo}
-                                                    </HoverCardContent>
-                                                </HoverCard>
-                                            </div>
-                                            <div className="text-[11px] text-zinc-500 font-mono mt-1.5 flex items-center gap-1 select-none whitespace-nowrap overflow-hidden leading-none text-left w-full">
-                                                <button 
-                                                    onClick={() => setSelectedDispatchId(null)}
-                                                    className="hover:underline hover:text-zinc-855 dark:hover:text-zinc-145 transition-colors focus:outline-none shrink-0"
-                                                >
-                                                    All
-                                                </button>
-                                                <span className="text-zinc-400 shrink-0">/</span>
-                                                
-                                                <HoverCard openDelay={200} closeDelay={100}>
-                                                    <HoverCardTrigger asChild>
-                                                        <span className="text-zinc-450 dark:text-zinc-550 truncate max-w-[100px] xs:max-w-[160px] sm:max-w-[220px] min-w-0 shrink block cursor-help">
-                                                            {dispatch.id}
-                                                        </span>
-                                                    </HoverCardTrigger>
-                                                    <HoverCardContent align="start" side="bottom" className="w-auto p-2 text-[10px] font-mono bg-zinc-900 text-white border-zinc-800 shadow-xl rounded-md z-[300] select-text">
-                                                        {dispatch.id}
-                                                    </HoverCardContent>
-                                                </HoverCard>
-
-                                                <span className="text-zinc-455 dark:text-zinc-600 font-normal select-none mx-0.5 shrink-0">•</span>
-
-                                                <HoverCard openDelay={200} closeDelay={100}>
-                                                    <HoverCardTrigger asChild>
-                                                        <span className="text-zinc-400 dark:text-zinc-600 truncate min-w-0 shrink-0 cursor-help">
-                                                            {dispatch.date}
-                                                        </span>
-                                                    </HoverCardTrigger>
-                                                    <HoverCardContent align="start" side="bottom" className="w-auto p-2 text-[10px] font-mono bg-zinc-900 text-white border-zinc-800 shadow-xl rounded-md z-[300] select-text">
-                                                        {dispatch.date}
-                                                    </HoverCardContent>
-                                                </HoverCard>
-                                            </div>
-                                        </div>
+                                             <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-50 leading-none">Dispatch</h2>
+                                             <div className="text-[11px] text-zinc-500 font-mono mt-1.5 flex items-center gap-1 select-none whitespace-nowrap overflow-hidden leading-none text-left w-full">
+                                                 <button 
+                                                     onClick={() => setSelectedDispatchId(null)}
+                                                     className="hover:underline hover:text-zinc-855 dark:hover:text-zinc-145 transition-colors focus:outline-none shrink-0"
+                                                 >
+                                                     All
+                                                 </button>
+                                                 <span className="text-zinc-400 shrink-0">/</span>
+                                                 
+                                                 <HoverCard openDelay={200} closeDelay={100}>
+                                                     <HoverCardTrigger asChild>
+                                                         <span className="text-zinc-500 dark:text-zinc-400 truncate min-w-0 shrink block cursor-help font-semibold">
+                                                             {dispatch.id}
+                                                         </span>
+                                                     </HoverCardTrigger>
+                                                     <HoverCardContent align="start" side="bottom" className="w-auto p-2 text-[10px] font-mono bg-zinc-900 text-white border-zinc-800 shadow-xl rounded-md z-[300] select-text">
+                                                         {dispatch.id}
+                                                     </HoverCardContent>
+                                                 </HoverCard>
+                                             </div>
+                                         </div>
                                     </div>
                                     <Badge variant="outline" className={cn(
                                         "text-[9px] font-bold uppercase tracking-wider py-0.5 px-2 rounded-full border shadow-none",
@@ -3053,32 +2979,48 @@ export function EngagementDetailSheet({
                             </>
                         );
                     })() : (
-                        <div className="px-6 py-2 bg-white dark:bg-zinc-950 border-b border-zinc-100 dark:border-zinc-800">
-                            <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-wider overflow-x-auto no-scrollbar py-0.5">
-                            {[
-                                { id: "all", label: "All" },
-                                { id: "pending", label: "Pending" },
-                                { id: "verified", label: "Verified" },
-                                { id: "need_correction", label: "Need Correction" }
-                            ].map((tab) => {
-                                const isActive = activeTab === tab.id;
-                                return (
-                                    <button
-                                        key={tab.id}
-                                        onClick={() => setActiveTab(tab.id as any)}
-                                        className={cn(
-                                            "pb-1.5 border-b-2 transition-all duration-200 select-none whitespace-nowrap outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0",
-                                            isActive 
-                                                ? "border-zinc-900 dark:border-zinc-50 text-zinc-900 dark:text-zinc-50 font-bold" 
-                                                : "border-transparent text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 font-semibold"
-                                        )}
+                        <div className="px-6 py-3 bg-white dark:bg-zinc-950 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
+                            <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-50 leading-none">Deployments</h2>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button 
+                                        variant="ghost" 
+                                        size="sm" 
+                                        className="h-8 px-2.5 text-xs font-semibold text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 flex items-center gap-1.5 rounded-lg border border-transparent hover:border-zinc-200 dark:hover:border-zinc-800 transition-all focus:outline-none focus:ring-0 focus-visible:ring-0 focus:border-zinc-200 dark:focus:border-zinc-800"
                                     >
-                                        {tab.label}
-                                    </button>
-                                );
-                            })}
+                                        <span>{
+                                            activeTab === "all" ? "All" :
+                                            activeTab === "pending" ? "Pending" :
+                                            activeTab === "verified" ? "Verified" :
+                                            activeTab === "need_correction" ? "Need Correction" : "All"
+                                        }</span>
+                                        <ChevronDown className="h-3.5 w-3.5 text-zinc-400" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-40 p-1 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-lg rounded-xl z-[300]">
+                                    {[
+                                        { id: "all", label: "All" },
+                                        { id: "pending", label: "Pending" },
+                                        { id: "verified", label: "Verified" },
+                                        { id: "need_correction", label: "Need Correction" }
+                                    ].map((tab) => (
+                                        <DropdownMenuItem
+                                            key={tab.id}
+                                            onClick={() => setActiveTab(tab.id as any)}
+                                            className={cn(
+                                                "text-xs font-medium px-2.5 py-1.5 rounded-lg cursor-pointer flex items-center justify-between outline-none focus:outline-none focus:bg-zinc-50 dark:focus:bg-zinc-900/60",
+                                                activeTab === tab.id 
+                                                    ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 font-bold" 
+                                                    : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                                            )}
+                                        >
+                                            {tab.label}
+                                            {activeTab === tab.id && <Check className="h-3.5 w-3.5 text-zinc-900 dark:text-zinc-50" />}
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         </div>
-                    </div>
                 )}
                     </div>
 
@@ -3096,6 +3038,70 @@ export function EngagementDetailSheet({
                     )}
                     
                     <div className="p-6">
+                        {/* Top position Metadata Cards Grid in main list */}
+                        {(selectedDeploymentId || selectedDispatchId) && (() => {
+                            const target = selectedDeploymentId 
+                                ? (mockDispatches as any[]).flatMap((d: any) => (d.deployments as any[]) || []).find((dep: any) => dep.id === selectedDeploymentId) 
+                                : mockDispatches.find(d => d.id === selectedDispatchId);
+                            if (!target) return null;
+                            const dispatchParent = mockDispatches.find(d => d.id === selectedDispatchId || d.deployments?.some((dep: any) => dep.id === selectedDeploymentId));
+                            const createdTs = (target as any).created_at_raw || (dispatchParent as any)?.created_at_raw || (dispatchParent as any)?.date_raw;
+                            
+                            const safeFormatDate = (ts: any) => {
+                                if (!ts) return "15 Apr 2025";
+                                const num = typeof ts === "string" ? parseInt(ts) : ts;
+                                if (isNaN(num)) return ts;
+                                try {
+                                    return format(new Date(num), "dd MMM yyyy");
+                                } catch {
+                                    return "15 Apr 2025";
+                                }
+                            };
+
+                            const createdVal = safeFormatDate(createdTs);
+                            const updatedVal = (target as any).updated_at_raw ? safeFormatDate((target as any).updated_at_raw) : "Just now";
+                            const surveyorVal = (target as any).surveyor_name || record?.surveyor?.name || "Sagar Rahangdale";
+                            const surveyorPhoneVal = (target as any).surveyor_registred_no || record?.surveyor?.phoneNumber || "+91 95227 97884";
+
+                            return (
+                                <div className="grid grid-cols-3 gap-2.5 mb-5 w-full select-none">
+                                    <div className="bg-zinc-50/80 dark:bg-zinc-900/40 p-3 rounded-xl border border-zinc-100 dark:border-zinc-800/60 flex flex-col text-left min-w-0">
+                                        <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Created</span>
+                                        <span className="text-[11px] font-semibold text-zinc-800 dark:text-zinc-200 truncate mt-0.5">
+                                            {createdVal}
+                                        </span>
+                                    </div>
+                                    <div className="bg-zinc-50/80 dark:bg-zinc-900/40 p-3 rounded-xl border border-zinc-100 dark:border-zinc-800/60 flex flex-col text-left min-w-0">
+                                        <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Updated</span>
+                                        <span className="text-[11px] font-semibold text-zinc-800 dark:text-zinc-200 truncate mt-0.5">
+                                            {updatedVal}
+                                        </span>
+                                    </div>
+                                    <div className="bg-zinc-50/80 dark:bg-zinc-900/40 p-3 rounded-xl border border-zinc-100 dark:border-zinc-800/60 flex flex-col text-left min-w-0">
+                                        <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Surveyor</span>
+                                        <HoverCard openDelay={100} closeDelay={100}>
+                                            <HoverCardTrigger asChild>
+                                                <span className="text-[11px] font-bold text-zinc-900 dark:text-zinc-100 hover:text-emerald-600 dark:hover:text-emerald-400 underline decoration-dotted underline-offset-2 cursor-pointer transition-colors truncate mt-0.5 block">
+                                                    {surveyorVal}
+                                                </span>
+                                            </HoverCardTrigger>
+                                            <HoverCardContent align="end" className="w-64 p-3 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-xl rounded-xl z-[400]">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="h-9 w-9 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 flex items-center justify-center font-bold text-sm shrink-0 border border-emerald-200 dark:border-emerald-800">
+                                                        {surveyorVal.charAt(0).toUpperCase()}
+                                                    </div>
+                                                    <div className="flex flex-col text-left min-w-0 flex-1">
+                                                        <span className="text-xs font-bold text-zinc-900 dark:text-zinc-50 truncate">{surveyorVal}</span>
+                                                        <span className="text-[10px] text-zinc-500 font-medium">Field Surveyor</span>
+                                                        <span className="text-[10px] text-zinc-500 font-mono mt-0.5">{surveyorPhoneVal}</span>
+                                                    </div>
+                                                </div>
+                                            </HoverCardContent>
+                                        </HoverCard>
+                                    </div>
+                                </div>
+                            );
+                        })()}
                         <div className="space-y-4">
                             {isDataLoading ? (
                                 <div className="flex flex-col items-center justify-center min-h-[400px] w-full gap-3 animate-in fade-in duration-500">
@@ -3140,64 +3146,74 @@ export function EngagementDetailSheet({
                                                     const draftVal = deploymentCommentDraft[draftKey] || "";
                                                     const comments = deploymentCommentsList[draftKey] || [];
                                                     const showInput = showDeploymentCommentInput[draftKey] || false;
+                                                    const status = deploymentStatuses[selectedDeploymentId || ""] || "Pending";
+                                                    const isEditable = status === "Pending";
                                                     return (
                                                         <div className="space-y-3 pt-2">
-                                                            <div className="border-t border-zinc-100 dark:border-zinc-800 pt-3">
-                                                                <div className="mb-2">
-                                                                    <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
-                                                                        Add Comment{" "}
-                                                                        <span className="text-[10px] font-medium lowercase opacity-70">(optional)</span>
-                                                                    </span>
-                                                                </div>
-                                                                <div className="flex">
-                                                                    <Textarea
-                                                                        rows={showInput || draftVal.trim() ? 4 : 1}
-                                                                        placeholder="Type your comment here . . ."
-                                                                        className={cn(
-                                                                            "w-full box-border bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-md resize-none focus-visible:ring-1 focus-visible:ring-zinc-200 dark:focus-visible:ring-zinc-800 px-3 py-2 placeholder:text-zinc-400 transition-[min-height] duration-300 ease-in-out md:text-sm !min-h-0",
-                                                                            showInput || draftVal.trim()
-                                                                                ? "min-h-[100px] text-base"
-                                                                                : "h-10 min-h-0 max-h-10 text-sm leading-tight"
-                                                                        )}
-                                                                        value={draftVal}
-                                                                        onChange={(e) => setDeploymentCommentDraft(prev => ({ ...prev, [draftKey]: e.target.value }))}
-                                                                        onFocus={() => setShowDeploymentCommentInput(prev => ({ ...prev, [draftKey]: true }))}
-                                                                        onBlur={() => {
-                                                                            if (!draftVal.trim()) setShowDeploymentCommentInput(prev => ({ ...prev, [draftKey]: false }));
-                                                                        }}
-                                                                    />
-                                                                    <div className={cn(
-                                                                        "flex items-center gap-2 overflow-hidden transition-[height,opacity,margin-top] duration-300 ease-in-out",
-                                                                        draftVal.trim() ? "mt-2 h-7 opacity-100" : "mt-0 h-0 opacity-0 pointer-events-none"
-                                                                    )}>
-                                                                        <Button
-                                                                            size="sm"
-                                                                            className="h-6 px-3 text-[10px] font-bold uppercase tracking-wider bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 rounded-md shadow-sm"
-                                                                            onClick={() => {
-                                                                                if (!draftVal.trim()) return;
-                                                                                const newC: VerificationComment = { id: Date.now().toString(), date: new Date(), verifier: "Admin (You)", text: draftVal.trim() };
-                                                                                setDeploymentCommentsList(prev => ({ ...prev, [draftKey]: [...(prev[draftKey] || []), newC] }));
-                                                                                setDeploymentCommentDraft(prev => ({ ...prev, [draftKey]: "" }));
-                                                                                setShowDeploymentCommentInput(prev => ({ ...prev, [draftKey]: false }));
+                                                            {isEditable && (
+                                                                <div className="pt-2 pb-3">
+                                                                    <div className="space-y-0.5 mb-3">
+                                                                        <div className="text-[12px] font-bold text-zinc-400 uppercase tracking-widest">
+                                                                            ADD COMMENT <span className="text-[10px] font-medium lowercase opacity-70">(optional)</span>
+                                                                        </div>
+                                                                        <div className="text-[12px] font-normal text-zinc-500 dark:text-zinc-400 leading-tight">
+                                                                            Share any additional observations or feedback regarding this survey.
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="flex flex-col">
+                                                                        <Textarea
+                                                                            rows={showInput || draftVal.trim() ? 4 : 1}
+                                                                            placeholder="Type your comment here . . ."
+                                                                            className={cn(
+                                                                                "w-full box-border bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-md resize-none focus-visible:ring-1 focus-visible:ring-zinc-200 dark:focus-visible:ring-zinc-800 px-3 py-2 placeholder:text-zinc-400 transition-[min-height] duration-300 ease-in-out md:text-sm !min-h-0",
+                                                                                showInput || draftVal.trim()
+                                                                                    ? "min-h-[100px] text-base"
+                                                                                    : "h-10 min-h-0 max-h-10 text-sm leading-tight"
+                                                                            )}
+                                                                            value={draftVal}
+                                                                            onChange={(e) => setDeploymentCommentDraft(prev => ({ ...prev, [draftKey]: e.target.value }))}
+                                                                            onFocus={() => setShowDeploymentCommentInput(prev => ({ ...prev, [draftKey]: true }))}
+                                                                            onBlur={() => {
+                                                                                if (!draftVal.trim()) setShowDeploymentCommentInput(prev => ({ ...prev, [draftKey]: false }));
                                                                             }}
-                                                                            disabled={!draftVal.trim()}
-                                                                        >Save</Button>
-                                                                        <Button
-                                                                            variant="ghost"
-                                                                            size="sm"
-                                                                            className="h-6 px-2 text-[10px] font-bold text-zinc-400 hover:text-zinc-900 transition-colors"
-                                                                            onClick={() => {
-                                                                                setDeploymentCommentDraft(prev => ({ ...prev, [draftKey]: "" }));
-                                                                                setShowDeploymentCommentInput(prev => ({ ...prev, [draftKey]: false }));
-                                                                            }}
-                                                                        >Cancel</Button>
+                                                                        />
+                                                                        <div className={cn(
+                                                                            "flex items-center gap-2 overflow-hidden transition-[height,opacity,margin-top] duration-300 ease-in-out",
+                                                                            draftVal.trim() ? "mt-2 h-7 opacity-100" : "mt-0 h-0 opacity-0 pointer-events-none"
+                                                                        )}>
+                                                                            <Button 
+                                                                                size="sm"
+                                                                                className="h-6 px-3 text-[10px] font-bold uppercase tracking-wider bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 rounded-md shadow-sm transition-all duration-200"
+                                                                                onClick={() => {
+                                                                                    if (!draftVal.trim()) return;
+                                                                                    const newC: VerificationComment = { id: Date.now().toString(), date: new Date(), verifier: "Admin (You)", text: draftVal.trim() };
+                                                                                    setDeploymentCommentsList(prev => ({ ...prev, [draftKey]: [...(prev[draftKey] || []), newC] }));
+                                                                                    setDeploymentCommentDraft(prev => ({ ...prev, [draftKey]: "" }));
+                                                                                    setShowDeploymentCommentInput(prev => ({ ...prev, [draftKey]: false }));
+                                                                                }}
+                                                                                disabled={!draftVal.trim()}
+                                                                            >
+                                                                                Save
+                                                                            </Button>
+                                                                            <Button
+                                                                                variant="ghost"
+                                                                                size="sm"
+                                                                                className="h-6 px-2 text-[10px] font-bold text-zinc-400 hover:text-zinc-900 transition-colors"
+                                                                                onClick={() => {
+                                                                                    setDeploymentCommentDraft(prev => ({ ...prev, [draftKey]: "" }));
+                                                                                    setShowDeploymentCommentInput(prev => ({ ...prev, [draftKey]: false }));
+                                                                                }}
+                                                                            >
+                                                                                Cancel
+                                                                            </Button>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
-                                                            </div>
+                                                            )}
                                                             {comments.length > 0 && (
-                                                                <div className="py-2 border-t border-zinc-100 dark:border-zinc-800">
-                                                                    <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-2">
-                                                                        {comments.length > 1 ? "Comments" : "Comment"}
+                                                                <div className="py-2">
+                                                                    <div className="flex items-center gap-2 text-[12px] font-bold text-zinc-400 uppercase tracking-widest mb-2">
+                                                                        {comments.length > 1 ? 'Comments' : 'Comment'}
                                                                     </div>
                                                                     <div className="space-y-3">
                                                                         {comments.map((c, idx) => (
@@ -3377,64 +3393,74 @@ export function EngagementDetailSheet({
                                                                     const draftVal = dispatchCommentDraft[draftKey] || "";
                                                                     const comments = dispatchCommentsList[draftKey] || [];
                                                                     const showInput = showDispatchCommentInput[draftKey] || false;
+                                                                    const status = dispatchStatuses[selectedDispatchId || ""] || "Pending";
+                                                                    const isEditable = status === "Pending";
                                                                     return (
                                                                         <div className="space-y-3 pt-2">
-                                                                            <div className="border-t border-zinc-100 dark:border-zinc-800 pt-3">
-                                                                                <div className="mb-2">
-                                                                                    <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
-                                                                                        Add Comment{" "}
-                                                                                        <span className="text-[10px] font-medium lowercase opacity-70">(optional)</span>
-                                                                                    </span>
-                                                                                </div>
-                                                                                <div className="flex">
-                                                                                    <Textarea
-                                                                                        rows={showInput || draftVal.trim() ? 4 : 1}
-                                                                                        placeholder="Type your comment here . . ."
-                                                                                        className={cn(
-                                                                                            "w-full box-border bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-md resize-none focus-visible:ring-1 focus-visible:ring-zinc-200 dark:focus-visible:ring-zinc-800 px-3 py-2 placeholder:text-zinc-400 transition-[min-height] duration-300 ease-in-out md:text-sm !min-h-0",
-                                                                                            showInput || draftVal.trim()
-                                                                                                ? "min-h-[100px] text-base"
-                                                                                                : "h-10 min-h-0 max-h-10 text-sm leading-tight"
-                                                                                        )}
-                                                                                        value={draftVal}
-                                                                                        onChange={(e) => setDispatchCommentDraft(prev => ({ ...prev, [draftKey]: e.target.value }))}
-                                                                                        onFocus={() => setShowDispatchCommentInput(prev => ({ ...prev, [draftKey]: true }))}
-                                                                                        onBlur={() => {
-                                                                                            if (!draftVal.trim()) setShowDispatchCommentInput(prev => ({ ...prev, [draftKey]: false }));
-                                                                                        }}
-                                                                                    />
-                                                                                    <div className={cn(
-                                                                                        "flex items-center gap-2 overflow-hidden transition-[height,opacity,margin-top] duration-300 ease-in-out",
-                                                                                        draftVal.trim() ? "mt-2 h-7 opacity-100" : "mt-0 h-0 opacity-0 pointer-events-none"
-                                                                                    )}>
-                                                                                        <Button
-                                                                                            size="sm"
-                                                                                            className="h-6 px-3 text-[10px] font-bold uppercase tracking-wider bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 rounded-md shadow-sm"
-                                                                                            onClick={() => {
-                                                                                                if (!draftVal.trim()) return;
-                                                                                                const newC: VerificationComment = { id: Date.now().toString(), date: new Date(), verifier: "Admin (You)", text: draftVal.trim() };
-                                                                                                setDispatchCommentsList(prev => ({ ...prev, [draftKey]: [...(prev[draftKey] || []), newC] }));
-                                                                                                setDispatchCommentDraft(prev => ({ ...prev, [draftKey]: "" }));
-                                                                                                setShowDispatchCommentInput(prev => ({ ...prev, [draftKey]: false }));
+                                                                            {isEditable && (
+                                                                                <div className="pt-2 pb-3">
+                                                                                    <div className="space-y-0.5 mb-3">
+                                                                                        <div className="text-[12px] font-bold text-zinc-400 uppercase tracking-widest">
+                                                                                            ADD COMMENT <span className="text-[10px] font-medium lowercase opacity-70">(optional)</span>
+                                                                                        </div>
+                                                                                        <div className="text-[12px] font-normal text-zinc-500 dark:text-zinc-400 leading-tight">
+                                                                                            Share any additional observations or feedback regarding this survey.
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div className="flex flex-col">
+                                                                                        <Textarea
+                                                                                            rows={showInput || draftVal.trim() ? 4 : 1}
+                                                                                            placeholder="Type your comment here . . ."
+                                                                                            className={cn(
+                                                                                                "w-full box-border bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-md resize-none focus-visible:ring-1 focus-visible:ring-zinc-200 dark:focus-visible:ring-zinc-800 px-3 py-2 placeholder:text-zinc-400 transition-[min-height] duration-300 ease-in-out md:text-sm !min-h-0",
+                                                                                                showInput || draftVal.trim()
+                                                                                                    ? "min-h-[100px] text-base"
+                                                                                                    : "h-10 min-h-0 max-h-10 text-sm leading-tight"
+                                                                                            )}
+                                                                                            value={draftVal}
+                                                                                            onChange={(e) => setDispatchCommentDraft(prev => ({ ...prev, [draftKey]: e.target.value }))}
+                                                                                            onFocus={() => setShowDispatchCommentInput(prev => ({ ...prev, [draftKey]: true }))}
+                                                                                            onBlur={() => {
+                                                                                                if (!draftVal.trim()) setShowDispatchCommentInput(prev => ({ ...prev, [draftKey]: false }));
                                                                                             }}
-                                                                                            disabled={!draftVal.trim()}
-                                                                                        >Save</Button>
-                                                                                        <Button
-                                                                                            variant="ghost"
-                                                                                            size="sm"
-                                                                                            className="h-6 px-2 text-[10px] font-bold text-zinc-400 hover:text-zinc-900 transition-colors"
-                                                                                            onClick={() => {
-                                                                                                setDispatchCommentDraft(prev => ({ ...prev, [draftKey]: "" }));
-                                                                                                setShowDispatchCommentInput(prev => ({ ...prev, [draftKey]: false }));
-                                                                                            }}
-                                                                                        >Cancel</Button>
+                                                                                        />
+                                                                                        <div className={cn(
+                                                                                            "flex items-center gap-2 overflow-hidden transition-[height,opacity,margin-top] duration-300 ease-in-out",
+                                                                                            draftVal.trim() ? "mt-2 h-7 opacity-100" : "mt-0 h-0 opacity-0 pointer-events-none"
+                                                                                        )}>
+                                                                                            <Button 
+                                                                                                size="sm"
+                                                                                                className="h-6 px-3 text-[10px] font-bold uppercase tracking-wider bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 rounded-md shadow-sm transition-all duration-200"
+                                                                                                onClick={() => {
+                                                                                                    if (!draftVal.trim()) return;
+                                                                                                    const newC: VerificationComment = { id: Date.now().toString(), date: new Date(), verifier: "Admin (You)", text: draftVal.trim() };
+                                                                                                    setDispatchCommentsList(prev => ({ ...prev, [draftKey]: [...(prev[draftKey] || []), newC] }));
+                                                                                                    setDispatchCommentDraft(prev => ({ ...prev, [draftKey]: "" }));
+                                                                                                    setShowDispatchCommentInput(prev => ({ ...prev, [draftKey]: false }));
+                                                                                                }}
+                                                                                                disabled={!draftVal.trim()}
+                                                                                            >
+                                                                                                Save
+                                                                                            </Button>
+                                                                                            <Button
+                                                                                                variant="ghost"
+                                                                                                size="sm"
+                                                                                                className="h-6 px-2 text-[10px] font-bold text-zinc-400 hover:text-zinc-900 transition-colors"
+                                                                                                onClick={() => {
+                                                                                                    setDispatchCommentDraft(prev => ({ ...prev, [draftKey]: "" }));
+                                                                                                    setShowDispatchCommentInput(prev => ({ ...prev, [draftKey]: false }));
+                                                                                                }}
+                                                                                            >
+                                                                                                Cancel
+                                                                                            </Button>
+                                                                                        </div>
                                                                                     </div>
                                                                                 </div>
-                                                                            </div>
+                                                                            )}
                                                                             {comments.length > 0 && (
-                                                                                <div className="py-2 border-t border-zinc-100 dark:border-zinc-800">
-                                                                                    <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-2">
-                                                                                        {comments.length > 1 ? "Comments" : "Comment"}
+                                                                                <div className="py-2">
+                                                                                    <div className="flex items-center gap-2 text-[12px] font-bold text-zinc-400 uppercase tracking-widest mb-2">
+                                                                                        {comments.length > 1 ? 'Comments' : 'Comment'}
                                                                                     </div>
                                                                                     <div className="space-y-3">
                                                                                         {comments.map((c, idx) => (
@@ -3478,21 +3504,9 @@ export function EngagementDetailSheet({
                                                                                             <div className="p-3.5 flex flex-col select-none">
                                                                                                 <div className="flex items-center justify-between w-full">
                                                                                                     <div className="flex flex-col text-left">
-                                                                                                        <div className="flex items-center gap-1.5">
-                                                                                                            <span className="font-bold text-sm text-zinc-900 dark:text-zinc-50">Deployment</span>
-                                                                                                            <HoverCard openDelay={100} closeDelay={100}>
-                                                                                                                <HoverCardTrigger asChild>
-                                                                                                                    <Button variant="ghost" size="icon" className="h-3.5 w-3.5 rounded text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 shrink-0" onClick={(e) => e.stopPropagation()}>
-                                                                                                                        <Info className="h-2.5 w-2.5" />
-                                                                                                                    </Button>
-                                                                                                                </HoverCardTrigger>
-                                                                                                                <HoverCardContent align="start" className="w-80 p-4 z-[300] bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-xl rounded-xl">
-                                                                                                                    {deploymentActivityInfo}
-                                                                                                                </HoverCardContent>
-                                                                                                            </HoverCard>
-                                                                                                        </div>
-                                                                                                        <span className="text-[11px] text-zinc-500 font-mono block mt-0.5">{depl.id}</span>
-                                                                                                    </div>
+                                                                                                         <span className="font-bold text-sm text-zinc-900 dark:text-zinc-50 font-mono">{depl.id}</span>
+                                                                                                         <span className="text-[11px] text-zinc-500 font-mono block mt-0.5">{dispatch.date || record?.deployed || "15 Apr 2025"}</span>
+                                                                                                     </div>
                                                                                                     <div className="flex items-center gap-2">
                                                                                                         <Badge variant="outline" className={cn(
                                                                                                             "text-[9px] font-bold uppercase tracking-wider py-0 px-1.5 rounded-full border shadow-none",
@@ -3545,26 +3559,9 @@ export function EngagementDetailSheet({
                                                                         {/* Top Header Row: Title, Badge, ID */}
                                                                         <div className="flex items-center justify-between w-full">
                                                                             <div className="flex flex-col text-left">
-                                                                                <div className="flex items-center gap-1.5">
-                                                                                    <span className="font-bold text-sm text-zinc-900 dark:text-zinc-50">Dispatch</span>
-                                                                                    <HoverCard openDelay={100} closeDelay={100}>
-                                                                                        <HoverCardTrigger asChild>
-                                                                                            <Button 
-                                                                                                variant="ghost" 
-                                                                                                size="icon" 
-                                                                                                className="h-3.5 w-3.5 rounded text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 shrink-0"
-                                                                                                onClick={(e) => e.stopPropagation()}
-                                                                                            >
-                                                                                                <Info className="h-2.5 w-2.5" />
-                                                                                            </Button>
-                                                                                        </HoverCardTrigger>
-                                                                                        <HoverCardContent align="start" className="w-80 p-4 z-[300] bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-xl rounded-xl">
-                                                                                            {dispatchActivityInfo}
-                                                                                        </HoverCardContent>
-                                                                                    </HoverCard>
-                                                                                </div>
-                                                                                <span className="text-[11px] text-zinc-500 font-mono block mt-0.5">{dispatch.id} • {dispatch.date}</span>
-                                                                            </div>
+                                                                                 <span className="font-bold text-sm text-zinc-900 dark:text-zinc-50 font-mono">{dispatch.id}</span>
+                                                                                 <span className="text-[11px] text-zinc-500 font-mono block mt-0.5">{dispatch.date}</span>
+                                                                             </div>
                                                                             <Badge variant="outline" className={cn(
                                                                                 "text-[9px] font-bold uppercase tracking-wider py-0 px-1.5 rounded-full border shadow-none",
                                                                                 (dispatchStatuses[dispatch.id] || "Pending") === "Verified" && "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/50",
@@ -3608,193 +3605,203 @@ export function EngagementDetailSheet({
                     </div>
                 </ScrollArea>
 
-                {/* Footer section */}
-                <div className="border-t border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 z-20 flex flex-col relative">
-                    <div className="p-4 flex items-center justify-between gap-4">
-                        {/* Left: Navigation */}
-                        <div className="flex items-center gap-3">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-9 w-9 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
-                                onClick={onPrevious}
-                                disabled={isFirst || isDataLoading}
-                            >
-                                <ChevronLeft className="h-5 w-5" />
-                            </Button>
-                            <span className="text-[11px] font-bold text-zinc-500 tabular-nums">
-                                {currentIndex + 1} / {totalCount}
-                            </span>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-9 w-9 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
-                                onClick={onNext}
-                                disabled={isLast || isDataLoading}
-                            >
-                                <ChevronRight className="h-5 w-5" />
-                            </Button>
-                        </div>
-
-                        {/* Right: Actions for selected Dispatch / Deployment */}
-                        {(selectedDeploymentId || selectedDispatchId) && (() => {
-                            if (selectedDeploymentId) {
-                                const dispatch = mockDispatches.find(d => d.deployments?.some(dep => dep.id === selectedDeploymentId));
-                                const deployment = dispatch?.deployments?.find(dep => dep.id === selectedDeploymentId);
-                                if (!deployment) return null;
-                                const status = deploymentStatuses[deployment.id] || "Pending";
-                                if (status !== "Pending") return null;
-                                return (
-                                    <div className="flex items-center gap-2">
-                                        {isReporting ? (
-                                            <>
-                                                <Button
-                                                    variant="outline"
-                                                    className="h-9 px-4 text-xs font-bold border-zinc-200 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 transition-all dark:bg-zinc-950 dark:border-zinc-800"
-                                                    onClick={() => {
-                                                        setIsReporting(false);
-                                                        setReportingCardType(null);
-                                                        setActiveReportingCardId(null);
-                                                        setReportedIds([]);
-                                                    }}
-                                                >
-                                                    Cancel
-                                                </Button>
-                                                <Button
-                                                    className={cn(
-                                                        "h-9 px-5 text-xs font-bold shadow-md transition-all active:scale-[0.98] bg-red-600 hover:bg-red-700 text-white dark:bg-red-600 dark:text-white"
-                                                    )}
-                                                    onClick={() => setIsReportingFinalStep(true)}
-                                                    disabled={reportedIds.length === 0}
-                                                >
-                                                    <AlertCircle className="mr-2 h-3.5 w-3.5" />
-                                                    {reportedIds.length === 0 ? "Report" : `Report Selected (${reportedIds.length})`}
-                                                </Button>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Button
-                                                    variant="outline"
-                                                    className="h-9 px-4 text-xs font-bold border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all dark:bg-zinc-955 dark:hover:bg-red-950/20"
-                                                    onClick={() => {
-                                                        setIsReporting(true);
-                                                        setReportingCardType("deployment");
-                                                        setActiveReportingCardId(deployment.id);
-                                                        setReportedIds([]);
-                                                    }}
-                                                >
-                                                    <AlertCircle className="mr-2 h-3.5 w-3.5" />
-                                                    Report
-                                                </Button>
-                                                <Button
-                                                    className="h-9 px-5 text-xs font-bold shadow-md transition-all active:scale-[0.98] bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900"
-                                                    onClick={() => {
-                                                        const nowStr = format(new Date(), "dd MMM yyyy, hh:mm a");
-                                                        setDeploymentStatuses(prev => ({ ...prev, [deployment.id]: "Verified" }));
-                                                        setDeploymentVerifierNames(prev => ({ ...prev, [deployment.id]: "Admin (You)" }));
-                                                        setDeploymentVerifierTimes(prev => ({ ...prev, [deployment.id]: nowStr }));
-                                                        showToast("Approved Successfully", "Deployment approved successfully.", "success");
-                                                    }}
-                                                >
-                                                    <CheckCircle2 className="mr-2 h-3.5 w-3.5" />
-                                                    Approve
-                                                </Button>
-                                            </>
-                                        )}
-                                    </div>
-                                );
-                            } else {
-                                const dispatch = mockDispatches.find(d => d.id === selectedDispatchId);
-                                if (!dispatch) return null;
-                                const status = dispatchStatuses[dispatch.id] || "Pending";
-                                if (status !== "Pending") return null;
-                                return (
-                                    <div className="flex items-center gap-2">
-                                        {isReporting ? (
-                                            <>
-                                                <Button
-                                                    variant="outline"
-                                                    className="h-9 px-4 text-xs font-bold border-zinc-200 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 transition-all dark:bg-zinc-950 dark:border-zinc-800"
-                                                    onClick={() => {
-                                                        setIsReporting(false);
-                                                        setReportingCardType(null);
-                                                        setActiveReportingCardId(null);
-                                                        setReportedIds([]);
-                                                    }}
-                                                >
-                                                    Cancel
-                                                </Button>
-                                                <Button
-                                                    className={cn(
-                                                        "h-9 px-5 text-xs font-bold shadow-md transition-all active:scale-[0.98] bg-red-600 hover:bg-red-700 text-white dark:bg-red-600 dark:text-white"
-                                                    )}
-                                                    onClick={() => setIsReportingFinalStep(true)}
-                                                    disabled={reportedIds.length === 0}
-                                                >
-                                                    <AlertCircle className="mr-2 h-3.5 w-3.5" />
-                                                    {reportedIds.length === 0 ? "Report" : `Report Selected (${reportedIds.length})`}
-                                                </Button>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Button
-                                                    variant="outline"
-                                                    className="h-9 px-4 text-xs font-bold border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all dark:bg-zinc-955 dark:hover:bg-red-950/20"
-                                                    onClick={() => {
-                                                        setIsReporting(true);
-                                                        setReportingCardType("dispatch");
-                                                        setActiveReportingCardId(dispatch.id);
-                                                        setReportedIds([]);
-                                                    }}
-                                                >
-                                                    <AlertCircle className="mr-2 h-3.5 w-3.5" />
-                                                    Report
-                                                </Button>
-                                                <Button
-                                                    className="h-9 px-5 text-xs font-bold shadow-md transition-all active:scale-[0.98] bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900"
-                                                    onClick={() => {
-                                                    const nowStr = format(new Date(), "dd MMM yyyy, hh:mm a");
-                                                    setDispatchStatuses(prev => ({ ...prev, [dispatch.id]: "Verified" }));
-                                                    setDispatchVerifierNames(prev => ({ ...prev, [dispatch.id]: "Admin (You)" }));
-                                                    setDispatchVerifierTimes(prev => ({ ...prev, [dispatch.id]: nowStr }));
-
-                                                    if (dispatch.deployments) {
-                                                        setDeploymentStatuses(prev => {
-                                                            const updated = { ...prev };
-                                                            dispatch.deployments.forEach((depl: any) => {
-                                                                updated[depl.id] = "Verified";
-                                                            });
-                                                            return updated;
-                                                        });
-                                                        setDeploymentVerifierNames(prev => {
-                                                            const updated = { ...prev };
-                                                            dispatch.deployments.forEach((depl: any) => {
-                                                                updated[depl.id] = "Admin (You)";
-                                                            });
-                                                            return updated;
-                                                        });
-                                                        setDeploymentVerifierTimes(prev => {
-                                                            const updated = { ...prev };
-                                                            dispatch.deployments.forEach((depl: any) => {
-                                                                updated[depl.id] = nowStr;
-                                                            });
-                                                            return updated;
-                                                        });
-                                                    }
-                                                    showToast("Approved Successfully", "Dispatch and its deployments approved successfully.", "success");
-                                                }}
-                                            >
-                                                <CheckCircle2 className="mr-2 h-3.5 w-3.5" />
-                                                Approve
-                                            </Button>
-                                        </>
-                                    )}
+                {(() => {
+                    const hasSelected = !!(selectedDeploymentId || selectedDispatchId);
+                    if (hasSelected) {
+                        const status = selectedDeploymentId
+                            ? (deploymentStatuses[selectedDeploymentId] || "Pending")
+                            : (dispatchStatuses[selectedDispatchId || ""] || "Pending");
+                        if (status !== "Pending") return null;
+                    }
+                    return (
+                        <div className="border-t border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 z-20 flex flex-col relative">
+                            <div className="p-4 flex items-center justify-between gap-4">
+                                {/* Left: Navigation */}
+                                <div className="flex items-center gap-3">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-9 w-9 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+                                        onClick={onPrevious}
+                                        disabled={isFirst || isDataLoading}
+                                    >
+                                        <ChevronLeft className="h-5 w-5" />
+                                    </Button>
+                                    <span className="text-[11px] font-bold text-zinc-500 tabular-nums">
+                                        {currentIndex + 1} / {totalCount}
+                                    </span>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-9 w-9 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+                                        onClick={onNext}
+                                        disabled={isLast || isDataLoading}
+                                    >
+                                        <ChevronRight className="h-5 w-5" />
+                                    </Button>
                                 </div>
-                            );
-                            }
-                        })()}
-                    </div>
-                </div>
+
+                                {/* Right: Actions for selected Dispatch / Deployment */}
+                                {(selectedDeploymentId || selectedDispatchId) && (() => {
+                                    if (selectedDeploymentId) {
+                                        const dispatch = mockDispatches.find(d => d.deployments?.some(dep => dep.id === selectedDeploymentId));
+                                        const deployment = dispatch?.deployments?.find(dep => dep.id === selectedDeploymentId);
+                                        if (!deployment) return null;
+                                        const status = deploymentStatuses[deployment.id] || "Pending";
+                                        if (status !== "Pending") return null;
+                                        return (
+                                            <div className="flex items-center gap-2">
+                                                {isReporting ? (
+                                                    <>
+                                                        <Button
+                                                            variant="outline"
+                                                            className="h-9 px-4 text-xs font-bold border-zinc-200 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 transition-all dark:bg-zinc-955 dark:border-zinc-800"
+                                                            onClick={() => {
+                                                                setIsReporting(false);
+                                                                setReportingCardType(null);
+                                                                setActiveReportingCardId(null);
+                                                                setReportedIds([]);
+                                                            }}
+                                                        >
+                                                            Cancel
+                                                        </Button>
+                                                        <Button
+                                                            className={cn(
+                                                                "h-9 px-5 text-xs font-bold shadow-md transition-all active:scale-[0.98] bg-red-600 hover:bg-red-700 text-white dark:bg-red-600 dark:text-white"
+                                                            )}
+                                                            onClick={() => setIsReportingFinalStep(true)}
+                                                            disabled={reportedIds.length === 0}
+                                                        >
+                                                            <AlertCircle className="mr-2 h-3.5 w-3.5" />
+                                                            {reportedIds.length === 0 ? "Report" : `Report Selected (${reportedIds.length})`}
+                                                        </Button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Button
+                                                            variant="outline"
+                                                            className="h-9 px-4 text-xs font-bold border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all dark:bg-zinc-955 dark:hover:bg-red-950/20"
+                                                            onClick={() => {
+                                                                setIsReporting(true);
+                                                                setReportingCardType("deployment");
+                                                                setActiveReportingCardId(deployment.id);
+                                                                setReportedIds([]);
+                                                            }}
+                                                        >
+                                                            <AlertCircle className="mr-2 h-3.5 w-3.5" />
+                                                            Report
+                                                        </Button>
+                                                        <Button
+                                                            className="h-9 px-5 text-xs font-bold shadow-md transition-all active:scale-[0.98] bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900"
+                                                            onClick={() => {
+                                                                const nowStr = format(new Date(), "dd MMM yyyy, hh:mm a");
+                                                                setDeploymentStatuses(prev => ({ ...prev, [deployment.id]: "Verified" }));
+                                                                setDeploymentVerifierNames(prev => ({ ...prev, [deployment.id]: "Admin (You)" }));
+                                                                setDeploymentVerifierTimes(prev => ({ ...prev, [deployment.id]: nowStr }));
+                                                                showToast("Approved Successfully", "Deployment approved successfully.", "success");
+                                                            }}
+                                                        >
+                                                            <CheckCircle2 className="mr-2 h-3.5 w-3.5" />
+                                                            Approve
+                                                        </Button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        );
+                                    } else {
+                                        const dispatch = mockDispatches.find(d => d.id === selectedDispatchId);
+                                        if (!dispatch) return null;
+                                        const status = dispatchStatuses[dispatch.id] || "Pending";
+                                        if (status !== "Pending") return null;
+                                        return (
+                                            <div className="flex items-center gap-2">
+                                                {isReporting ? (
+                                                    <>
+                                                        <Button
+                                                            variant="outline"
+                                                            className="h-9 px-4 text-xs font-bold border-zinc-200 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 transition-all dark:bg-zinc-955 dark:border-zinc-800"
+                                                            onClick={() => {
+                                                                setIsReporting(false);
+                                                                setReportingCardType(null);
+                                                                setActiveReportingCardId(null);
+                                                                setReportedIds([]);
+                                                            }}
+                                                        >
+                                                            Cancel
+                                                        </Button>
+                                                        <Button
+                                                            className={cn(
+                                                                "h-9 px-5 text-xs font-bold shadow-md transition-all active:scale-[0.98] bg-red-600 hover:bg-red-700 text-white dark:bg-red-600 dark:text-white"
+                                                            )}
+                                                            onClick={() => setIsReportingFinalStep(true)}
+                                                            disabled={reportedIds.length === 0}
+                                                        >
+                                                            <AlertCircle className="mr-2 h-3.5 w-3.5" />
+                                                            {reportedIds.length === 0 ? "Report" : `Report Selected (${reportedIds.length})`}
+                                                        </Button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Button
+                                                            variant="outline"
+                                                            className="h-9 px-4 text-xs font-bold border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all dark:bg-zinc-955 dark:hover:bg-red-950/20"
+                                                            onClick={() => {
+                                                                setIsReporting(true);
+                                                                setReportingCardType("dispatch");
+                                                                setActiveReportingCardId(dispatch.id);
+                                                                setReportedIds([]);
+                                                            }}
+                                                        >
+                                                            <AlertCircle className="mr-2 h-3.5 w-3.5" />
+                                                            Report
+                                                        </Button>
+                                                        <Button
+                                                            className="h-9 px-5 text-xs font-bold shadow-md transition-all active:scale-[0.98] bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900"
+                                                            onClick={() => {
+                                                                const nowStr = format(new Date(), "dd MMM yyyy, hh:mm a");
+                                                                setDispatchStatuses(prev => ({ ...prev, [dispatch.id]: "Verified" }));
+                                                                setDispatchVerifierNames(prev => ({ ...prev, [dispatch.id]: "Admin (You)" }));
+                                                                setDispatchVerifierTimes(prev => ({ ...prev, [dispatch.id]: nowStr }));
+
+                                                                if (dispatch.deployments) {
+                                                                    setDeploymentStatuses(prev => {
+                                                                        const updated = { ...prev };
+                                                                        dispatch.deployments.forEach((depl: any) => {
+                                                                            updated[depl.id] = "Verified";
+                                                                        });
+                                                                        return updated;
+                                                                    });
+                                                                    setDeploymentVerifierNames(prev => {
+                                                                        const updated = { ...prev };
+                                                                        dispatch.deployments.forEach((depl: any) => {
+                                                                            updated[depl.id] = "Admin (You)";
+                                                                        });
+                                                                        return updated;
+                                                                    });
+                                                                    setDeploymentVerifierTimes(prev => {
+                                                                        const updated = { ...prev };
+                                                                        dispatch.deployments.forEach((depl: any) => {
+                                                                            updated[depl.id] = nowStr;
+                                                                        });
+                                                                        return updated;
+                                                                    });
+                                                                }
+                                                                showToast("Approved Successfully", "Dispatch and its deployments approved successfully.", "success");
+                                                            }}
+                                                        >
+                                                            <CheckCircle2 className="mr-2 h-3.5 w-3.5" />
+                                                            Approve
+                                                        </Button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        );
+                                    }
+                                })()}
+                            </div>
+                        </div>
+                    );
+                })()}
 
             </SheetContent>
         </Sheet>
